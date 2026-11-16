@@ -1366,16 +1366,30 @@
           window.appState.todos = window.appState.todos.filter(x => x.id !== el.dataset.id);
           saveState(); renderAll(); showToast('Deleted', 'info');
           break;
-        case 'export':
+                  case 'export':
           e.preventDefault();
-          {
-            const data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.appState, null, 2));
-            const a = document.createElement('a');
-            a.setAttribute('href', data);
-            a.setAttribute('download', 'classtrack_backup_' + formatDateLocal() + '.json');
-            document.body.appendChild(a); a.click(); a.remove();
-            showToast('Exported', 'success');
-          }
+          (function() {
+            try {
+              var json = JSON.stringify(window.appState, null, 2);
+              var blob = new Blob([json], { type: 'application/octet-stream' });
+              var url = URL.createObjectURL(blob);
+              var a = document.createElement('a');
+              a.href = url;
+              a.download = 'classtrack_backup_' + getFormattedDateToday() + '.json';
+              a.rel = 'noopener';
+              a.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;';
+              document.body.appendChild(a);
+              a.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+              setTimeout(function() {
+                if (a.parentNode) a.parentNode.removeChild(a);
+                URL.revokeObjectURL(url);
+              }, 2000);
+              showToast('Download started — check Files → Downloads', 'success');
+            } catch(err) {
+              showToast('Export failed: ' + err.message, 'error');
+              console.error('Export error:', err);
+            }
+          })();
           break;
         case 'import': e.preventDefault(); document.getElementById('importJsonFileInput').click(); break;
         case 'seed': e.preventDefault(); showConfirmModal('Populate Demo', 'Replace all data with demo?', () => { populateSeedData(); initHeader(); renderAll(); showToast('Demo loaded', 'success'); }); break;
