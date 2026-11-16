@@ -1134,50 +1134,7 @@
     initHeader();
     switchTab('attendance');
     renderAll();
-
-    // ============================================================
-    // SILENT iPAD SAFARI TOUCH-LAYER FIX
-    // Forces the browser to fully attach its touch/event system
-    // WITHOUT showing any alert() or popup. This replaces the
-    // accidental fix the diagnostic alert was providing.
-    // ============================================================
-    (function silentTouchLayerFix() {
-      // 1. Force synchronous reflow (same thing alert() did)
-      void document.body.offsetHeight;
-      void document.body.getBoundingClientRect();
-
-      // 2. Inject a 1x1 probe element that forces iOS to build
-      //    the compositor/touch layer for the body
-      var probe = document.createElement('div');
-      probe.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0.01;pointer-events:auto;z-index:1;';
-      document.body.appendChild(probe);
-      void probe.getBoundingClientRect();
-
-      // 3. Toggle cursor to force style recalc
-      document.body.style.cursor = 'pointer';
-      void document.body.offsetWidth;
-      document.body.style.cursor = '';
-
-      // 4. Dispatch a synthetic touch cycle so the browser
-      //    registers the touch target regions
-      try {
-        var ts = document.createEvent('Event');
-        ts.initEvent('touchstart', true, true);
-        document.body.dispatchEvent(ts);
-        var te = document.createEvent('Event');
-        te.initEvent('touchend', true, true);
-        document.body.dispatchEvent(te);
-      } catch (e) {}
-
-      // 5. Remove probe after a tick
-      setTimeout(function() { probe.remove(); }, 50);
-
-      // 6. Second reflow pass after layout stabilizes
-      setTimeout(function() {
-        void document.body.offsetHeight;
-        void document.body.getBoundingClientRect();
-      }, 0);
-    })();
+();
   </script>
 </body>
 </html>
