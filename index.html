@@ -1366,16 +1366,22 @@
           window.appState.todos = window.appState.todos.filter(x => x.id !== el.dataset.id);
           saveState(); renderAll(); showToast('Deleted', 'info');
           break;
-                  case 'export':
+                case 'export':
           e.preventDefault();
           (function() {
             try {
+              // Inline date — no external helper needed
+              var now = new Date();
+              var pad = function(n) { return String(n).padStart(2, '0'); };
+              var dateStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+              var timeStr = pad(now.getHours()) + pad(now.getMinutes());
+
               var json = JSON.stringify(window.appState, null, 2);
               var blob = new Blob([json], { type: 'application/octet-stream' });
               var url = URL.createObjectURL(blob);
               var a = document.createElement('a');
               a.href = url;
-              a.download = 'classtrack_backup_' + getFormattedDateToday() + '.json';
+              a.download = 'classtrack_backup_' + dateStr + '_' + timeStr + '.json';
               a.rel = 'noopener';
               a.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;';
               document.body.appendChild(a);
