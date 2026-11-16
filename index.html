@@ -332,7 +332,7 @@
         <h3 id="studentModalTitle" class="font-bold text-base">Add New Student</h3>
         <button type="button" data-action="close" data-close="studentModal" class="text-rose-200 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
-      <form id="studentForm" class="p-6 space-y-4 overflow-y-auto">
+            <form id="studentForm" class="p-6 space-y-4">
         <input type="hidden" id="studentEditId">
 
         <div>
@@ -394,12 +394,13 @@
         <div class="min-w-0">
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Time Slot</label>
           <select id="studentFormTimeSlot" required
-                  class="w-full text-sm p-3 border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none"></select>
+                  class="w-full text-sm p-3 border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
+          </select>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div class="min-w-0">
-            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Term Start</label>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Term Start Date</label>
             <input type="date" id="studentFormTermStartDate" required
                    class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
           </div>
@@ -410,7 +411,7 @@
           </div>
         </div>
 
-        <div class="pt-4 flex justify-end space-x-2 border-t border-slate-100 flex-shrink-0">
+        <div class="pt-4 flex justify-end space-x-2 border-t border-slate-100">
           <button type="button" data-action="close" data-close="studentModal"
                   class="px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl btn-touch">Cancel</button>
           <button type="submit"
