@@ -477,21 +477,9 @@
     </div>
   </div>
 
-  <!-- ============================================================
-       DIAGNOSTIC: This catches ANY error during script execution
-       and shows it in an alert so we know exactly what's broken.
-       ============================================================ -->
-
   <script>
-    // ============================================================
     // STATE
-    // ============================================================
-    window.appState = {
-      settings: { className: "Robotics & Coding Academy", teacherName: "Ms. Clara" },
-      timeSlots: ["09:00 - 10:30", "11:00 - 12:30", "14:00 - 15:30", "16:00 - 17:30"],
-      students: [],
-      todos: []
-    };
+    window.appState = { settings: { className: "Robotics & Coding Academy", teacherName: "Ms. Clara" }, timeSlots: ["09:00 - 10:30","11:00 - 12:30","14:00 - 15:30","16:00 - 17:30"], students: [], todos: [] };
     window.currentTab = 'attendance';
     window.attendanceDateStr = new Date().toISOString().split('T')[0];
     window.attendanceDay = 'Monday';
@@ -501,53 +489,38 @@
     window.todoFilter = 'ALL';
     const STORAGE_KEY = 'classtrack_master_v1';
 
-    // ============================================================
     // HELPERS
-    // ============================================================
     function getDayOfWeekFromDateStr(dateStr) {
       if (!dateStr) return 'Monday';
-      const p = dateStr.split('-');
-      const d = new Date(p[0], p[1]-1, p[2]);
-      const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-      const day = days[d.getDay()];
-      return day === 'Sunday' ? 'Monday' : day;
+      var p = dateStr.split('-'); var d = new Date(p[0], p[1]-1, p[2]);
+      var days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+      var day = days[d.getDay()]; return day === 'Sunday' ? 'Monday' : day;
     }
-    function calculate3MonthTermName(startDateStr) {
-      if (!startDateStr) return '';
-      const p = startDateStr.split('-');
-      const start = new Date(p[0], p[1]-1, p[2]);
-      if (isNaN(start)) return '';
-      const end = new Date(start); end.setMonth(end.getMonth()+2);
-      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      return months[start.getMonth()] + '–' + months[end.getMonth()] + ' ' + end.getFullYear();
+    function calculate3MonthTermName(s) {
+      if (!s) return '';
+      var p = s.split('-'); var start = new Date(p[0], p[1]-1, p[2]); if (isNaN(start)) return '';
+      var end = new Date(start); end.setMonth(end.getMonth()+2);
+      var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return m[start.getMonth()] + '–' + m[end.getMonth()] + ' ' + end.getFullYear();
     }
-    function calculateAge(dobStr) {
-      if (!dobStr) return 'N/A';
-      const dob = new Date(dobStr); if (isNaN(dob)) return 'N/A';
-      const now = new Date();
-      let y = now.getFullYear() - dob.getFullYear();
-      let m = now.getMonth() - dob.getMonth();
-      if (m<0 || (m===0 && now.getDate()<dob.getDate())) { y--; m+=12; }
-      return y + 'y ' + m + 'm';
+    function calculateAge(s) {
+      if (!s) return 'N/A';
+      var d = new Date(s); if (isNaN(d)) return 'N/A';
+      var n = new Date(); var y = n.getFullYear() - d.getFullYear(); var mm = n.getMonth() - d.getMonth();
+      if (mm<0 || (mm===0 && n.getDate()<d.getDate())) { y--; mm+=12; }
+      return y + 'y ' + mm + 'm';
     }
-    function getInitials(name) {
-      if (!name) return '??';
-      const p = name.trim().split(/\s+/);
+    function getInitials(n) {
+      if (!n) return '??'; var p = n.trim().split(/\s+/);
       if (p.length===1) return p[0].substring(0,2).toUpperCase();
       return (p[0][0]+p[p.length-1][0]).toUpperCase();
     }
     function getFormattedDateToday() { return new Date().toISOString().split('T')[0]; }
-    function escapeHtml(str) {
-      if (!str) return '';
-      return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-    }
-    function parseUrlsToLinks(text) {
-      if (!text) return '';
-      return text.replace(/(https?:\/\/[^\s]+)/g, url => '<a href="' + url + '" target="_blank" rel="noopener" class="text-rose-700 underline">' + url + '</a>');
-    }
+    function escapeHtml(s) { if (!s) return ''; return s.replace(/[&<>"']/g, function(m) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]; }); }
+    function parseUrlsToLinks(t) { if (!t) return ''; return t.replace(/(https?:\/\/[^\s]+)/g, function(u) { return '<a href="' + u + '" target="_blank" rel="noopener" class="text-rose-700 underline">' + u + '</a>'; }); }
     function getLevelBadgeHtml(l) {
       if (!l) return '';
-      let bg = 'bg-slate-100 text-slate-800 border-slate-200';
+      var bg = 'bg-slate-100 text-slate-800 border-slate-200';
       if (l.startsWith('CR')) bg = 'bg-rose-100 text-rose-900 border-rose-200';
       else if (l.startsWith('CT')) bg = 'bg-amber-100 text-amber-900 border-amber-200';
       else if (l.startsWith('RB')) bg = 'bg-sky-100 text-sky-900 border-sky-200';
@@ -559,93 +532,58 @@
       return '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 text-rose-900 border border-rose-300">' + s + '</span>';
     }
 
-    // ============================================================
     // STORAGE
-    // ============================================================
-    function saveState() {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(window.appState)); updateStorageSizeDisplay(); }
-      catch (e) { console.error(e); }
-    }
+    function saveState() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(window.appState)); updateStorageSizeDisplay(); } catch(e) {} }
     function loadState() {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) window.appState = JSON.parse(saved);
-        else populateSeedData();
-      } catch (e) { populateSeedData(); }
+      try { var s = localStorage.getItem(STORAGE_KEY); if (s) window.appState = JSON.parse(s); else populateSeedData(); }
+      catch(e) { populateSeedData(); }
     }
     function updateStorageSizeDisplay() {
-      try {
-        const b = new Blob([JSON.stringify(window.appState)]).size;
-        const el = document.getElementById('statStorageSize');
-        if (el) el.textContent = (b/1024).toFixed(2) + ' KB';
-      } catch (e) {}
+      try { var b = new Blob([JSON.stringify(window.appState)]).size; var el = document.getElementById('statStorageSize'); if (el) el.textContent = (b/1024).toFixed(2) + ' KB'; } catch(e) {}
     }
 
-    // ============================================================
-    // MODAL SYSTEM
-    // ============================================================
+    // MODALS
     function openModal(id) {
-      document.querySelectorAll('.modal-backdrop.active-modal').forEach(m => m.classList.remove('active-modal'));
-      const m = document.getElementById(id);
-      if (m) m.classList.add('active-modal');
+      document.querySelectorAll('.modal-backdrop.active-modal').forEach(function(m) { m.classList.remove('active-modal'); });
+      var m = document.getElementById(id); if (m) m.classList.add('active-modal');
     }
-    function closeModal(id) {
-      const m = document.getElementById(id);
-      if (m) m.classList.remove('active-modal');
-    }
-    function closeAllModals() {
-      document.querySelectorAll('.modal-backdrop.active-modal').forEach(m => m.classList.remove('active-modal'));
-    }
+    function closeModal(id) { var m = document.getElementById(id); if (m) m.classList.remove('active-modal'); }
+    function closeAllModals() { document.querySelectorAll('.modal-backdrop.active-modal').forEach(function(m) { m.classList.remove('active-modal'); }); }
 
-    // ============================================================
     // TOAST
-    // ============================================================
     function showToast(msg, type) {
       type = type || 'success';
-      const c = document.getElementById('toastContainer');
-      const t = document.createElement('div');
-      let bg = 'bg-slate-900 text-white', icon = 'fa-circle-check text-emerald-400';
+      var c = document.getElementById('toastContainer'); var t = document.createElement('div');
+      var bg = 'bg-slate-900 text-white', icon = 'fa-circle-check text-emerald-400';
       if (type === 'error') { bg = 'bg-rose-900 text-white'; icon = 'fa-circle-xmark text-rose-300'; }
       else if (type === 'info') { bg = 'bg-amber-900 text-white'; icon = 'fa-circle-info text-amber-300'; }
       t.className = bg + ' p-3.5 rounded-xl shadow-lg flex items-center justify-between text-xs font-semibold pointer-events-auto';
       t.innerHTML = '<div class="flex items-center space-x-2.5"><i class="fa-solid ' + icon + '"></i><span>' + escapeHtml(msg) + '</span></div><button type="button" class="text-white/60 hover:text-white ml-3"><i class="fa-solid fa-xmark"></i></button>';
       t.querySelector('button').onclick = function() { t.remove(); };
-      c.appendChild(t);
-      setTimeout(function() { t.remove(); }, 3500);
+      c.appendChild(t); setTimeout(function() { t.remove(); }, 3500);
     }
 
-    // ============================================================
     // CONFIRM
-    // ============================================================
     function showConfirmModal(title, msg, cb) {
       document.getElementById('confirmTitle').textContent = title;
       document.getElementById('confirmMessage').textContent = msg;
-      const ok = document.getElementById('confirmOkBtn');
-      const cancel = document.getElementById('confirmCancelBtn');
-      const cleanup = function() { closeModal('confirmModal'); ok.onclick = null; cancel.onclick = null; };
+      var ok = document.getElementById('confirmOkBtn'), cancel = document.getElementById('confirmCancelBtn');
+      var cleanup = function() { closeModal('confirmModal'); ok.onclick = null; cancel.onclick = null; };
       ok.onclick = function() { cleanup(); cb(); };
       cancel.onclick = cleanup;
       openModal('confirmModal');
     }
 
-    // ============================================================
-    // SEED DATA
-    // ============================================================
+    // SEED
     function populateSeedData() {
       window.appState = {
         settings: { className: "Robotics & Coding Academy", teacherName: "Ms. Clara" },
         timeSlots: ["09:00 - 10:30","11:00 - 12:30","14:00 - 15:30","16:00 - 17:30"],
         students: [
-          { id:"std_101", name:"John Doe", emoji:"🤖", dob:"2018-04-12", level:"CR1", day:"Monday", timeSlot:"09:00 - 10:30", termStartDate:"2026-01-05", termName:"Jan–Mar 2026", sessionsCompleted:10, archivedTerms:[],
-            attendanceLogs:[{id:"l1",date:"2026-01-05",status:"Present",projectTitle:"Intro to Gears",driveLink:"",notes:"Great!"},{id:"l2",date:"2026-01-12",status:"Present",projectTitle:"Pulley System",driveLink:"",notes:"Good"},{id:"l3",date:"2026-01-19",status:"Excused",projectTitle:"Missed",driveLink:"",notes:"Travel"}],
-            makeupTickets:[{id:"t_101",absentDate:"2026-01-19",status:"Pending",redeemedDate:""}] },
-          { id:"std_102", name:"Maya Lin", emoji:"🚀", dob:"2017-09-25", level:"CR3", day:"Monday", timeSlot:"09:00 - 10:30", termStartDate:"2026-01-05", termName:"Jan–Mar 2026", sessionsCompleted:11, archivedTerms:[],
-            attendanceLogs:[{id:"lm1",date:"2026-01-05",status:"Present",projectTitle:"Windmill",driveLink:"",notes:"Precise"}], makeupTickets:[] },
-          { id:"std_103", name:"Alex Rivera", emoji:"⚙️", dob:"2016-01-15", level:"CT2", day:"Tuesday", timeSlot:"11:00 - 12:30", termStartDate:"2026-01-06", termName:"Jan–Mar 2026", sessionsCompleted:5, archivedTerms:[],
-            attendanceLogs:[{id:"la1",date:"2026-01-06",status:"Present",projectTitle:"Bridge",driveLink:"",notes:"Solid"},{id:"la2",date:"2026-01-13",status:"Sick",projectTitle:"Absent",driveLink:"",notes:"Flu"}],
-            makeupTickets:[{id:"t_102",absentDate:"2026-01-13",status:"Pending",redeemedDate:""}] },
-          { id:"std_104", name:"Ethan Zhang", emoji:"👾", dob:"2015-06-30", level:"RB1", day:"Wednesday", timeSlot:"14:00 - 15:30", termStartDate:"2026-01-07", termName:"Jan–Mar 2026", sessionsCompleted:8, archivedTerms:[],
-            attendanceLogs:[{id:"le1",date:"2026-01-07",status:"Present",projectTitle:"Rover",driveLink:"",notes:"Good"}], makeupTickets:[] },
+          { id:"std_101", name:"John Doe", emoji:"🤖", dob:"2018-04-12", level:"CR1", day:"Monday", timeSlot:"09:00 - 10:30", termStartDate:"2026-01-05", termName:"Jan–Mar 2026", sessionsCompleted:10, archivedTerms:[], attendanceLogs:[{id:"l1",date:"2026-01-05",status:"Present",projectTitle:"Intro to Gears",driveLink:"",notes:"Great!"},{id:"l2",date:"2026-01-12",status:"Present",projectTitle:"Pulley System",driveLink:"",notes:"Good"},{id:"l3",date:"2026-01-19",status:"Excused",projectTitle:"Missed",driveLink:"",notes:"Travel"}], makeupTickets:[{id:"t_101",absentDate:"2026-01-19",status:"Pending",redeemedDate:""}] },
+          { id:"std_102", name:"Maya Lin", emoji:"🚀", dob:"2017-09-25", level:"CR3", day:"Monday", timeSlot:"09:00 - 10:30", termStartDate:"2026-01-05", termName:"Jan–Mar 2026", sessionsCompleted:11, archivedTerms:[], attendanceLogs:[{id:"lm1",date:"2026-01-05",status:"Present",projectTitle:"Windmill",driveLink:"",notes:"Precise"}], makeupTickets:[] },
+          { id:"std_103", name:"Alex Rivera", emoji:"⚙️", dob:"2016-01-15", level:"CT2", day:"Tuesday", timeSlot:"11:00 - 12:30", termStartDate:"2026-01-06", termName:"Jan–Mar 2026", sessionsCompleted:5, archivedTerms:[], attendanceLogs:[{id:"la1",date:"2026-01-06",status:"Present",projectTitle:"Bridge",driveLink:"",notes:"Solid"},{id:"la2",date:"2026-01-13",status:"Sick",projectTitle:"Absent",driveLink:"",notes:"Flu"}], makeupTickets:[{id:"t_102",absentDate:"2026-01-13",status:"Pending",redeemedDate:""}] },
+          { id:"std_104", name:"Ethan Zhang", emoji:"👾", dob:"2015-06-30", level:"RB1", day:"Wednesday", timeSlot:"14:00 - 15:30", termStartDate:"2026-01-07", termName:"Jan–Mar 2026", sessionsCompleted:8, archivedTerms:[], attendanceLogs:[{id:"le1",date:"2026-01-07",status:"Present",projectTitle:"Rover",driveLink:"",notes:"Good"}], makeupTickets:[] },
           { id:"std_105", name:"Sophia Chen", emoji:"🎨", dob:"2019-11-05", level:"CR2", day:"Monday", timeSlot:"09:00 - 10:30", termStartDate:"2026-01-05", termName:"Jan–Mar 2026", sessionsCompleted:3, archivedTerms:[], attendanceLogs:[], makeupTickets:[] },
           { id:"std_106", name:"Lucas Vance", emoji:"🛸", dob:"2016-08-14", level:"RB3", day:"Saturday", timeSlot:"16:00 - 17:30", termStartDate:"2026-01-10", termName:"Jan–Mar 2026", sessionsCompleted:2, archivedTerms:[], attendanceLogs:[], makeupTickets:[] }
         ],
@@ -658,30 +596,24 @@
       saveState();
     }
 
-    // ============================================================
     // INIT
-    // ============================================================
     function initHeader() {
-      const c = document.getElementById('headerClassName');
-      const t = document.getElementById('headerTeacherName');
+      var c = document.getElementById('headerClassName'), t = document.getElementById('headerTeacherName');
       if (c && window.appState.settings) c.value = window.appState.settings.className || '';
       if (t && window.appState.settings) t.value = window.appState.settings.teacherName || '';
     }
-
     function switchTab(tab) {
       window.currentTab = tab;
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('bg-rose-900', 'text-white');
-        btn.classList.add('text-rose-200');
+      document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.add('hidden'); });
+      document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        btn.classList.remove('bg-rose-900','text-white'); btn.classList.add('text-rose-200');
       });
-      const c = document.getElementById('tab-' + tab);
-      const n = document.querySelector('.tab-btn[data-tab="' + tab + '"]');
+      var c = document.getElementById('tab-' + tab);
+      var n = document.querySelector('.tab-btn[data-tab="' + tab + '"]');
       if (c) c.classList.remove('hidden');
-      if (n) { n.classList.add('bg-rose-900', 'text-white'); n.classList.remove('text-rose-200'); }
+      if (n) { n.classList.add('bg-rose-900','text-white'); n.classList.remove('text-rose-200'); }
       renderAll();
     }
-
     function renderAll() {
       updateBadges();
       try {
@@ -691,49 +623,42 @@
         else if (window.currentTab === 'history') renderHistoryTab();
         else if (window.currentTab === 'todos') renderTodosTab();
         else if (window.currentTab === 'settings') renderSettingsTab();
-      } catch (e) {
-        console.error('Render error:', e);
-      }
+      } catch(e) { console.error(e); }
     }
-
     function updateBadges() {
       try {
-        let t = 0;
-        window.appState.students.forEach(s => { if (s.makeupTickets) t += s.makeupTickets.filter(x => x.status === 'Pending').length; });
-        const tb = document.getElementById('ticketBadgeCount');
+        var t = 0;
+        window.appState.students.forEach(function(s) { if (s.makeupTickets) t += s.makeupTickets.filter(function(x) { return x.status === 'Pending'; }).length; });
+        var tb = document.getElementById('ticketBadgeCount');
         if (tb) { if (t>0) { tb.textContent=t; tb.classList.remove('hidden'); } else tb.classList.add('hidden'); }
-        const todoCount = window.appState.todos.filter(x => !x.completed).length;
-        const ub = document.getElementById('todoBadgeCount');
+        var todoCount = window.appState.todos.filter(function(x) { return !x.completed; }).length;
+        var ub = document.getElementById('todoBadgeCount');
         if (ub) { if (todoCount>0) { ub.textContent=todoCount; ub.classList.remove('hidden'); } else ub.classList.add('hidden'); }
-      } catch (e) { console.error(e); }
+      } catch(e) {}
     }
 
-    // ============================================================
-    // RENDER: ATTENDANCE
-    // ============================================================
+    // RENDER ATTENDANCE
     function renderAttendanceTab() {
-      const di = document.getElementById('attendanceSelectedDate');
-      if (di) di.value = window.attendanceDateStr;
-      const db = document.getElementById('attendanceDayOfWeekBadge');
-      if (db) db.textContent = window.attendanceDay;
-      document.querySelectorAll('.day-btn').forEach(b => {
+      var di = document.getElementById('attendanceSelectedDate'); if (di) di.value = window.attendanceDateStr;
+      var db = document.getElementById('attendanceDayOfWeekBadge'); if (db) db.textContent = window.attendanceDay;
+      document.querySelectorAll('.day-btn').forEach(function(b) {
         if (b.dataset.day === window.attendanceDay) b.className = "day-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-800 text-white shadow-sm btn-touch";
         else b.className = "day-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 btn-touch";
       });
-      const ts = document.getElementById('timeSlotFilterSelect');
+      var ts = document.getElementById('timeSlotFilterSelect');
       if (ts) {
         ts.innerHTML = '<option value="ALL">All Time Slots</option>';
         window.appState.timeSlots.forEach(function(s) {
-          const o = document.createElement('option'); o.value = s; o.textContent = s;
+          var o = document.createElement('option'); o.value = s; o.textContent = s;
           if (window.attendanceTime === s) o.selected = true;
           ts.appendChild(o);
         });
       }
-      const lvl = document.getElementById('levelFilter').value;
-      const tb = document.getElementById('attendanceTableBody');
-      const es = document.getElementById('attendanceEmptyState');
+      var lvl = document.getElementById('levelFilter').value;
+      var tb = document.getElementById('attendanceTableBody');
+      var es = document.getElementById('attendanceEmptyState');
       tb.innerHTML = '';
-      const students = window.appState.students.filter(function(s) {
+      var students = window.appState.students.filter(function(s) {
         if (s.day !== window.attendanceDay) return false;
         if (lvl !== 'ALL' && !s.level.startsWith(lvl)) return false;
         if (window.attendanceTime !== 'ALL' && s.timeSlot !== window.attendanceTime) return false;
@@ -741,9 +666,8 @@
       });
       if (students.length === 0) { es.classList.remove('hidden'); return; } else es.classList.add('hidden');
       students.forEach(function(s) {
-        const log = (s.attendanceLogs||[]).find(function(l) { return l.date === window.attendanceDateStr; });
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50";
+        var log = (s.attendanceLogs||[]).find(function(l) { return l.date === window.attendanceDateStr; });
+        var tr = document.createElement('tr'); tr.className = "hover:bg-slate-50";
         tr.innerHTML =
           '<td class="p-3 font-semibold text-slate-900 truncate-cell"><span class="mr-1.5 text-base">' + (s.emoji||'👤') + '</span>' + escapeHtml(s.name) + '<span class="block text-[10px] text-slate-400 font-normal">' + s.timeSlot + '</span></td>' +
           '<td class="p-3">' + getLevelBadgeHtml(s.level) + '</td>' +
@@ -758,25 +682,20 @@
           '<td class="p-3"><input type="text" id="project_' + s.id + '" value="' + (log?escapeHtml(log.projectTitle||''):'') + '" placeholder="Project" class="text-xs p-1.5 border border-slate-300 rounded-lg w-full"></td>' +
           '<td class="p-3"><input type="url" id="link_' + s.id + '" value="' + (log?escapeHtml(log.driveLink||''):'') + '" placeholder="Link" class="text-xs p-1.5 border border-slate-300 rounded-lg w-full"></td>' +
           '<td class="p-3"><input type="text" id="notes_' + s.id + '" value="' + (log?escapeHtml(log.notes||''):'') + '" placeholder="Notes" class="text-xs p-1.5 border border-slate-300 rounded-lg w-full"></td>' +
-          '<td class="p-3 text-center">' +
-            '<button type="button" data-action="saveAttendance" data-id="' + s.id + '" class="bg-slate-800 hover:bg-slate-900 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg inline-flex items-center space-x-1 btn-touch"><i class="fa-solid fa-floppy-disk text-xs"></i><span>Save</span></button>' +
-            '<div id="savedBadge_' + s.id + '" class="mt-1 hidden"><span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200"><i class="fa-solid fa-check mr-1"></i>Saved</span></div>' +
-          '</td>';
+          '<td class="p-3 text-center"><button type="button" data-action="saveAttendance" data-id="' + s.id + '" class="bg-slate-800 hover:bg-slate-900 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg inline-flex items-center space-x-1 btn-touch"><i class="fa-solid fa-floppy-disk text-xs"></i><span>Save</span></button></td>';
         tb.appendChild(tr);
       });
     }
-
     function saveAttendanceRow(id) {
-      const s = window.appState.students.find(function(x) { return x.id === id; });
-      if (!s) return;
-      const status = document.getElementById('status_'+id).value;
-      const projectTitle = document.getElementById('project_'+id).value.trim();
-      const driveLink = document.getElementById('link_'+id).value.trim();
-      const notes = document.getElementById('notes_'+id).value.trim();
-      const date = window.attendanceDateStr;
-      const idx = (s.attendanceLogs||[]).findIndex(function(l) { return l.date === date; });
+      var s = window.appState.students.find(function(x) { return x.id === id; }); if (!s) return;
+      var status = document.getElementById('status_'+id).value;
+      var projectTitle = document.getElementById('project_'+id).value.trim();
+      var driveLink = document.getElementById('link_'+id).value.trim();
+      var notes = document.getElementById('notes_'+id).value.trim();
+      var date = window.attendanceDateStr;
+      var idx = (s.attendanceLogs||[]).findIndex(function(l) { return l.date === date; });
       if (idx >= 0) {
-        const old = s.attendanceLogs[idx].status;
+        var old = s.attendanceLogs[idx].status;
         s.attendanceLogs[idx] = { id: s.attendanceLogs[idx].id, date: date, status: status, projectTitle: projectTitle, driveLink: driveLink, notes: notes };
         if (old !== 'Present' && old !== 'Make-Up' && (status === 'Present' || status === 'Make-Up')) s.sessionsCompleted = Math.min(11, s.sessionsCompleted+1);
       } else {
@@ -789,43 +708,31 @@
         }
       }
       if (status === 'Make-Up' && s.makeupTickets) {
-        const p = s.makeupTickets.find(function(t) { return t.status === 'Pending'; });
+        var p = s.makeupTickets.find(function(t) { return t.status === 'Pending'; });
         if (p) { p.status = 'Resolved'; p.redeemedDate = date; }
       }
-      saveState(); updateBadges();
-      const b = document.getElementById('savedBadge_'+id);
-      if (b) b.classList.remove('hidden');
-      showToast('Saved ' + s.name, 'success');
+      saveState(); updateBadges(); showToast('Saved ' + s.name, 'success');
     }
 
-    // ============================================================
-    // RENDER: DIRECTORY
-    // ============================================================
+    // RENDER DIRECTORY
     function renderDirectoryTab() {
-      const sv = document.getElementById('directorySearchInput').value.toLowerCase().trim();
-      const c = document.getElementById('directoryContent');
-      c.innerHTML = '';
-      const f = window.appState.students.filter(function(s) {
-        const n = s.name.toLowerCase().indexOf(sv) >= 0;
-        const l = s.level.toLowerCase().indexOf(sv) >= 0;
+      var sv = document.getElementById('directorySearchInput').value.toLowerCase().trim();
+      var c = document.getElementById('directoryContent'); c.innerHTML = '';
+      var f = window.appState.students.filter(function(s) {
+        var n = s.name.toLowerCase().indexOf(sv) >= 0, l = s.level.toLowerCase().indexOf(sv) >= 0;
         if (!n && !l) return false;
         if (window.directoryRenewalOnly && s.sessionsCompleted < 10) return false;
         return true;
       });
-      if (f.length === 0) {
-        c.innerHTML = '<div class="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400"><i class="fa-solid fa-users-slash text-4xl mb-2"></i><p class="font-medium">No students match.</p></div>';
-        return;
-      }
+      if (f.length === 0) { c.innerHTML = '<div class="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400"><i class="fa-solid fa-users-slash text-4xl mb-2"></i><p class="font-medium">No students match.</p></div>'; return; }
       if (window.directoryView === 'table') {
-        const w = document.createElement('div');
-        w.className = "bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden";
+        var w = document.createElement('div'); w.className = "bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden";
         w.innerHTML = '<div class="overflow-x-auto"><table class="table-fixed-layout text-left text-xs"><thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[11px] border-b border-slate-200"><tr><th class="p-3 w-48">Student</th><th class="p-3 w-28">Age</th><th class="p-3 w-28">Level</th><th class="p-3 w-40">Schedule</th><th class="p-3 w-28 text-center">Progress</th><th class="p-3 w-36 text-center">Debt</th><th class="p-3 w-48 text-right">Actions</th></tr></thead><tbody class="divide-y divide-slate-100" id="dirTableBody"></tbody></table></div>';
         c.appendChild(w);
-        const tbody = document.getElementById('dirTableBody');
+        var tbody = document.getElementById('dirTableBody');
         f.forEach(function(s) {
-          const pend = s.makeupTickets ? s.makeupTickets.filter(function(t) { return t.status === 'Pending'; }).length : 0;
-          const tr = document.createElement('tr');
-          tr.className = "hover:bg-slate-50";
+          var pend = s.makeupTickets ? s.makeupTickets.filter(function(t) { return t.status === 'Pending'; }).length : 0;
+          var tr = document.createElement('tr'); tr.className = "hover:bg-slate-50";
           tr.innerHTML =
             '<td class="p-3"><div class="flex items-center space-x-2.5"><div class="w-8 h-8 rounded-full bg-slate-100 font-bold flex items-center justify-center border">' + (s.emoji||getInitials(s.name)) + '</div><div><button type="button" data-action="timeline" data-id="' + s.id + '" class="font-bold text-slate-900 text-left hover:underline btn-touch">' + escapeHtml(s.name) + '</button><span class="block text-[10px] text-slate-400">' + s.termName + '</span></div></div></td>' +
             '<td class="p-3"><span class="font-bold">' + calculateAge(s.dob) + '</span><span class="block text-[10px] text-slate-400">' + (s.dob||'N/A') + '</span></td>' +
@@ -841,17 +748,12 @@
           tbody.appendChild(tr);
         });
       } else {
-        const g = document.createElement('div');
-        g.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4";
+        var g = document.createElement('div'); g.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4";
         f.forEach(function(s) {
-          const pend = s.makeupTickets ? s.makeupTickets.filter(function(t) { return t.status === 'Pending'; }).length : 0;
-          const card = document.createElement('div');
-          card.className = "bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4 relative overflow-hidden";
+          var pend = s.makeupTickets ? s.makeupTickets.filter(function(t) { return t.status === 'Pending'; }).length : 0;
+          var card = document.createElement('div'); card.className = "bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4 relative overflow-hidden";
           if (s.sessionsCompleted >= 10) {
-            const tb = document.createElement('div');
-            tb.className = "absolute top-0 left-0 right-0 bg-amber-500 text-slate-950 text-[10px] font-extrabold uppercase py-0.5 text-center";
-            tb.textContent = "Renewal Due";
-            card.appendChild(tb);
+            var tb = document.createElement('div'); tb.className = "absolute top-0 left-0 right-0 bg-amber-500 text-slate-950 text-[10px] font-extrabold uppercase py-0.5 text-center"; tb.textContent = "Renewal Due"; card.appendChild(tb);
           }
           card.innerHTML += '<div class="flex items-start justify-between ' + (s.sessionsCompleted>=10?'pt-2':'') + '"><div class="flex items-center space-x-3"><div class="w-12 h-12 rounded-2xl bg-rose-900 text-white font-bold flex items-center justify-center text-2xl">' + (s.emoji||getInitials(s.name)) + '</div><div><button type="button" data-action="timeline" data-id="' + s.id + '" class="font-bold text-slate-900 text-base hover:underline text-left btn-touch">' + escapeHtml(s.name) + '</button><p class="text-xs text-slate-500">Age: <span class="font-bold">' + calculateAge(s.dob) + '</span></p></div></div>' + getLevelBadgeHtml(s.level) + '</div>' +
           '<div class="bg-slate-50 p-3 rounded-xl border grid grid-cols-2 gap-2 text-xs"><div><span class="block text-[10px] font-bold text-slate-400 uppercase">Schedule</span><span class="font-bold">' + s.day + '</span><span class="block text-[10px] text-slate-500">' + s.timeSlot + '</span></div><div><span class="block text-[10px] font-bold text-slate-400 uppercase">Term</span><span class="font-bold">' + s.termName + '</span><span class="block text-[10px] text-slate-500">' + s.sessionsCompleted + '/11</span></div></div>' +
@@ -863,25 +765,19 @@
       }
     }
 
-    // ============================================================
-    // RENDER: TICKETS
-    // ============================================================
+    // RENDER TICKETS
     function renderTicketsTab() {
-      const tb = document.getElementById('makeupTicketsTableBody');
-      const es = document.getElementById('ticketsEmptyState');
+      var tb = document.getElementById('makeupTicketsTableBody');
+      var es = document.getElementById('ticketsEmptyState');
       tb.innerHTML = '';
-      const all = [];
-      window.appState.students.forEach(function(s) {
-        if (s.makeupTickets) s.makeupTickets.filter(function(t) { return t.status === 'Pending'; }).forEach(function(t) { all.push({s:s,t:t}); });
-      });
+      var all = [];
+      window.appState.students.forEach(function(s) { if (s.makeupTickets) s.makeupTickets.filter(function(t) { return t.status === 'Pending'; }).forEach(function(t) { all.push({s:s,t:t}); }); });
       document.getElementById('totalPendingTicketsCount').textContent = all.length;
       if (all.length === 0) { es.classList.remove('hidden'); return; } else es.classList.add('hidden');
       all.forEach(function(item) {
-        const s = item.s, t = item.t;
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-amber-50/50";
-        tr.innerHTML =
-          '<td class="p-3"><button type="button" data-action="timeline" data-id="' + s.id + '" class="font-bold hover:underline btn-touch">' + escapeHtml(s.name) + '</button></td>' +
+        var s = item.s, t = item.t;
+        var tr = document.createElement('tr'); tr.className = "hover:bg-amber-50/50";
+        tr.innerHTML = '<td class="p-3"><button type="button" data-action="timeline" data-id="' + s.id + '" class="font-bold hover:underline btn-touch">' + escapeHtml(s.name) + '</button></td>' +
           '<td class="p-3">' + getLevelBadgeHtml(s.level) + '</td>' +
           '<td class="p-3 font-medium">' + s.day + ' (' + s.timeSlot + ')</td>' +
           '<td class="p-3 font-mono font-semibold text-rose-800 bg-rose-50 rounded">' + t.absentDate + '</td>' +
@@ -891,29 +787,21 @@
       });
     }
 
-    // ============================================================
-    // RENDER: HISTORY
-    // ============================================================
+    // RENDER HISTORY
     function renderHistoryTab() {
-      const sv = document.getElementById('historySearchInput').value.toLowerCase().trim();
-      const tb = document.getElementById('historyTableBody');
-      const es = document.getElementById('historyEmptyState');
+      var sv = document.getElementById('historySearchInput').value.toLowerCase().trim();
+      var tb = document.getElementById('historyTableBody');
+      var es = document.getElementById('historyEmptyState');
       tb.innerHTML = '';
-      const all = [];
-      window.appState.students.forEach(function(s) {
-        (s.attendanceLogs||[]).forEach(function(l) { all.push({s:s,l:l}); });
-      });
+      var all = [];
+      window.appState.students.forEach(function(s) { (s.attendanceLogs||[]).forEach(function(l) { all.push({s:s,l:l}); }); });
       all.sort(function(a,b) { return new Date(b.l.date) - new Date(a.l.date); });
-      const f = all.filter(function(i) {
-        return i.s.name.toLowerCase().indexOf(sv) >= 0 || i.s.level.toLowerCase().indexOf(sv) >= 0 || (i.l.projectTitle||'').toLowerCase().indexOf(sv) >= 0;
-      });
+      var f = all.filter(function(i) { return i.s.name.toLowerCase().indexOf(sv) >= 0 || i.s.level.toLowerCase().indexOf(sv) >= 0 || (i.l.projectTitle||'').toLowerCase().indexOf(sv) >= 0; });
       if (f.length === 0) { es.classList.remove('hidden'); return; } else es.classList.add('hidden');
       f.forEach(function(item) {
-        const s = item.s, l = item.l;
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50";
-        tr.innerHTML =
-          '<td class="p-3 font-mono text-slate-600">' + l.date + '</td>' +
+        var s = item.s, l = item.l;
+        var tr = document.createElement('tr'); tr.className = "hover:bg-slate-50";
+        tr.innerHTML = '<td class="p-3 font-mono text-slate-600">' + l.date + '</td>' +
           '<td class="p-3"><button type="button" data-action="timeline" data-id="' + s.id + '" class="font-bold hover:underline btn-touch">' + escapeHtml(s.name) + '</button></td>' +
           '<td class="p-3">' + getLevelBadgeHtml(s.level) + '</td>' +
           '<td class="p-3">' + getStatusBadgeHtml(l.status) + '</td>' +
@@ -924,19 +812,15 @@
       });
     }
 
-    // ============================================================
-    // RENDER: TODOS
-    // ============================================================
+    // RENDER TODOS
     function renderTodosTab() {
-      document.querySelectorAll('.todo-filter-btn').forEach(function(b) {
-        b.classList.remove('bg-rose-800','text-white');
-      });
-      const ab = document.querySelector('.todo-filter-btn[data-filter="' + window.todoFilter + '"]');
+      document.querySelectorAll('.todo-filter-btn').forEach(function(b) { b.classList.remove('bg-rose-800','text-white'); });
+      var ab = document.querySelector('.todo-filter-btn[data-filter="' + window.todoFilter + '"]');
       if (ab) ab.classList.add('bg-rose-800','text-white');
-      const c = document.getElementById('todoListContainer');
-      const es = document.getElementById('todosEmptyState');
+      var c = document.getElementById('todoListContainer');
+      var es = document.getElementById('todosEmptyState');
       c.innerHTML = '';
-      const f = window.appState.todos.filter(function(t) {
+      var f = window.appState.todos.filter(function(t) {
         if (window.todoFilter === 'ACTIVE') return !t.completed;
         if (window.todoFilter === 'COMPLETED') return t.completed;
         if (['High','Medium','Low'].indexOf(window.todoFilter) >= 0) return t.priority === window.todoFilter;
@@ -944,60 +828,43 @@
       });
       if (f.length === 0) { es.classList.remove('hidden'); return; } else es.classList.add('hidden');
       f.forEach(function(t) {
-        const card = document.createElement('div');
+        var card = document.createElement('div');
         card.className = 'p-4 rounded-xl border ' + (t.completed?'bg-slate-50 opacity-70':'bg-white shadow-sm') + ' flex items-start justify-between gap-3';
-        let pb = '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300">Low</span>';
+        var pb = '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300">Low</span>';
         if (t.priority === 'High') pb = '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-rose-100 text-rose-900 border border-rose-300">High</span>';
         else if (t.priority === 'Medium') pb = '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">Medium</span>';
-        card.innerHTML =
-          '<div class="flex items-start space-x-3 w-full">' +
-            '<input type="checkbox" ' + (t.completed?'checked':'') + ' data-action="todoToggle" data-id="' + t.id + '" class="mt-1 w-4 h-4">' +
-            '<div class="space-y-1 w-full"><div class="flex flex-wrap items-center gap-2">' + pb + '</div><p class="text-xs ' + (t.completed?'line-through text-slate-400':'text-slate-800') + '">' + parseUrlsToLinks(escapeHtml(t.task)) + '</p></div>' +
-          '</div>' +
-          '<button type="button" data-action="todoDelete" data-id="' + t.id + '" class="text-slate-400 hover:text-rose-700 p-1.5 btn-touch"><i class="fa-solid fa-trash-can text-xs"></i></button>';
+        card.innerHTML = '<div class="flex items-start space-x-3 w-full"><input type="checkbox" ' + (t.completed?'checked':'') + ' data-action="todoToggle" data-id="' + t.id + '" class="mt-1 w-4 h-4"><div class="space-y-1 w-full"><div class="flex flex-wrap items-center gap-2">' + pb + '</div><p class="text-xs ' + (t.completed?'line-through text-slate-400':'text-slate-800') + '">' + parseUrlsToLinks(escapeHtml(t.task)) + '</p></div></div><button type="button" data-action="todoDelete" data-id="' + t.id + '" class="text-slate-400 hover:text-rose-700 p-1.5 btn-touch"><i class="fa-solid fa-trash-can text-xs"></i></button>';
         c.appendChild(card);
       });
     }
 
-    // ============================================================
-    // RENDER: SETTINGS
-    // ============================================================
+    // RENDER SETTINGS
     function renderSettingsTab() {
       document.getElementById('statStudentCount').textContent = window.appState.students.length;
-      let p = 0;
-      window.appState.students.forEach(function(s) {
-        if (s.makeupTickets) p += s.makeupTickets.filter(function(t) { return t.status === 'Pending'; }).length;
-      });
+      var p = 0;
+      window.appState.students.forEach(function(s) { if (s.makeupTickets) p += s.makeupTickets.filter(function(t) { return t.status === 'Pending'; }).length; });
       document.getElementById('statTicketCount').textContent = p;
       updateStorageSizeDisplay();
     }
 
-    // ============================================================
     // MODAL OPENERS
-    // ============================================================
     function populateTimeSlotDropdown(id) {
-      const s = document.getElementById(id);
-      if (!s) return;
+      var s = document.getElementById(id); if (!s) return;
       s.innerHTML = '';
-      window.appState.timeSlots.forEach(function(slot) {
-        const o = document.createElement('option'); o.value = slot; o.textContent = slot; s.appendChild(o);
-      });
+      window.appState.timeSlots.forEach(function(slot) { var o = document.createElement('option'); o.value = slot; o.textContent = slot; s.appendChild(o); });
     }
-
     function openAddStudentModal() {
       document.getElementById('studentModalTitle').textContent = 'Add New Student';
       document.getElementById('studentEditId').value = '';
       document.getElementById('studentForm').reset();
       populateTimeSlotDropdown('studentFormTimeSlot');
-      const today = getFormattedDateToday();
+      var today = getFormattedDateToday();
       document.getElementById('studentFormTermStartDate').value = today;
       document.getElementById('studentFormTermName').value = calculate3MonthTermName(today);
       openModal('studentModal');
     }
-
     function openEditStudentModal(id) {
-      const s = window.appState.students.find(function(x) { return x.id === id; });
-      if (!s) return;
+      var s = window.appState.students.find(function(x) { return x.id === id; }); if (!s) return;
       document.getElementById('studentModalTitle').textContent = 'Edit Student';
       document.getElementById('studentEditId').value = s.id;
       document.getElementById('studentFormName').value = s.name;
@@ -1011,49 +878,42 @@
       document.getElementById('studentFormTermName').value = s.termName || calculate3MonthTermName(s.termStartDate);
       openModal('studentModal');
     }
-
     function openAddMakeupModal() {
-      const sel = document.getElementById('makeupStudentSelect');
+      var sel = document.getElementById('makeupStudentSelect');
       sel.innerHTML = '<option value="">-- Select --</option>';
-      const el = window.appState.students.filter(function(s) { return s.makeupTickets && s.makeupTickets.some(function(t) { return t.status === 'Pending'; }); });
+      var el = window.appState.students.filter(function(s) { return s.makeupTickets && s.makeupTickets.some(function(t) { return t.status === 'Pending'; }); });
       if (el.length === 0) { showToast('No pending tickets', 'info'); return; }
       el.forEach(function(s) {
-        const cnt = s.makeupTickets.filter(function(t) { return t.status === 'Pending'; }).length;
-        const o = document.createElement('option'); o.value = s.id; o.textContent = s.name + ' (' + s.level + ') - ' + cnt + ' ticket(s)';
+        var cnt = s.makeupTickets.filter(function(t) { return t.status === 'Pending'; }).length;
+        var o = document.createElement('option'); o.value = s.id; o.textContent = s.name + ' (' + s.level + ') - ' + cnt + ' ticket(s)';
         sel.appendChild(o);
       });
       populateMakeupTicketDropdown();
       openModal('addMakeupModal');
     }
-
     function populateMakeupTicketDropdown() {
-      const sid = document.getElementById('makeupStudentSelect').value;
-      const ts = document.getElementById('makeupTicketSelect');
-      ts.innerHTML = '';
+      var sid = document.getElementById('makeupStudentSelect').value;
+      var ts = document.getElementById('makeupTicketSelect'); ts.innerHTML = '';
       if (!sid) return;
-      const s = window.appState.students.find(function(x) { return x.id === sid; });
+      var s = window.appState.students.find(function(x) { return x.id === sid; });
       if (!s || !s.makeupTickets) return;
       s.makeupTickets.filter(function(t) { return t.status === 'Pending'; }).forEach(function(t) {
-        const o = document.createElement('option'); o.value = t.id; o.textContent = 'Missed: ' + t.absentDate;
-        ts.appendChild(o);
+        var o = document.createElement('option'); o.value = t.id; o.textContent = 'Missed: ' + t.absentDate; ts.appendChild(o);
       });
     }
-
     function openTimelineModal(id) {
-      const s = window.appState.students.find(function(x) { return x.id === id; });
-      if (!s) return;
+      var s = window.appState.students.find(function(x) { return x.id === id; }); if (!s) return;
       document.getElementById('timelineAvatar').textContent = s.emoji || getInitials(s.name);
       document.getElementById('timelineStudentName').textContent = s.name;
       document.getElementById('timelineSubtext').textContent = s.level + ' • Age: ' + calculateAge(s.dob) + ' • ' + s.day + ' (' + s.timeSlot + ')';
       document.getElementById('timelineTermNameBadge').textContent = s.termName;
-      const g = document.getElementById('timelineGrid');
-      g.innerHTML = '';
-      const logs = s.attendanceLogs || [];
-      for (let i = 1; i <= 11; i++) {
-        const b = document.createElement('div');
+      var g = document.getElementById('timelineGrid'); g.innerHTML = '';
+      var logs = s.attendanceLogs || [];
+      for (var i = 1; i <= 11; i++) {
+        var b = document.createElement('div');
         if (i <= s.sessionsCompleted) {
           b.className = "p-2 rounded-xl border border-emerald-300 bg-emerald-50 text-center space-y-1";
-          const log = logs[i-1];
+          var log = logs[i-1];
           b.innerHTML = '<span class="block text-[10px] font-extrabold text-emerald-800">#' + i + '</span><i class="fa-solid fa-circle-check text-emerald-600"></i><span class="block text-[9px] font-mono font-bold text-emerald-900">' + (log?log.date.substring(5):'OK') + '</span>';
         } else {
           b.className = "p-2 rounded-xl border border-slate-200 bg-white text-center space-y-1 opacity-60";
@@ -1061,43 +921,37 @@
         }
         g.appendChild(b);
       }
-      const lb = document.getElementById('timelineCurrentLogsBody');
-      lb.innerHTML = '';
+      var lb = document.getElementById('timelineCurrentLogsBody'); lb.innerHTML = '';
       if (logs.length === 0) lb.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">No logs yet.</td></tr>';
       else logs.forEach(function(l) {
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50";
+        var tr = document.createElement('tr'); tr.className = "hover:bg-slate-50";
         tr.innerHTML = '<td class="p-2.5 font-mono text-slate-600">' + l.date + '</td><td class="p-2.5">' + getStatusBadgeHtml(l.status) + '</td><td class="p-2.5 font-semibold">' + escapeHtml(l.projectTitle||'-') + '</td><td class="p-2.5">' + (l.driveLink?parseUrlsToLinks(l.driveLink):'-') + '</td><td class="p-2.5 text-slate-600">' + escapeHtml(l.notes||'-') + '</td>';
         lb.appendChild(tr);
       });
-      const ac = document.getElementById('timelineArchivedTermsContainer');
-      ac.innerHTML = '';
+      var ac = document.getElementById('timelineArchivedTermsContainer'); ac.innerHTML = '';
       if ((s.archivedTerms||[]).length === 0) ac.innerHTML = '<p class="text-xs text-slate-400 italic">No archives.</p>';
       else s.archivedTerms.forEach(function(term, idx) {
-        const box = document.createElement('div');
-        box.className = "border border-slate-200 rounded-xl overflow-hidden bg-slate-50";
+        var box = document.createElement('div'); box.className = "border border-slate-200 rounded-xl overflow-hidden bg-slate-50";
         box.innerHTML = '<button type="button" data-action="archiveToggle" data-target="arc_' + idx + '" class="w-full px-4 py-3 text-left font-bold text-xs bg-slate-100 hover:bg-slate-200 btn-touch"><i class="fa-solid fa-box-archive mr-2 text-rose-800"></i>' + term.termName + '</button><div id="arc_' + idx + '" class="hidden p-3 bg-white border-t overflow-x-auto"><table class="w-full text-xs"><thead class="text-slate-500 font-bold border-b"><tr><th class="p-2">Date</th><th class="p-2">Status</th><th class="p-2">Project</th></tr></thead><tbody>' + (term.logs||[]).map(function(l) { return '<tr><td class="p-2 font-mono">' + l.date + '</td><td class="p-2">' + l.status + '</td><td class="p-2">' + escapeHtml(l.projectTitle||'-') + '</td></tr>'; }).join('') + '</tbody></table></div>';
         ac.appendChild(box);
       });
       openModal('timelineModal');
     }
 
-    // ============================================================
-    // FORM SUBMIT HANDLERS
-    // ============================================================
+    // FORM HANDLERS
     document.getElementById('studentForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const id = document.getElementById('studentEditId').value;
-      const name = document.getElementById('studentFormName').value.trim();
-      const emoji = document.getElementById('studentFormEmoji').value.trim();
-      const dob = document.getElementById('studentFormDob').value;
-      const level = document.getElementById('studentFormLevel').value;
-      const day = document.getElementById('studentFormDay').value;
-      const timeSlot = document.getElementById('studentFormTimeSlot').value;
-      const termStartDate = document.getElementById('studentFormTermStartDate').value;
-      const termName = calculate3MonthTermName(termStartDate);
+      var id = document.getElementById('studentEditId').value;
+      var name = document.getElementById('studentFormName').value.trim();
+      var emoji = document.getElementById('studentFormEmoji').value.trim();
+      var dob = document.getElementById('studentFormDob').value;
+      var level = document.getElementById('studentFormLevel').value;
+      var day = document.getElementById('studentFormDay').value;
+      var timeSlot = document.getElementById('studentFormTimeSlot').value;
+      var termStartDate = document.getElementById('studentFormTermStartDate').value;
+      var termName = calculate3MonthTermName(termStartDate);
       if (id) {
-        const s = window.appState.students.find(function(x) { return x.id === id; });
+        var s = window.appState.students.find(function(x) { return x.id === id; });
         if (s) { s.name = name; s.emoji = emoji; s.dob = dob; s.level = level; s.day = day; s.timeSlot = timeSlot; s.termStartDate = termStartDate; s.termName = termName; }
         showToast('Updated', 'success');
       } else {
@@ -1106,18 +960,17 @@
       }
       saveState(); closeModal('studentModal'); renderAll();
     });
-
     document.getElementById('addMakeupForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const sid = document.getElementById('makeupStudentSelect').value;
-      const tid = document.getElementById('makeupTicketSelect').value;
-      const pt = document.getElementById('makeupProjectTitle').value.trim();
-      const dl = document.getElementById('makeupDriveLink').value.trim();
-      const nt = document.getElementById('makeupNotes').value.trim();
+      var sid = document.getElementById('makeupStudentSelect').value;
+      var tid = document.getElementById('makeupTicketSelect').value;
+      var pt = document.getElementById('makeupProjectTitle').value.trim();
+      var dl = document.getElementById('makeupDriveLink').value.trim();
+      var nt = document.getElementById('makeupNotes').value.trim();
       if (!sid || !tid) return showToast('Select student and ticket', 'error');
-      const s = window.appState.students.find(function(x) { return x.id === sid; });
-      const t = s.makeupTickets.find(function(x) { return x.id === tid; });
-      const today = getFormattedDateToday();
+      var s = window.appState.students.find(function(x) { return x.id === sid; });
+      var t = s.makeupTickets.find(function(x) { return x.id === tid; });
+      var today = getFormattedDateToday();
       t.status = 'Resolved'; t.redeemedDate = today;
       s.sessionsCompleted = Math.min(11, s.sessionsCompleted + 1);
       if (!s.attendanceLogs) s.attendanceLogs = [];
@@ -1125,41 +978,30 @@
       saveState(); closeModal('addMakeupModal'); document.getElementById('addMakeupForm').reset(); renderAll();
       showToast('Make-Up resolved', 'success');
     });
-
     document.getElementById('timeSlotForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const v = document.getElementById('newTimeSlotInput').value.trim();
+      var v = document.getElementById('newTimeSlotInput').value.trim();
       if (!v) return;
       if (window.appState.timeSlots.indexOf(v) < 0) window.appState.timeSlots.push(v);
       saveState(); closeModal('timeSlotModal'); document.getElementById('newTimeSlotInput').value = ''; renderAttendanceTab();
       showToast('Time slot added', 'success');
     });
-
     document.getElementById('todoForm').addEventListener('submit', function(e) {
       e.preventDefault();
-      const task = document.getElementById('todoTaskInput').value.trim();
-      const priority = document.getElementById('todoPriorityInput').value;
-      const deadline = document.getElementById('todoDeadlineInput').value;
+      var task = document.getElementById('todoTaskInput').value.trim();
+      var priority = document.getElementById('todoPriorityInput').value;
+      var deadline = document.getElementById('todoDeadlineInput').value;
       if (!task) return;
       window.appState.todos.push({ id:'td_'+Date.now(), task:task, priority:priority, deadline:deadline, completed:false });
       saveState(); closeModal('todoModal'); document.getElementById('todoForm').reset(); renderAll();
       showToast('Task added', 'success');
     });
 
-    // ============================================================
-    // EVENT DELEGATION — the ONE handler that makes everything work
-    // ============================================================
+    // EVENT DELEGATION
     document.addEventListener('click', function(e) {
-      // Log for diagnostics
-      window.__diag.clicks++;
-
-      // Find closest element with data-action
-      let el = e.target;
+      var el = e.target;
       while (el && el !== document.body) {
-        if (el.dataset && el.dataset.action) {
-          handleAction(el.dataset.action, el, e);
-          return;
-        }
+        if (el.dataset && el.dataset.action) { handleAction(el.dataset.action, el, e); return; }
         el = el.parentElement;
       }
     }, false);
@@ -1178,8 +1020,7 @@
         case 'deleteStudent':
           e.preventDefault();
           (function() {
-            const s = window.appState.students.find(function(x) { return x.id === el.dataset.id; });
-            if (!s) return;
+            var s = window.appState.students.find(function(x) { return x.id === el.dataset.id; }); if (!s) return;
             showConfirmModal('Delete Student', 'Delete ' + s.name + '?', function() {
               window.appState.students = window.appState.students.filter(function(x) { return x.id !== el.dataset.id; });
               saveState(); renderAll(); showToast('Deleted', 'info');
@@ -1189,11 +1030,10 @@
         case 'archive':
           e.preventDefault();
           (function() {
-            const s = window.appState.students.find(function(x) { return x.id === el.dataset.id; });
-            if (!s) return;
+            var s = window.appState.students.find(function(x) { return x.id === el.dataset.id; }); if (!s) return;
             if (s.sessionsCompleted < 10) return showToast('Not enough sessions', 'info');
-            const today = getFormattedDateToday();
-            const next = calculate3MonthTermName(today);
+            var today = getFormattedDateToday();
+            var next = calculate3MonthTermName(today);
             showConfirmModal('Archive Term', 'Archive ' + s.name + ' and start ' + next + '?', function() {
               if (!s.archivedTerms) s.archivedTerms = [];
               s.archivedTerms.push({ termName:s.termName, archivedDate:today, logs:(s.attendanceLogs||[]).slice() });
@@ -1215,7 +1055,7 @@
         case 'todoToggle':
           e.preventDefault();
           (function() {
-            const t = window.appState.todos.find(function(x) { return x.id === el.dataset.id; });
+            var t = window.appState.todos.find(function(x) { return x.id === el.dataset.id; });
             if (t) { t.completed = !t.completed; saveState(); renderAll(); }
           })();
           break;
@@ -1227,10 +1067,9 @@
         case 'export':
           e.preventDefault();
           (function() {
-            const data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.appState, null, 2));
-            const a = document.createElement('a');
-            a.setAttribute('href', data);
-            a.setAttribute('download', 'classtrack_backup_' + getFormattedDateToday() + '.json');
+            var data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.appState, null, 2));
+            var a = document.createElement('a');
+            a.setAttribute('href', data); a.setAttribute('download', 'classtrack_backup_' + getFormattedDateToday() + '.json');
             document.body.appendChild(a); a.click(); a.remove();
             showToast('Exported', 'success');
           })();
@@ -1252,15 +1091,12 @@
         case 'close': e.preventDefault(); closeModal(el.dataset.close); break;
         case 'archiveToggle':
           e.preventDefault();
-          (function() {
-            const target = document.getElementById(el.dataset.target);
-            if (target) target.classList.toggle('hidden');
-          })();
+          (function() { var t = document.getElementById(el.dataset.target); if (t) t.classList.toggle('hidden'); })();
           break;
       }
     }
 
-    // Form input handlers
+    // INPUT HANDLERS
     document.getElementById('attendanceSelectedDate').addEventListener('change', function() {
       window.attendanceDateStr = this.value;
       window.attendanceDay = getDayOfWeekFromDateStr(this.value);
@@ -1270,20 +1106,15 @@
     document.getElementById('timeSlotFilterSelect').addEventListener('change', function() { window.attendanceTime = this.value; renderAttendanceTab(); });
     document.getElementById('directorySearchInput').addEventListener('input', renderDirectoryTab);
     document.getElementById('historySearchInput').addEventListener('input', renderHistoryTab);
-    document.getElementById('headerClassName').addEventListener('change', function() {
-      window.appState.settings.className = this.value; saveState();
-    });
-    document.getElementById('headerTeacherName').addEventListener('change', function() {
-      window.appState.settings.teacherName = this.value; saveState();
-    });
+    document.getElementById('headerClassName').addEventListener('change', function() { window.appState.settings.className = this.value; saveState(); });
+    document.getElementById('headerTeacherName').addEventListener('change', function() { window.appState.settings.teacherName = this.value; saveState(); });
     document.getElementById('makeupStudentSelect').addEventListener('change', populateMakeupTicketDropdown);
     document.getElementById('importJsonFileInput').addEventListener('change', function(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const r = new FileReader();
+      var file = event.target.files[0]; if (!file) return;
+      var r = new FileReader();
       r.onload = function(e) {
         try {
-          const d = JSON.parse(e.target.result);
+          var d = JSON.parse(e.target.result);
           if (d && d.students && Array.isArray(d.students)) { window.appState = d; saveState(); initHeader(); renderAll(); showToast('Restored', 'success'); }
           else showToast('Invalid file', 'error');
         } catch(err) { showToast('Parse error', 'error'); }
@@ -1293,22 +1124,60 @@
     document.getElementById('studentFormTermStartDate').addEventListener('change', function() {
       document.getElementById('studentFormTermName').value = calculate3MonthTermName(this.value);
     });
-
-    // Backdrop click to close
     document.querySelectorAll('.modal-backdrop').forEach(function(m) {
       m.addEventListener('click', function(e) { if (e.target === m) m.classList.remove('active-modal'); });
     });
-
-    // Escape key
     document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeAllModals(); });
 
-    // ============================================================
     // BOOT
-    // ============================================================
     loadState();
     initHeader();
     switchTab('attendance');
     renderAll();
-</script>
+
+    // ============================================================
+    // SILENT iPAD SAFARI TOUCH-LAYER FIX
+    // Forces the browser to fully attach its touch/event system
+    // WITHOUT showing any alert() or popup. This replaces the
+    // accidental fix the diagnostic alert was providing.
+    // ============================================================
+    (function silentTouchLayerFix() {
+      // 1. Force synchronous reflow (same thing alert() did)
+      void document.body.offsetHeight;
+      void document.body.getBoundingClientRect();
+
+      // 2. Inject a 1x1 probe element that forces iOS to build
+      //    the compositor/touch layer for the body
+      var probe = document.createElement('div');
+      probe.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0.01;pointer-events:auto;z-index:1;';
+      document.body.appendChild(probe);
+      void probe.getBoundingClientRect();
+
+      // 3. Toggle cursor to force style recalc
+      document.body.style.cursor = 'pointer';
+      void document.body.offsetWidth;
+      document.body.style.cursor = '';
+
+      // 4. Dispatch a synthetic touch cycle so the browser
+      //    registers the touch target regions
+      try {
+        var ts = document.createEvent('Event');
+        ts.initEvent('touchstart', true, true);
+        document.body.dispatchEvent(ts);
+        var te = document.createEvent('Event');
+        te.initEvent('touchend', true, true);
+        document.body.dispatchEvent(te);
+      } catch (e) {}
+
+      // 5. Remove probe after a tick
+      setTimeout(function() { probe.remove(); }, 50);
+
+      // 6. Second reflow pass after layout stabilizes
+      setTimeout(function() {
+        void document.body.offsetHeight;
+        void document.body.getBoundingClientRect();
+      }, 0);
+    })();
+  </script>
 </body>
 </html>
