@@ -481,16 +481,6 @@
        DIAGNOSTIC: This catches ANY error during script execution
        and shows it in an alert so we know exactly what's broken.
        ============================================================ -->
-  <script>
-    // Global error handler - will alert on any JS error
-    window.onerror = function(msg, url, line, col, err) {
-      alert('⚠️ JS ERROR: ' + msg + '\n\nLine: ' + line + ':' + col);
-      return false;
-    };
-
-    // Save reference to diagnostics element
-    window.__diag = { errors: [], clicks: 0 };
-  </script>
 
   <script>
     // ============================================================
@@ -1319,20 +1309,6 @@
     initHeader();
     switchTab('attendance');
     renderAll();
-
-    // ============================================================
-    // DIAGNOSTIC CONFIRMATION
-    // (This alert appears once on load to confirm JS is running)
-    // ============================================================
-    setTimeout(function() {
-      const tabCount = document.querySelectorAll('.tab-btn').length;
-      const hasHandler = typeof handleAction === 'function';
-      alert('✅ ClassTrack loaded successfully!\n\n' +
-            'Tab buttons found: ' + tabCount + '\n' +
-            'Click handler: ' + (hasHandler ? 'ACTIVE' : 'MISSING') + '\n' +
-            'Students loaded: ' + window.appState.students.length + '\n\n' +
-            'If you still can\'t tap, tell me what this says.');
-    }, 500);
-  </script>
+</script>
 </body>
 </html>
