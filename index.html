@@ -45,14 +45,20 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-    .btn-touch {
-      min-height: 44px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
+    /* WITH THIS */
+.btn-touch {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  /* iOS Safari touch fix */
+  -webkit-appearance: none;
+  appearance: none;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+}
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -1880,5 +1886,23 @@
       }, 3500);
     };
   </script>
+  <script>
+// Global iOS tap fix: ensure ALL buttons and tab nav respond to touch
+document.addEventListener('DOMContentLoaded', () => {
+  // Force pointer-events on interactive elements
+  const fixTouches = () => {
+    document.querySelectorAll('button, .btn-touch, .tab-btn, .day-btn, [onclick]').forEach(el => {
+      el.style.pointerEvents = 'auto';
+      el.style.cursor = 'pointer';
+    });
+  };
+  fixTouches();
+
+  // Re-apply after every render (since tables are re-rendered dynamically)
+  const observer = new MutationObserver(fixTouches);
+  observer.observe(document.body, { childList: true, subtree: true });
+});
+</script>
 </body>
+  
 </html>
