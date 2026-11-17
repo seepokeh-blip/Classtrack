@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <!-- Meta Tag PWA & Web App -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -42,6 +42,73 @@
     ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:4px; }
     .modal-backdrop { display:none; pointer-events:none; }
     .modal-backdrop.active-modal { display:flex; pointer-events:auto; }
+
+    /* ===================== iOS GLASS THEME (visual layer only) ===================== */
+    .hidden { display:none !important; }
+    :root { --glass: rgba(255,255,255,.62); --glass-border: rgba(255,255,255,.78); --glass-shadow: 0 8px 30px rgba(127,29,29,.08), inset 0 1px 0 rgba(255,255,255,.85); }
+    body, body button, body input, body select, body textarea { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Inter',sans-serif !important; }
+    body.bg-slate-50 { background:
+      radial-gradient(700px 420px at 8% -8%, rgba(220,38,38,.16), transparent 62%),
+      radial-gradient(640px 420px at 100% 6%, rgba(244,114,182,.15), transparent 60%),
+      radial-gradient(700px 500px at 50% 110%, rgba(153,27,27,.10), transparent 60%), #f7f2f2 !important; background-attachment:fixed !important; }
+    /* Header = frosted maroon glass (blur lives on a pseudo-element so the fixed bottom nav still works) */
+    header { background:transparent !important; border:0 !important; box-shadow:0 6px 24px rgba(127,29,29,.22) !important; padding-top:env(safe-area-inset-top,0px); }
+    header::before { content:''; position:absolute; inset:0; z-index:-1; background:linear-gradient(135deg,rgba(136,19,55,.88),rgba(127,29,29,.84)); -webkit-backdrop-filter:blur(22px) saturate(180%); backdrop-filter:blur(22px) saturate(180%); border-bottom:1px solid rgba(255,255,255,.18); }
+    header .bg-rose-800.p-2\.5 { background:rgba(255,255,255,.16) !important; border-color:rgba(255,255,255,.28) !important; border-radius:16px !important; }
+    header .bg-rose-950\/60 { background:rgba(255,255,255,.14) !important; border:1px solid rgba(255,255,255,.26) !important; border-radius:14px !important; }
+    nav { background:rgba(0,0,0,.14) !important; border-top:1px solid rgba(255,255,255,.12) !important; }
+    .tab-btn { border-radius:14px !important; margin:4px 0; transition:background-color .2s, color .2s, transform .12s; }
+    .tab-btn.bg-rose-900 { background:rgba(255,255,255,.2) !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.3); }
+    /* Glass cards */
+    main div.bg-white { background:var(--glass) !important; -webkit-backdrop-filter:blur(18px) saturate(160%); backdrop-filter:blur(18px) saturate(160%); border:1px solid var(--glass-border) !important; border-radius:22px !important; box-shadow:var(--glass-shadow) !important; }
+    main thead, main thead th { background:rgba(241,245,249,.75) !important; }
+    main tbody tr:hover { background:rgba(255,255,255,.55); }
+    /* Controls */
+    input:not([type=checkbox]):not([type=hidden]):not(#headerClassName):not(#headerTeacherName), select, textarea { background-color:rgba(255,255,255,.72) !important; border-color:rgba(148,163,184,.42) !important; border-radius:13px !important; }
+    input:focus, select:focus, textarea:focus { box-shadow:0 0 0 3px rgba(153,27,27,.16) !important; border-color:rgba(153,27,27,.5) !important; outline:none; }
+    button { transition:transform .12s ease, background-color .2s ease, opacity .2s; }
+    button:active { transform:scale(.96); }
+    button.rounded-xl, button.rounded-lg { border-radius:14px !important; }
+    /* Modals = glass sheets */
+    .modal-backdrop { background:rgba(30,15,20,.34) !important; -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); }
+    .modal-backdrop > div { background:rgba(255,255,255,.8) !important; -webkit-backdrop-filter:blur(30px) saturate(180%); backdrop-filter:blur(30px) saturate(180%); border:1px solid rgba(255,255,255,.85) !important; border-radius:28px !important; box-shadow:0 24px 60px rgba(60,10,20,.28) !important; }
+    @keyframes sheetUp { from { transform:translateY(28px); opacity:0; } to { transform:none; opacity:1; } }
+    .modal-backdrop.active-modal > div { animation:sheetUp .3s cubic-bezier(.2,.8,.2,1); }
+    /* Toasts */
+    #toastContainer { left:50% !important; right:auto !important; transform:translateX(-50%); top:calc(env(safe-area-inset-top,0px) + 10px) !important; }
+    #toastContainer > div { background:rgba(35,20,24,.8) !important; -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); border-radius:18px !important; }
+    ::-webkit-scrollbar-thumb { background:rgba(153,27,27,.25); }
+
+    /* ===================== MOBILE: bottom tab bar, bottom sheets, table -> cards ===================== */
+    @media (max-width:767px) {
+      main { padding-bottom:calc(110px + env(safe-area-inset-bottom,0px)) !important; }
+      .text-xs { font-size:13px !important; line-height:1.4 !important; }
+      .text-\[11px\] { font-size:12px !important; } .text-\[10px\] { font-size:11px !important; }
+      nav { position:fixed !important; left:12px; right:12px; bottom:calc(10px + env(safe-area-inset-bottom,0px)); z-index:40; display:flex; justify-content:space-between; gap:2px; padding:6px !important; overflow:visible !important;
+            background:rgba(255,255,255,.72) !important; border:1px solid rgba(255,255,255,.85) !important; border-radius:28px; -webkit-backdrop-filter:blur(26px) saturate(190%); backdrop-filter:blur(26px) saturate(190%); box-shadow:0 12px 40px rgba(60,10,20,.25); }
+      .tab-btn { flex:1; flex-direction:column !important; justify-content:center; gap:3px; padding:7px 0 !important; margin:0; min-width:0; color:#64748b !important; background:transparent !important; box-shadow:none !important; position:relative; }
+      .tab-btn > i { font-size:18px !important; margin:0 !important; }
+      .tab-btn > span:not([id]) { font-size:0 !important; margin:0 !important; }
+      .tab-btn > span:not([id])::after { font-size:10px; font-weight:700; letter-spacing:.01em; }
+      .tab-btn[data-tab=attendance] > span::after { content:'Attendance'; } .tab-btn[data-tab=directory] > span::after { content:'Students'; }
+      .tab-btn[data-tab=tickets] > span::after { content:'Make-Up'; } .tab-btn[data-tab=history] > span::after { content:'History'; }
+      .tab-btn[data-tab=todos] > span::after { content:'To-Do'; } .tab-btn[data-tab=settings] > span::after { content:'Settings'; }
+      .tab-btn.bg-rose-900 { color:#991b1b !important; background:rgba(153,27,27,.12) !important; }
+      #ticketBadgeCount, #todoBadgeCount { position:absolute; top:2px; left:calc(50% + 6px); margin:0 !important; font-size:10px !important; }
+      .modal-backdrop.active-modal { align-items:flex-end !important; padding:0 !important; }
+      .modal-backdrop > div { max-width:100% !important; border-radius:28px 28px 0 0 !important; max-height:92vh !important; padding-bottom:env(safe-area-inset-bottom,0px); }
+      input:not([type=checkbox]), select, textarea { font-size:16px !important; }
+      /* tables become stacked cards */
+      :is(#tab-attendance,#tab-directory,#tab-tickets,#tab-history) :is(table,tbody) { display:block !important; width:100% !important; }
+      :is(#tab-attendance,#tab-directory,#tab-tickets,#tab-history) div.bg-white:has(> table) { background:transparent !important; border:0 !important; box-shadow:none !important; -webkit-backdrop-filter:none; backdrop-filter:none; max-height:none !important; overflow:visible !important; }
+      :is(#tab-attendance,#tab-directory,#tab-tickets,#tab-history) thead { display:none !important; }
+      :is(#tab-attendance,#tab-directory,#tab-tickets,#tab-history) tbody tr { display:block !important; margin:10px; padding:10px 14px; background:rgba(255,255,255,.72); border:1px solid rgba(255,255,255,.9) !important; border-radius:20px; box-shadow:0 4px 16px rgba(127,29,29,.08); }
+      :is(#tab-attendance,#tab-directory,#tab-tickets,#tab-history) tbody td { display:flex !important; align-items:center; justify-content:space-between; gap:12px; width:auto !important; max-width:none !important; padding:6px 0 !important; border:0 !important; white-space:normal !important; overflow:visible !important; text-align:right !important; position:static !important; box-shadow:none !important; background:transparent !important; }
+      :is(#tab-attendance,#tab-directory,#tab-tickets,#tab-history) tbody td::before { content:attr(data-label); flex:0 0 78px; text-align:left; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:#94a3b8; }
+      :is(#tab-attendance,#tab-directory,#tab-tickets,#tab-history) tbody td[data-label="Actions"]::before, :is(#tab-attendance,#tab-directory,#tab-tickets,#tab-history) tbody td[data-label=""]::before, :is(#tab-attendance,#tab-directory,#tab-tickets,#tab-history) tbody td:not([data-label])::before { display:none; }
+      :is(#tab-attendance,#tab-directory,#tab-tickets,#tab-history) tbody td > :is(input,select) { flex:1; min-width:0; }
+      :is(#tab-attendance,#tab-directory,#tab-tickets,#tab-history) tbody td[data-label=""], :is(#tab-attendance,#tab-directory,#tab-tickets,#tab-history) tbody td[data-label="Actions"] { justify-content:flex-end; }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased">
@@ -388,9 +455,10 @@
           <div class="min-w-0">
             <div class="flex items-center justify-between mb-1">
               <label class="block text-xs font-bold text-slate-700 uppercase">Level</label>
-              <button type="button" data-action="levels" data-return="studentModal" title="Levels" class="p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl flex items-center justify-center btn-touch">
-              <i class="fa-solid fa-layer-group"></i>
-            </button>
+              <button type="button" data-action="levels" data-return="studentModal" title="Levels" class="p-3 bg-slate-100 hover: bg-slate-200 text-slate-700
+                border border-slate-300 rounded-xl flex items-center justify-center btn-touch">
+                <i class="fa-solid fa-layer-group"></i>
+</button›
             </div>
             <select id="studentFormLevel" required class="w-full text-sm p-3 border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none"></select>
           </div>
@@ -2228,6 +2296,22 @@
     initHeader();
     switchTab('attendance');
     renderAll();
+
+    // Visual helper: copy column titles onto cells so tables can render as cards on phones
+    (function() {
+      function labelCells() {
+        document.querySelectorAll('#tab-attendance table, #tab-directory table, #tab-tickets table, #tab-history table').forEach(t => {
+          const hs = Array.from(t.querySelectorAll('thead th')).map(h => h.textContent.trim());
+          t.querySelectorAll('tbody tr').forEach(tr => Array.from(tr.children).forEach((td, i) => {
+            if (td.dataset.label === undefined) td.dataset.label = hs[i] || '';
+          }));
+        });
+      }
+      let queued = false;
+      new MutationObserver(() => { if (queued) return; queued = true; requestAnimationFrame(() => { queued = false; labelCells(); }); })
+        .observe(document.querySelector('main'), { childList: true, subtree: true });
+      labelCells();
+    })();
   </script>
 </body>
 </html>
