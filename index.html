@@ -36,19 +36,14 @@
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased">
-<div id="authScreen" style="position:fixed; inset:0; background:white; z-index:10000; display:flex; align-items:center; justify-content:center; padding:20px;">
+<div id="authScreen" style="position:fixed; inset:0; background:white; z-index:99999; display:flex; align-items:center; justify-content:center; padding:20px;">
   <div style="width:100%; max-width:320px; display:flex; flex-direction:column; gap:12px;">
-    <h2 style="font-size:20px; font-weight:bold; text-align:center;">Login ClassTrack</h2>
-    <input type="email" id="authEmail" placeholder="Email" style="padding:12px; border:1px solid #ccc; border-radius:12px; font-size:16px;">
-    <input type="password" id="authPassword" placeholder="Password" style="padding:12px; border:1px solid #ccc; border-radius:12px; font-size:16px;">
-    <button onclick="signIn(document.getElementById('authEmail').value, document.getElementById('authPassword').value)" style="padding:12px; background:#991B1B; color:white; border:none; border-radius:12px; font-size:16px; font-weight:bold;">Masuk</button>
-    <p style="text-align:center; font-size:14px; color:#666; margin:8px 0;">
-  Belum punya akun? 
-  <a href="#" onclick="event.preventDefault(); signUp(document.getElementById('authEmail').value, document.getElementById('authPassword').value); return false;" 
-     style="color:#991B1B; font-weight:bold; text-decoration:underline; padding:8px; display:inline-block; cursor:pointer;">
-    Daftar di sini
-  </a>
-</p>
+    <h2 style="font-size:20px; font-weight:bold; text-align:center; margin-bottom:8px;">Login ClassTrack</h2>
+    <input type="email" id="authEmail" placeholder="Email" style="padding:14px; border:1px solid #ccc; border-radius:12px; font-size:16px; width:100%; box-sizing:border-box;">
+    <input type="password" id="authPassword" placeholder="Password" style="padding:14px; border:1px solid #ccc; border-radius:12px; font-size:16px; width:100%; box-sizing:border-box;">
+    <button type="button" id="btnLogin" style="padding:14px; background:#991B1B; color:white; border:none; border-radius:12px; font-size:16px; font-weight:bold; width:100%; cursor:pointer;">MASUK</button>
+    <button type="button" id="btnDaftar" style="padding:14px; background:#e2e8f0; color:#334155; border:1px solid #cbd5e1; border-radius:12px; font-size:16px; font-weight:bold; width:100%; cursor:pointer;">DAFTAR</button>
+    <p id="authDebug" style="text-align:center; font-size:12px; color:#94a3b8; margin-top:8px;">—</p>
   </div>
 </div>
   <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-md w-full px-4"></div>
