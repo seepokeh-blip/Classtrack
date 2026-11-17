@@ -673,9 +673,10 @@ async function signIn(email, password) {
 
 // Fungsi Daftar
 async function signUp(email, password) {
+  alert('signUp dipanggil. Email: "' + email + '", Password length: ' + password.length);
   const { data, error } = await supabase.auth.signUp({ email, password });
-  if (error) { showToast(error.message, 'error'); return; }
-  showToast('Cek email untuk konfirmasi, lalu login.', 'info');
+  if (error) { alert('Error: ' + error.message); return; }
+  alert('Berhasil! Cek email untuk konfirmasi, lalu login.');
 }
 
 // Fungsi Logout
