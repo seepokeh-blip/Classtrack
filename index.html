@@ -93,7 +93,7 @@
           <span id="todoBadgeCount" class="hidden bg-rose-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-1">0</span>
         </button>
         <button type="button" data-action="tab" data-tab="settings" class="tab-btn px-4 py-3 text-xs font-bold rounded-t-lg transition-colors flex items-center space-x-2 whitespace-nowrap btn-touch">
-          <i class="fa-solid fa-sliders text-sm"></i><span>Backup & Settings</span>
+          <i class="fa-solid fa-sliders text-sm"></i><span>6. Backup & Settings</span>
         </button>
       </nav>
     </header>
@@ -128,10 +128,10 @@
               <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mr-1">Level:</span>
               <select id="levelFilter" class="text-xs font-medium border border-slate-300 rounded-lg px-2.5 py-1.5 bg-slate-50 focus:outline-none">
                 <option value="ALL">All Level</option>
-                <option value="CR">CR (Creativity)</option>
-                <option value="CT">CT (Construction)</option>
-                <option value="RB">RB (Robotics)</option>
               </select>
+              <button type="button" data-action="levels" title="Manage Levels" class="text-xs text-rose-700 font-semibold p-2 bg-rose-50 hover:bg-rose-100 rounded-lg border border-rose-200 btn-touch">
+                <i class="fa-solid fa-layer-group"></i>
+              </button>
             </div>
             <div class="flex items-center space-x-2">
               <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mr-1">Time Slot:</span>
@@ -386,25 +386,11 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div class="min-w-0">
-            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Level</label>
-            <select id="studentFormLevel" required class="w-full text-sm p-3 border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
-              <optgroup label="Creativity (Rose)">
-                <option value="CR1">CR1 - Creativity 1</option>
-                <option value="CR2">CR2 - Creativity 2</option>
-                <option value="CR3">CR3 - Creativity 3</option>
-                <option value="CR4">CR4 - Creativity 4</option>
-              </optgroup>
-              <optgroup label="Construction (Amber)">
-                <option value="CT1">CT1 - Construction 1</option>
-                <option value="CT2">CT2 - Construction 2</option>
-                <option value="CT3">CT3 - Construction 3</option>
-              </optgroup>
-              <optgroup label="Robotics (Ice Blue)">
-                <option value="RB1">RB1 - Robotics 1</option>
-                <option value="RB2">RB2 - Robotics 2</option>
-                <option value="RB3">RB3 - Robotics 3</option>
-              </optgroup>
-            </select>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-bold text-slate-700 uppercase">Level</label>
+              <button type="button" data-action="levels" data-return="studentModal" class="text-[11px] font-bold text-rose-800 hover:underline btn-touch" style="min-height:0">Manage</button>
+            </div>
+            <select id="studentFormLevel" required class="w-full text-sm p-3 border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none"></select>
           </div>
           <div class="min-w-0">
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Regular Day</label>
@@ -567,6 +553,45 @@
           <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Archived Terms History</h4>
           <div id="timelineArchivedTermsContainer" class="space-y-2"></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANAGE LEVELS MODAL (Add, Edit, Reorder & Delete) -->
+  <div id="levelModal" class="modal-backdrop fixed inset-0 bg-slate-900/60 z-50 items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center flex-shrink-0">
+        <h3 class="font-bold text-sm flex items-center space-x-2"><i class="fa-solid fa-layer-group"></i><span>Manage Levels</span></h3>
+        <button type="button" data-action="close" data-close="levelModal" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <div class="p-6 space-y-4 overflow-y-auto">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Existing Levels (in order)</label>
+          <div id="levelsListContainer" class="space-y-1.5 max-h-60 overflow-y-auto pr-1"></div>
+        </div>
+        <form id="levelForm" class="pt-3 border-t border-slate-200 space-y-3">
+          <input type="hidden" id="levelEditIdx">
+          <input type="hidden" id="levelColorInput" value="rose">
+          <label id="levelFormTitle" class="block text-xs font-bold text-slate-700 uppercase">Add New Level</label>
+          <input type="text" id="levelNameInput" required maxlength="20" placeholder="Level name, e.g. Beginner" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:outline-none">
+          <input type="text" id="levelDescInput" maxlength="40" placeholder="Description (optional)" class="w-full text-sm p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:outline-none">
+          <div>
+            <span class="block text-[11px] font-bold text-slate-500 uppercase mb-1.5">Badge Color</span>
+            <div id="levelColorPicker" class="flex flex-wrap gap-2.5">
+              <button type="button" data-action="levelColor" data-color="rose" class="level-color-btn w-7 h-7 rounded-full bg-rose-500" style="min-height:0" aria-label="Rose"></button>
+              <button type="button" data-action="levelColor" data-color="amber" class="level-color-btn w-7 h-7 rounded-full bg-amber-500" style="min-height:0" aria-label="Amber"></button>
+              <button type="button" data-action="levelColor" data-color="sky" class="level-color-btn w-7 h-7 rounded-full bg-sky-500" style="min-height:0" aria-label="Sky"></button>
+              <button type="button" data-action="levelColor" data-color="emerald" class="level-color-btn w-7 h-7 rounded-full bg-emerald-500" style="min-height:0" aria-label="Emerald"></button>
+              <button type="button" data-action="levelColor" data-color="violet" class="level-color-btn w-7 h-7 rounded-full bg-violet-500" style="min-height:0" aria-label="Violet"></button>
+              <button type="button" data-action="levelColor" data-color="slate" class="level-color-btn w-7 h-7 rounded-full bg-slate-500" style="min-height:0" aria-label="Slate"></button>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button type="button" id="levelCancelEditBtn" data-action="levelCancelEdit" class="hidden px-4 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl btn-touch">Cancel Edit</button>
+            <button type="submit" id="levelSubmitBtn" class="flex-1 px-4 py-2.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-xl btn-touch">+ Add Level</button>
+          </div>
+        </form>
+        <button type="button" id="levelBackBtn" data-action="close" data-close="levelModal" class="hidden w-full px-4 py-3 text-sm font-bold text-white bg-rose-800 hover:bg-rose-900 rounded-xl btn-touch"><i class="fa-solid fa-arrow-left mr-2 text-xs"></i>Back to Student Form</button>
       </div>
     </div>
   </div>
@@ -770,10 +795,8 @@
 
     function getLevelBadgeHtml(level) {
       if (!level) return '';
-      let bg = 'bg-slate-100 text-slate-800 border-slate-200';
-      if (level.startsWith('CR')) bg = 'bg-rose-100 text-rose-900 border-rose-200';
-      else if (level.startsWith('CT')) bg = 'bg-amber-100 text-amber-900 border-amber-200';
-      else if (level.startsWith('RB')) bg = 'bg-sky-100 text-sky-900 border-sky-200';
+      const lv = getLevels().find(l => l.name === level);
+      const bg = (LEVEL_COLORS[lv ? lv.color : 'slate'] || LEVEL_COLORS.slate).badge;
       return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold border ' + bg + '">' + escapeHtml(level) + '</span>';
     }
 
@@ -940,6 +963,11 @@
     function closeModal(id) {
       const m = document.getElementById(id);
       if (m) m.classList.remove('active-modal');
+      if (id === 'levelModal' && window.levelReturnTo) {
+        const backL = window.levelReturnTo;
+        window.levelReturnTo = null;
+        openModal(backL);
+      }
       if (id === 'timeSlotModal' && window.timeSlotReturnTo) {
         const back = window.timeSlotReturnTo;
         window.timeSlotReturnTo = null;
@@ -1071,6 +1099,7 @@
         });
       }
 
+      populateLevelFilter();
       const lvl = document.getElementById('levelFilter').value;
       const tb = document.getElementById('attendanceTableBody');
       const es = document.getElementById('attendanceEmptyState');
@@ -1078,7 +1107,7 @@
 
       const students = window.appState.students.filter(s => {
         if (s.day !== window.attendanceDay) return false;
-        if (lvl !== 'ALL' && !s.level.startsWith(lvl)) return false;
+        if (lvl !== 'ALL' && s.level !== lvl) return false;
         if (window.attendanceTime !== 'ALL' && s.timeSlot !== window.attendanceTime) return false;
         return true;
       });
@@ -1447,6 +1476,203 @@
     }
 
     // ============================================================
+    // LEVEL MANAGEMENT (Add, Edit/Rename, Reorder & Delete)
+    // ============================================================
+    const LEVEL_COLORS = {
+      rose:    { badge: 'bg-rose-100 text-rose-900 border-rose-200',          dot: 'bg-rose-500' },
+      amber:   { badge: 'bg-amber-100 text-amber-900 border-amber-200',       dot: 'bg-amber-500' },
+      sky:     { badge: 'bg-sky-100 text-sky-900 border-sky-200',             dot: 'bg-sky-500' },
+      emerald: { badge: 'bg-emerald-100 text-emerald-900 border-emerald-200', dot: 'bg-emerald-500' },
+      violet:  { badge: 'bg-violet-100 text-violet-900 border-violet-200',    dot: 'bg-violet-500' },
+      slate:   { badge: 'bg-slate-100 text-slate-800 border-slate-200',       dot: 'bg-slate-500' }
+    };
+    window.levelReturnTo = null;
+
+    function defaultLevels() {
+      const out = [];
+      [1, 2, 3, 4].forEach(n => out.push({ name: 'CR' + n, desc: 'Creativity ' + n, color: 'rose' }));
+      [1, 2, 3].forEach(n => out.push({ name: 'CT' + n, desc: 'Construction ' + n, color: 'amber' }));
+      [1, 2, 3].forEach(n => out.push({ name: 'RB' + n, desc: 'Robotics ' + n, color: 'sky' }));
+      return out;
+    }
+
+    // Always returns a valid list; older data without levels gets the original defaults
+    function getLevels() {
+      const st = window.appState;
+      if (!Array.isArray(st.levels) || st.levels.length === 0) st.levels = defaultLevels();
+      (st.students || []).forEach(s => {
+        if (s.level && !st.levels.some(l => l.name === s.level)) st.levels.push({ name: s.level, desc: '', color: 'slate' });
+      });
+      return st.levels;
+    }
+
+    function populateLevelDropdown() {
+      const sel = document.getElementById('studentFormLevel');
+      if (!sel) return;
+      const prev = sel.value;
+      sel.innerHTML = '';
+      getLevels().forEach(l => {
+        const o = document.createElement('option');
+        o.value = l.name; o.textContent = l.name + (l.desc ? ' - ' + l.desc : '');
+        sel.appendChild(o);
+      });
+      if (prev && getLevels().some(l => l.name === prev)) sel.value = prev;
+    }
+
+    function populateLevelFilter(prevOverride) {
+      const f = document.getElementById('levelFilter');
+      if (!f) return;
+      const prev = prevOverride !== undefined ? prevOverride : f.value;
+      f.innerHTML = '<option value="ALL">All Level</option>';
+      getLevels().forEach(l => {
+        const o = document.createElement('option');
+        o.value = l.name; o.textContent = l.name + (l.desc ? ' (' + l.desc + ')' : '');
+        f.appendChild(o);
+      });
+      f.value = (prev !== 'ALL' && getLevels().some(l => l.name === prev)) ? prev : 'ALL';
+    }
+
+    function updateLevelColorUI() {
+      const cur = document.getElementById('levelColorInput').value;
+      document.querySelectorAll('.level-color-btn').forEach(b => {
+        const on = b.dataset.color === cur;
+        b.classList.toggle('ring-2', on);
+        b.classList.toggle('ring-offset-2', on);
+        b.classList.toggle('ring-slate-800', on);
+      });
+    }
+
+    function resetLevelForm() {
+      document.getElementById('levelEditIdx').value = '';
+      document.getElementById('levelNameInput').value = '';
+      document.getElementById('levelDescInput').value = '';
+      document.getElementById('levelColorInput').value = 'rose';
+      document.getElementById('levelFormTitle').textContent = 'Add New Level';
+      document.getElementById('levelSubmitBtn').textContent = '+ Add Level';
+      document.getElementById('levelCancelEditBtn').classList.add('hidden');
+      updateLevelColorUI();
+    }
+
+    function renderLevelsModalList() {
+      const c = document.getElementById('levelsListContainer');
+      if (!c) return;
+      c.innerHTML = '';
+      const levels = getLevels();
+      levels.forEach((l, i) => {
+        const count = window.appState.students.filter(s => s.level === l.name).length;
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between bg-slate-50 border border-slate-200 pl-3 pr-1 py-1 rounded-lg text-xs';
+        row.innerHTML =
+          '<div class="flex items-center space-x-2 min-w-0">' +
+            '<span class="w-3 h-3 rounded-full flex-shrink-0 ' + (LEVEL_COLORS[l.color] || LEVEL_COLORS.slate).dot + '"></span>' +
+            '<div class="min-w-0"><span class="font-bold text-slate-800">' + escapeHtml(l.name) + '</span>' +
+            '<span class="block text-[10px] text-slate-400 truncate">' + (l.desc ? escapeHtml(l.desc) + ' • ' : '') + count + (count === 1 ? ' student' : ' students') + '</span></div>' +
+          '</div>' +
+          '<div class="flex items-center flex-shrink-0">' +
+            '<button type="button" data-action="levelUp" data-idx="' + i + '" ' + (i === 0 ? 'disabled' : '') + ' class="w-8 text-slate-500 hover:text-slate-800 disabled:opacity-25 btn-touch" title="Move up"><i class="fa-solid fa-chevron-up text-[11px]"></i></button>' +
+            '<button type="button" data-action="levelDown" data-idx="' + i + '" ' + (i === levels.length - 1 ? 'disabled' : '') + ' class="w-8 text-slate-500 hover:text-slate-800 disabled:opacity-25 btn-touch" title="Move down"><i class="fa-solid fa-chevron-down text-[11px]"></i></button>' +
+            '<button type="button" data-action="levelEdit" data-idx="' + i + '" class="w-8 text-slate-600 hover:text-slate-900 btn-touch" title="Edit level"><i class="fa-solid fa-pen-to-square text-xs"></i></button>' +
+            '<button type="button" data-action="levelDelete" data-idx="' + i + '" class="w-8 text-rose-600 hover:text-rose-800 btn-touch" title="Delete level"><i class="fa-solid fa-trash-can text-xs"></i></button>' +
+          '</div>';
+        c.appendChild(row);
+      });
+    }
+
+    function openManageLevelsModal(returnTo) {
+      window.levelReturnTo = returnTo || null;
+      const bb = document.getElementById('levelBackBtn');
+      if (bb) bb.classList.toggle('hidden', !returnTo);
+      resetLevelForm();
+      renderLevelsModalList();
+      openModal('levelModal');
+    }
+
+    function refreshAfterLevelChange() {
+      saveState();
+      renderLevelsModalList();
+      renderAll();
+    }
+
+    function startEditLevel(idx) {
+      const l = getLevels()[idx];
+      if (!l) return;
+      document.getElementById('levelEditIdx').value = String(idx);
+      document.getElementById('levelNameInput').value = l.name;
+      document.getElementById('levelDescInput').value = l.desc || '';
+      document.getElementById('levelColorInput').value = l.color || 'slate';
+      document.getElementById('levelFormTitle').textContent = 'Edit Level: ' + l.name;
+      document.getElementById('levelSubmitBtn').textContent = 'Save Changes';
+      document.getElementById('levelCancelEditBtn').classList.remove('hidden');
+      updateLevelColorUI();
+      const inp = document.getElementById('levelNameInput');
+      inp.scrollIntoView({ block: 'nearest' });
+      inp.focus();
+    }
+
+    function deleteLevel(idx) {
+      const levels = getLevels();
+      const l = levels[idx];
+      if (!l) return;
+      if (levels.length <= 1) return showToast('At least one level is required.', 'error');
+      const n = window.appState.students.filter(s => s.level === l.name).length;
+      if (n > 0) return showToast(n + (n === 1 ? ' student uses' : ' students use') + ' level ' + l.name + '. Change their level first.', 'error');
+      levels.splice(idx, 1);
+      resetLevelForm();
+      populateLevelDropdown();
+      populateLevelFilter();
+      refreshAfterLevelChange();
+      showToast('Level ' + l.name + ' removed', 'info');
+    }
+
+    function moveLevel(idx, dir) {
+      const levels = getLevels();
+      const j = idx + dir;
+      if (j < 0 || j >= levels.length) return;
+      const tmp = levels[idx]; levels[idx] = levels[j]; levels[j] = tmp;
+      populateLevelDropdown();
+      populateLevelFilter();
+      refreshAfterLevelChange();
+    }
+
+    function submitLevelForm() {
+      const levels = getLevels();
+      const name = document.getElementById('levelNameInput').value.trim();
+      const desc = document.getElementById('levelDescInput').value.trim();
+      const color = document.getElementById('levelColorInput').value || 'slate';
+      const editRaw = document.getElementById('levelEditIdx').value;
+      const editIdx = editRaw === '' ? -1 : parseInt(editRaw, 10);
+      if (!name) return showToast('Please enter a level name.', 'error');
+      if (levels.some((l, i) => i !== editIdx && l.name.toLowerCase() === name.toLowerCase())) {
+        return showToast('Level "' + name + '" already exists.', 'error');
+      }
+      const formSel = document.getElementById('studentFormLevel');
+      const filt = document.getElementById('levelFilter');
+      let selectValue = formSel.value;
+      let filterValue = filt.value;
+      let msg;
+      if (editIdx >= 0 && levels[editIdx]) {
+        const oldName = levels[editIdx].name;
+        if (oldName !== name) {
+          window.appState.students.forEach(s => { if (s.level === oldName) s.level = name; });
+          if (selectValue === oldName) selectValue = name;
+          if (filterValue === oldName) filterValue = name;
+        }
+        levels[editIdx] = { name, desc, color };
+        msg = 'Level updated' + (oldName !== name ? ' (students renamed too)' : '');
+      } else {
+        levels.push({ name, desc, color });
+        if (window.levelReturnTo === 'studentModal') selectValue = name;
+        msg = 'Level ' + name + ' added';
+      }
+      populateLevelDropdown();
+      if (levels.some(l => l.name === selectValue)) formSel.value = selectValue;
+      populateLevelFilter(filterValue);
+      resetLevelForm();
+      refreshAfterLevelChange();
+      showToast(msg, 'success');
+    }
+
+    // ============================================================
     // MODAL OPENERS & PREFILLS
     // ============================================================
     function populateTimeSlotDropdown(id) {
@@ -1467,6 +1693,7 @@
       document.getElementById('studentModalTitle').textContent = 'Add New Student';
       document.getElementById('studentEditId').value = '';
       document.getElementById('studentForm').reset();
+      populateLevelDropdown();
       populateTimeSlotDropdown('studentFormTimeSlot');
       const today = formatDateLocal();
       document.getElementById('studentFormTermStartDate').value = today;
@@ -1482,6 +1709,7 @@
       document.getElementById('studentFormName').value = s.name;
       document.getElementById('studentFormEmoji').value = s.emoji || '';
       document.getElementById('studentFormDob').value = s.dob;
+      populateLevelDropdown();
       document.getElementById('studentFormLevel').value = s.level;
       document.getElementById('studentFormDay').value = s.day;
       populateTimeSlotDropdown('studentFormTimeSlot');
@@ -1744,6 +1972,11 @@
     document.getElementById('historyLogStatus').addEventListener('change', updateHistoryLogHint);
     document.getElementById('historyLogDate').addEventListener('change', updateHistoryLogHint);
 
+    document.getElementById('levelForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      submitLevelForm();
+    });
+
     document.getElementById('timeSlotForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const v = document.getElementById('newTimeSlotInput').value.trim();
@@ -1813,6 +2046,13 @@
             showToast('Time slot removed', 'info');
           }
           break;
+        case 'levels': e.preventDefault(); openManageLevelsModal(el.dataset.return); break;
+        case 'levelEdit': e.preventDefault(); startEditLevel(parseInt(el.dataset.idx, 10)); break;
+        case 'levelDelete': e.preventDefault(); deleteLevel(parseInt(el.dataset.idx, 10)); break;
+        case 'levelUp': e.preventDefault(); moveLevel(parseInt(el.dataset.idx, 10), -1); break;
+        case 'levelDown': e.preventDefault(); moveLevel(parseInt(el.dataset.idx, 10), 1); break;
+        case 'levelColor': e.preventDefault(); document.getElementById('levelColorInput').value = el.dataset.color; updateLevelColorUI(); break;
+        case 'levelCancelEdit': e.preventDefault(); resetLevelForm(); break;
         case 'addMakeup': e.preventDefault(); openAddMakeupModal(); break;
         case 'saveAttendance': e.preventDefault(); saveAttendanceRow(el.dataset.id); break;
         case 'goToDirectory':
@@ -1977,7 +2217,7 @@
     document.querySelectorAll('.modal-backdrop').forEach(m => {
       m.addEventListener('click', function(e) { if (e.target === m) closeModal(m.id); });
     });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') { window.timeSlotReturnTo = null; closeAllModals(); } });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { window.timeSlotReturnTo = null; window.levelReturnTo = null; closeAllModals(); } });
 
     // ============================================================
     // APPLICATION BOOTSTRAP
