@@ -11,7 +11,7 @@
   <meta name="theme-color" content="#881337">
 
   <link rel="icon" type="image/png" href="icon.png">
-  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="apple-touch-icon" href="iconpng">
 
   <title>ClassTrack</title>
   <script src="https://cdn.tailwindcss.com"></script>
@@ -423,7 +423,7 @@
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Time Slot</label>
           <div class="flex items-center space-x-2">
             <select id="studentFormTimeSlot" required class="w-full text-sm p-3 border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none"></select>
-            <button type="button" data-action="addTimeSlot" title="Manage Time Slots" class="p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl flex items-center justify-center btn-touch">
+            <button type="button" data-action="addTimeSlot" data-return="studentModal" title="Manage Time Slots" class="p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl flex items-center justify-center btn-touch">
               <i class="fa-solid fa-clock-rotate-left text-xs"></i>
             </button>
           </div>
@@ -488,6 +488,7 @@
             <button type="submit" class="px-4 py-2.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-xl btn-touch whitespace-nowrap">+ Add</button>
           </div>
         </form>
+        <button type="button" id="timeSlotBackBtn" data-action="close" data-close="timeSlotModal" class="hidden w-full px-4 py-3 text-sm font-bold text-white bg-rose-800 hover:bg-rose-900 rounded-xl btn-touch"><i class="fa-solid fa-arrow-left mr-2 text-xs"></i>Back to Student Form</button>
       </div>
     </div>
   </div>
@@ -939,6 +940,11 @@
     function closeModal(id) {
       const m = document.getElementById(id);
       if (m) m.classList.remove('active-modal');
+      if (id === 'timeSlotModal' && window.timeSlotReturnTo) {
+        const back = window.timeSlotReturnTo;
+        window.timeSlotReturnTo = null;
+        openModal(back); // form values are kept: the modal is only re-shown, never reset
+      }
     }
 
     function closeAllModals() {
@@ -1432,7 +1438,10 @@
       });
     }
 
-    function openManageTimeSlotsModal() {
+    function openManageTimeSlotsModal(returnTo) {
+      window.timeSlotReturnTo = returnTo || null;
+      const bb = document.getElementById('timeSlotBackBtn');
+      if (bb) bb.classList.toggle('hidden', !returnTo);
       renderTimeSlotsModalList();
       openModal('timeSlotModal');
     }
@@ -1443,6 +1452,7 @@
     function populateTimeSlotDropdown(id) {
       const s = document.getElementById(id);
       if (!s) return;
+      const prev = s.value;
       s.innerHTML = '';
       sortTimeSlots();
       window.appState.timeSlots.forEach(slot => {
@@ -1450,6 +1460,7 @@
         o.value = slot; o.textContent = slot;
         s.appendChild(o);
       });
+      if (prev && window.appState.timeSlots.includes(prev)) s.value = prev;
     }
 
     function openAddStudentModal() {
@@ -1746,6 +1757,7 @@
       renderTimeSlotsModalList();
       renderAttendanceTab();
       populateTimeSlotDropdown('studentFormTimeSlot');
+      if (window.timeSlotReturnTo === 'studentModal') document.getElementById('studentFormTimeSlot').value = v;
       showToast('Time slot added & sorted', 'success');
     });
 
@@ -1788,7 +1800,7 @@
       switch (action) {
         case 'tab': e.preventDefault(); switchTab(el.dataset.tab); break;
         case 'day': e.preventDefault(); window.attendanceDay = el.dataset.day; renderAttendanceTab(); break;
-        case 'addTimeSlot': e.preventDefault(); openManageTimeSlotsModal(); break;
+        case 'addTimeSlot': e.preventDefault(); openManageTimeSlotsModal(el.dataset.return); break;
         case 'deleteTimeSlot':
           e.preventDefault();
           const slotToDelete = el.dataset.slot;
@@ -1963,9 +1975,9 @@
       document.getElementById('studentFormTermName').value = calculate3MonthTermName(this.value);
     });
     document.querySelectorAll('.modal-backdrop').forEach(m => {
-      m.addEventListener('click', function(e) { if (e.target === m) m.classList.remove('active-modal'); });
+      m.addEventListener('click', function(e) { if (e.target === m) closeModal(m.id); });
     });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllModals(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') { window.timeSlotReturnTo = null; closeAllModals(); } });
 
     // ============================================================
     // APPLICATION BOOTSTRAP
