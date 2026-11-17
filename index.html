@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>ClassTrack - iPad Class Management System</title>
@@ -35,7 +36,15 @@
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased">
-
+<div id="authScreen" style="position:fixed; inset:0; background:white; z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px;">
+  <div style="width:100%; max-width:320px; display:flex; flex-direction:column; gap:12px;">
+    <h2 style="font-size:20px; font-weight:bold; text-align:center;">Login ClassTrack</h2>
+    <input type="email" id="authEmail" placeholder="Email" style="padding:12px; border:1px solid #ccc; border-radius:12px; font-size:16px;">
+    <input type="password" id="authPassword" placeholder="Password" style="padding:12px; border:1px solid #ccc; border-radius:12px; font-size:16px;">
+    <button onclick="signIn(document.getElementById('authEmail').value, document.getElementById('authPassword').value)" style="padding:12px; background:#991B1B; color:white; border:none; border-radius:12px; font-size:16px; font-weight:bold;">Masuk</button>
+    <button onclick="signUp(document.getElementById('authEmail').value, document.getElementById('authPassword').value)" style="padding:8px; background:none; border:none; color:#666; font-size:14px;">Belum punya akun? Daftar</button>
+  </div>
+</div>
   <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-md w-full px-4"></div>
 
   <div class="w-full flex-grow flex flex-col min-h-screen">
@@ -642,39 +651,85 @@
       if (status === 'Make-Up') return '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-100 text-sky-900 border border-sky-300">Make-Up</span>';
       return '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 text-rose-900 border border-rose-300">' + escapeHtml(status) + '</span>';
     }
+    // Inisialisasi Supabase
+const supabase = createClient('https://blfbaxnnbyozeauekhqm.supabase.co/rest/v1/', 'sb_publishable_DpgDAjJMhNIRS3hmnmgxvQ_oge9LGVJ');
+let currentUser = null;
 
+// Fungsi Login
+async function signIn(email, password) {
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) { showToast(error.message, 'error'); return; }
+  currentUser = data.user;
+  await loadState(); // Ambil data dari cloud setelah login
+  renderAll();
+  document.getElementById('authScreen').style.display = 'none'; // Sembunyikan layar login
+}
+
+// Fungsi Daftar
+async function signUp(email, password) {
+  const { data, error } = await supabase.auth.signUp({ email, password });
+  if (error) { showToast(error.message, 'error'); return; }
+  showToast('Cek email untuk konfirmasi, lalu login.', 'info');
+}
+
+// Fungsi Logout
+async function signOut() {
+  await supabase.auth.signOut();
+  currentUser = null;
+  window.appState = { settings: {}, students: [], todos: [] };
+  renderAll();
+  document.getElementById('authScreen').style.display = 'flex'; // Tampilkan lagi layar login
+}
     // ============================================================
     // STORAGE (with migration + validation)
     // ============================================================
-    function saveState() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(window.appState));
-        updateStorageSizeDisplay();
-      } catch (e) { console.error('Save error:', e); }
-    }
-    function loadState() {
-      try {
-        let saved = localStorage.getItem(STORAGE_KEY);
-        if (!saved) {
-          saved = localStorage.getItem(OLD_STORAGE_KEY);
-          if (saved) {
-            const old = JSON.parse(saved);
-            window.appState = migrateState(old);
-            saveState();
-            return;
-          }
-        }
-        if (saved) {
-          window.appState = JSON.parse(saved);
-        } else {
-          populateSeedData();
-        }
-      } catch (e) {
-        console.error('Load error:', e);
-        populateSeedData();
-      }
-      validateState();
-    }
+    // Simpan ke Supabase
+async function saveState() {
+  if (!currentUser) return; // Jangan simpan kalau belum login
+  const { error } = await supabase
+    .from('classes')
+    .upsert({
+      user_id: currentUser.id,
+      data: window.appState,
+      updated_at: new Date().toISOString()
+    });
+  if (error) showToast('Gagal simpan: ' + error.message, 'error');
+  else updateStorageSizeDisplay(); // Anggap ini status "tersimpan"
+}
+
+// Ambil dari Supabase
+async function loadState() {
+  if (!currentUser) return;
+  const { data, error } = await supabase
+    .from('classes')
+    .select('data')
+    .eq('user_id', currentUser.id)
+    .single();
+
+  // PGRST116 artinya data belum ada (pengguna baru)
+  if (error && error.code !== 'PGRST116') {
+    showToast('Gagal memuat data: ' + error.message, 'error');
+    return;
+  }
+  if (data && data.data) {
+    window.appState = data.data;
+  } else {
+    populateSeedData(); // Pengguna baru: muat data demo/kosong
+  }
+}
+
+// Cek sesi saat aplikasi dibuka (auto-login kalau sebelumnya sudah login)
+supabase.auth.onAuthStateChange(async (event, session) => {
+  if (session) {
+    currentUser = session.user;
+    await loadState();
+    renderAll();
+    document.getElementById('authScreen').style.display = 'none';
+  } else {
+    currentUser = null;
+    document.getElementById('authScreen').style.display = 'flex';
+  }
+});
     function migrateState(old) {
       const fresh = { settings: old.settings || { className: '', teacherName: '' }, timeSlots: old.timeSlots || [], students: [], todos: old.todos || [] };
       fresh.students = (old.students || []).map(s => {
