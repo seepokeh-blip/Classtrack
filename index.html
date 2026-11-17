@@ -1523,6 +1523,44 @@ supabase.auth.onAuthStateChange(async (event, session) => {
     initHeader();
     switchTab('attendance');
     renderAll();
+    // ============ AUTH LISTENERS (paling akhir) ============
+document.addEventListener('DOMContentLoaded', function() {
+  var btnLogin = document.getElementById('btnLogin');
+  var btnDaftar = document.getElementById('btnDaftar');
+  var debug = document.getElementById('authDebug');
+
+  function setDebug(msg) {
+    if (debug) debug.textContent = msg;
+  }
+
+  if (btnLogin) {
+    btnLogin.addEventListener('click', function(e) {
+      e.preventDefault();
+      setDebug('Tombol MASUK ditekan...');
+      var email = document.getElementById('authEmail').value;
+      var pass = document.getElementById('authPassword').value;
+      setDebug('Login: ' + email + ' / ' + pass.length + ' char');
+      signIn(email, pass);
+    });
+  } else {
+    setDebug('ERROR: btnLogin tidak ditemukan!');
+  }
+
+  if (btnDaftar) {
+    btnDaftar.addEventListener('click', function(e) {
+      e.preventDefault();
+      setDebug('Tombol DAFTAR ditekan...');
+      var email = document.getElementById('authEmail').value;
+      var pass = document.getElementById('authPassword').value;
+      setDebug('Daftar: ' + email + ' / ' + pass.length + ' char');
+      signUp(email, pass);
+    });
+  } else {
+    setDebug('ERROR: btnDaftar tidak ditemukan!');
+  }
+
+  setDebug('Auth listeners terpasang. Tekan tombol untuk tes.');
+});
   </script>
 </body>
 </html>
