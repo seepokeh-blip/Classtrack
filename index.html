@@ -365,7 +365,7 @@
         <h3 id="studentModalTitle" class="font-bold text-base">Add New Student</h3>
         <button type="button" data-action="close" data-close="studentModal" class="text-rose-200 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
-      <form id="studentForm" class="p-6 space-y-4 overflow-y-auto">
+          <form id="studentForm" class="p-6 space-y-4 overflow-y-auto">
         <input type="hidden" id="studentEditId">
 
         <div>
@@ -373,27 +373,18 @@
           <input type="text" id="studentFormName" required placeholder="e.g. John Doe" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="min-w-0">
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Emoji Avatar</label>
             <input type="text" id="studentFormEmoji" maxlength="4" placeholder="🤖" class="w-20 text-sm text-center p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
           </div>
           <div class="min-w-0">
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Date of Birth</label>
-            <input type="date" id="studentFormDob" required class="w-200 text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
+            <input type="date" id="studentFormDob" required class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div class="min-w-0">
-            <div class="flex items-center justify-between mb-1">
-              <label class="block text-xs font-bold text-slate-700 uppercase">Level</label>
-              <button type="button" data-action="levels" data-return="studentModal" title="Levels" class="p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl flex items-center justify-center btn-touch">
-              <i class="fa-solid fa-layer-group"></i>
-            </button>
-            </div>
-            <select id="studentFormLevel" required class="w-400 text-sm p-3 border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none"></select>
-          </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="min-w-0">
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Regular Day</label>
             <select id="studentFormDay" required class="w-full text-sm p-3 border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
@@ -405,22 +396,32 @@
               <option value="Saturday">Saturday</option>
             </select>
           </div>
+          <div class="min-w-0">
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Time Slot</label>
+            <div class="flex items-center space-x-2">
+              <select id="studentFormTimeSlot" required class="w-full text-sm p-3 border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none"></select>
+              <button type="button" data-action="addTimeSlot" data-return="studentModal" title="Manage Time Slots" class="p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl flex items-center justify-center btn-touch flex-shrink-0">
+                <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+              </button>
+            </div>
+          </div>
         </div>
 
+        <!-- Level dibuat full-width dengan tombol manage di samping (serasi dengan Time Slot) -->
         <div class="min-w-0">
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Time Slot</label>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Level</label>
           <div class="flex items-center space-x-2">
-            <select id="studentFormTimeSlot" required class="w-full text-sm p-3 border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none"></select>
-            <button type="button" data-action="addTimeSlot" data-return="studentModal" title="Manage Time Slots" class="p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl flex items-center justify-center btn-touch">
-              <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+            <select id="studentFormLevel" required class="w-full text-sm p-3 border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none"></select>
+            <button type="button" data-action="levels" data-return="studentModal" title="Manage Levels" class="p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl flex items-center justify-center btn-touch flex-shrink-0">
+              <i class="fa-solid fa-layer-group text-xs"></i>
             </button>
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="min-w-0">
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Term Start Date</label>
-            <input type="date" id="studentFormTermStartDate" required class="w-200 text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
+            <input type="date" id="studentFormTermStartDate" required class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
           </div>
           <div class="min-w-0">
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Active Term</label>
@@ -433,6 +434,7 @@
           <button type="submit" class="px-5 py-2.5 text-sm font-bold text-white bg-rose-800 hover:bg-rose-900 rounded-xl shadow-sm btn-touch">Save Student</button>
         </div>
       </form>
+  
     </div>
   </div>
 
