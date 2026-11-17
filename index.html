@@ -3,21 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <!-- Meta Tag PWA & Web App -->
+  <!-- Meta Tag PWA & Web App -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ClassTrack">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#881337">
 
-  <!-- Ikon Aplikasi (Ganti URL gambar di href dengan URL ikon Anda) -->
   <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/5706/5706541.png">
   <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/5706/5706541.png">
 
-  <title>ClassTrack</title>
+  <title>ClassTrack - Attendance & Student Progress Manager</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
   <script>
     tailwind.config = {
       theme: { extend: {
@@ -32,7 +31,7 @@
     .table-fixed-layout { table-layout:fixed; width:100%; }
     .truncate-cell { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .btn-touch {
-      min-height:44px; display:inline-flex; align-items:center; justify-content:center;
+      min-height:40px; display:inline-flex; align-items:center; justify-content:center;
       cursor:pointer; -webkit-appearance:none; appearance:none;
       -webkit-user-select:none; user-select:none; touch-action:manipulation;
       pointer-events:auto; position:relative; z-index:1;
@@ -47,9 +46,11 @@
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased">
 
+  <!-- Toast Container -->
   <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-md w-full px-4"></div>
 
   <div class="w-full flex-grow flex flex-col min-h-screen">
+    <!-- Main Header -->
     <header class="bg-rose-900 text-white shadow-md border-b border-rose-950 sticky top-0 z-30">
       <div class="w-full px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div class="flex items-center space-x-3 w-full sm:w-auto">
@@ -58,7 +59,7 @@
           </div>
           <div>
             <h1 class="text-xl font-bold tracking-tight text-white leading-none">ClassTrack</h1>
-            <p class="text-xs text-rose-200 font-medium mt-0.5">Attendance Manager</p>
+            <p class="text-xs text-rose-200 font-medium mt-0.5">Attendance & Student Progress</p>
           </div>
         </div>
         <div class="flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto justify-end">
@@ -72,6 +73,7 @@
           </div>
         </div>
       </div>
+      <!-- Navigation Tabs -->
       <nav class="bg-rose-950 px-4 flex space-x-1 overflow-x-auto border-t border-rose-900/60">
         <button type="button" data-action="tab" data-tab="attendance" class="tab-btn px-4 py-3 text-xs font-bold rounded-t-lg transition-colors flex items-center space-x-2 whitespace-nowrap btn-touch">
           <i class="fa-solid fa-calendar-check text-sm"></i><span>1. Daily Attendance</span>
@@ -98,31 +100,33 @@
 
     <main class="flex-grow p-4 sm:p-6 w-full max-w-full">
 
-      <section id="tab-attendance" class="tab-content space-y-4">
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
+      <!-- TAB 1: DAILY ATTENDANCE -->
+      <section id="tab-attendance" class="tab-content space-y-3">
+        <!-- Controls Bar -->
+        <div class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm space-y-3">
           <div class="flex items-center justify-between pb-2 border-b border-slate-100">
             <div class="flex items-center space-x-2 text-xs font-bold text-slate-700">
               <i class="fa-solid fa-calendar-day text-rose-800"></i>
               <span>Attendance Date:</span>
-              <input type="date" id="attendanceSelectedDate" class="text-xs font-extrabold text-rose-900 bg-rose-50 border border-rose-200 rounded-lg px-2.5 py-1 focus:outline-none">
+              <input type="date" id="attendanceSelectedDate" class="text-xs font-extrabold text-rose-900 bg-rose-50 border border-rose-200 rounded-lg px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-rose-500">
               <span id="attendanceDayOfWeekBadge" class="text-[10px] font-bold bg-rose-100 text-rose-800 px-2 py-0.5 rounded-md"></span>
             </div>
           </div>
-          <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap items-center justify-between gap-2.5">
             <div class="flex items-center space-x-2 overflow-x-auto pb-1 sm:pb-0">
-              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mr-1">Day:</span>
+              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mr-1">Day:</span>
               <div class="flex space-x-1">
-                <button type="button" data-action="day" data-day="Monday" class="day-btn px-3 py-1.5 rounded-lg text-xs font-semibold btn-touch">Mon</button>
-                <button type="button" data-action="day" data-day="Tuesday" class="day-btn px-3 py-1.5 rounded-lg text-xs font-semibold btn-touch">Tue</button>
-                <button type="button" data-action="day" data-day="Wednesday" class="day-btn px-3 py-1.5 rounded-lg text-xs font-semibold btn-touch">Wed</button>
-                <button type="button" data-action="day" data-day="Thursday" class="day-btn px-3 py-1.5 rounded-lg text-xs font-semibold btn-touch">Thu</button>
-                <button type="button" data-action="day" data-day="Friday" class="day-btn px-3 py-1.5 rounded-lg text-xs font-semibold btn-touch">Fri</button>
-                <button type="button" data-action="day" data-day="Saturday" class="day-btn px-3 py-1.5 rounded-lg text-xs font-semibold btn-touch">Sat</button>
+                <button type="button" data-action="day" data-day="Monday" class="day-btn px-2.5 py-1 rounded-lg text-xs font-semibold btn-touch">Mon</button>
+                <button type="button" data-action="day" data-day="Tuesday" class="day-btn px-2.5 py-1 rounded-lg text-xs font-semibold btn-touch">Tue</button>
+                <button type="button" data-action="day" data-day="Wednesday" class="day-btn px-2.5 py-1 rounded-lg text-xs font-semibold btn-touch">Wed</button>
+                <button type="button" data-action="day" data-day="Thursday" class="day-btn px-2.5 py-1 rounded-lg text-xs font-semibold btn-touch">Thu</button>
+                <button type="button" data-action="day" data-day="Friday" class="day-btn px-2.5 py-1 rounded-lg text-xs font-semibold btn-touch">Fri</button>
+                <button type="button" data-action="day" data-day="Saturday" class="day-btn px-2.5 py-1 rounded-lg text-xs font-semibold btn-touch">Sat</button>
               </div>
             </div>
             <div class="flex items-center space-x-2">
-              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mr-1">Level:</span>
-              <select id="levelFilter" class="text-xs font-medium border border-slate-300 rounded-lg px-3 py-2 bg-slate-50 focus:outline-none">
+              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mr-1">Level:</span>
+              <select id="levelFilter" class="text-xs font-medium border border-slate-300 rounded-lg px-2.5 py-1.5 bg-slate-50 focus:outline-none">
                 <option value="ALL">All Categories (CR, CT, RB)</option>
                 <option value="CR">CR (Creativity)</option>
                 <option value="CT">CT (Construction)</option>
@@ -130,51 +134,52 @@
               </select>
             </div>
             <div class="flex items-center space-x-2">
-              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mr-1">Time Slot:</span>
-              <select id="timeSlotFilterSelect" class="text-xs font-medium border border-slate-300 rounded-lg px-3 py-2 bg-slate-50 focus:outline-none"></select>
-              <button type="button" data-action="addTimeSlot" class="text-xs text-rose-700 font-semibold p-2 bg-rose-50 rounded-lg border border-rose-200 btn-touch">
-                <i class="fa-solid fa-plus"></i>
+              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mr-1">Time Slot:</span>
+              <select id="timeSlotFilterSelect" class="text-xs font-medium border border-slate-300 rounded-lg px-2.5 py-1.5 bg-slate-50 focus:outline-none"></select>
+              <button type="button" data-action="addTimeSlot" title="Manage Time Slots" class="text-xs text-rose-700 font-semibold p-2 bg-rose-50 hover:bg-rose-100 rounded-lg border border-rose-200 btn-touch">
+                <i class="fa-solid fa-clock-rotate-left"></i>
               </button>
             </div>
-            <button type="button" data-action="addMakeup" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-sm flex items-center space-x-2 transition btn-touch ml-auto">
-              <i class="fa-solid fa-user-plus"></i><span>+ Add Make-Up Student</span>
+            <button type="button" data-action="addMakeup" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold px-3.5 py-2 rounded-xl shadow-sm flex items-center space-x-2 transition btn-touch ml-auto">
+              <i class="fa-solid fa-user-plus"></i><span> Add Make-Up Student</span>
             </button>
           </div>
         </div>
-        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div class="overflow-x-auto">
-            <table class="table-fixed-layout text-left text-xs">
-              <thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[11px] border-b border-slate-200">
-                <tr>
-                  <th class="p-3 w-30">Student Name</th>
-                  <th class="p-3 w-14">Level</th>
-                  <th class="p-3 w-24 text-center">Quota</th>
-                  <th class="p-3 w-40">Attendance Status</th>
-                  <th class="p-3 w-44">Project Title</th>
-                  <th class="p-3 w-48">Media Drive Link</th>
-                  <th class="p-3 w-56">Teacher Notes</th>
-                  <th class="p-3 w-32 text-center">Action / Status</th>
-                </tr>
-              </thead>
-              <tbody id="attendanceTableBody" class="divide-y divide-slate-100"></tbody>
-            </table>
-          </div>
+
+        <!-- Scrollable Attendance Table Container -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm max-h-[520px] overflow-y-auto relative">
+          <table class="table-fixed-layout text-left text-xs">
+            <thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[11px] border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+              <tr>
+                <th class="p-2.5 w-36 bg-slate-100">Student Name</th>
+                <th class="p-2.5 w-16 bg-slate-100">Level</th>
+                <th class="p-2.5 w-20 text-center bg-slate-100">Quota</th>
+                <th class="p-2.5 w-36 bg-slate-100">Attendance Status</th>
+                <th class="p-2.5 w-44 bg-slate-100">Project Title</th>
+                <th class="p-2.5 w-44 bg-slate-100">Media Drive Link</th>
+                <th class="p-2.5 w-52 bg-slate-100">Teacher Notes</th>
+                <th class="p-2.5 w-28 text-center bg-slate-100">Action</th>
+              </tr>
+            </thead>
+            <tbody id="attendanceTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
           <div id="attendanceEmptyState" class="hidden p-12 text-center text-slate-400">
             <i class="fa-solid fa-calendar-xmark text-4xl mb-2 text-slate-300"></i>
-            <p class="font-medium text-slate-500">No scheduled students found.</p>
+            <p class="font-medium text-slate-500">No scheduled students found for this filter.</p>
           </div>
         </div>
       </section>
 
+      <!-- TAB 2: STUDENT DIRECTORY -->
       <section id="tab-directory" class="tab-content hidden space-y-4">
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-3">
           <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
             <div class="relative flex-grow sm:flex-grow-0 sm:w-64">
               <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-xs"></i>
-              <input type="text" id="directorySearchInput" placeholder="Search student name or level..." class="pl-8 pr-3 py-2 text-xs border border-slate-300 rounded-lg w-full bg-slate-50 focus:outline-none">
+              <input type="text" id="directorySearchInput" placeholder="Search student name or level..." class="pl-8 pr-3 py-2 text-xs border border-slate-300 rounded-lg w-full bg-slate-50 focus:outline-none focus:ring-1 focus:ring-rose-500">
             </div>
             <button type="button" data-action="toggleRenewal" class="px-3.5 py-2 text-xs font-semibold rounded-lg border border-slate-300 bg-slate-50 text-slate-700 flex items-center space-x-1.5 btn-touch">
-              <i class="fa-solid fa-bell text-amber-600"></i><span>Renewal Due (10-11)</span>
+              <i class="fa-solid fa-bell text-amber-600"></i><span>Renewal Due (10+)</span>
             </button>
           </div>
           <div class="flex items-center space-x-3 w-full md:w-auto justify-end">
@@ -183,18 +188,19 @@
               <button type="button" data-action="dirView" data-view="card" class="px-3 py-1 text-xs font-semibold rounded-md btn-touch"><i class="fa-solid fa-grip mr-1"></i>Cards</button>
             </div>
             <button type="button" data-action="addStudent" class="bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-sm flex items-center space-x-2 btn-touch">
-              <i class="fa-solid fa-user-plus"></i><span>+ Add Student</span>
+              <i class="fa-solid fa-user-plus"></i><span> Add Student</span>
             </button>
           </div>
         </div>
         <div id="directoryContent" class="space-y-4"></div>
       </section>
 
+      <!-- TAB 3: MAKE-UP TICKETS -->
       <section id="tab-tickets" class="tab-content hidden space-y-4">
         <div class="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-center justify-between">
           <div class="flex items-center space-x-3">
             <div class="bg-amber-500 text-white p-3 rounded-xl"><i class="fa-solid fa-ticket text-xl"></i></div>
-            <div><h2 class="text-sm font-bold text-amber-950">Outstanding Make-Up Tickets</h2><p class="text-xs text-amber-800">Track unresolved absence tickets.</p></div>
+            <div><h2 class="text-sm font-bold text-amber-950">Outstanding Make-Up Tickets</h2><p class="text-xs text-amber-800">Track and resolve student absence tickets.</p></div>
           </div>
           <div class="bg-white px-4 py-2 rounded-xl border border-amber-200 shadow-sm text-right">
             <span class="text-2xl font-extrabold text-amber-600 leading-none" id="totalPendingTicketsCount">0</span>
@@ -210,7 +216,7 @@
                   <th class="p-3 w-28">Level</th>
                   <th class="p-3 w-36">Schedule</th>
                   <th class="p-3 w-36">Missed Date</th>
-                  <th class="p-3 w-36">Ticket</th>
+                  <th class="p-3 w-36">Status</th>
                   <th class="p-3 w-40 text-center">Quick Action</th>
                 </tr>
               </thead>
@@ -219,36 +225,35 @@
           </div>
           <div id="ticketsEmptyState" class="hidden p-12 text-center text-slate-400">
             <i class="fa-solid fa-circle-check text-4xl mb-2 text-emerald-400"></i>
-            <p class="font-medium text-slate-600">No unresolved tickets!</p>
+            <p class="font-medium text-slate-600">No unresolved make-up tickets!</p>
           </div>
         </div>
       </section>
 
+      <!-- TAB 4: LEARNING HISTORY -->
       <section id="tab-history" class="tab-content hidden space-y-4">
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
           <div class="relative w-full sm:w-80">
             <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-xs"></i>
             <input type="text" id="historySearchInput" placeholder="Filter history..." class="pl-8 pr-3 py-2 text-xs border border-slate-300 rounded-lg w-full bg-slate-50 focus:outline-none">
           </div>
-          <p class="text-xs text-slate-500 font-medium"><i class="fa-solid fa-circle-info text-rose-800 mr-1"></i>Tap any student name to view timeline.</p>
+          <p class="text-xs text-slate-500 font-medium"><i class="fa-solid fa-circle-info text-rose-800 mr-1"></i>Tap student name to view timeline modal.</p>
         </div>
-        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div class="overflow-x-auto">
-            <table class="table-fixed-layout text-left text-xs">
-              <thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[11px] border-b border-slate-200">
-                <tr>
-                  <th class="p-3 w-28">Date</th>
-                  <th class="p-3 w-44">Student</th>
-                  <th class="p-3 w-24">Level</th>
-                  <th class="p-3 w-28">Status</th>
-                  <th class="p-3 w-48">Project</th>
-                  <th class="p-3 w-52">Media</th>
-                  <th class="p-3 w-64">Comments</th>
-                </tr>
-              </thead>
-              <tbody id="historyTableBody" class="divide-y divide-slate-100"></tbody>
-            </table>
-          </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden max-h-[600px] overflow-y-auto relative">
+          <table class="table-fixed-layout text-left text-xs">
+            <thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[11px] border-b border-slate-200 sticky top-0 z-10">
+              <tr>
+                <th class="p-3 w-28 bg-slate-100">Date</th>
+                <th class="p-3 w-44 bg-slate-100">Student</th>
+                <th class="p-3 w-24 bg-slate-100">Level</th>
+                <th class="p-3 w-28 bg-slate-100">Status</th>
+                <th class="p-3 w-48 bg-slate-100">Project</th>
+                <th class="p-3 w-36 bg-slate-100">Media</th>
+                <th class="p-3 w-64 bg-slate-100">Comments / Notes</th>
+              </tr>
+            </thead>
+            <tbody id="historyTableBody" class="divide-y divide-slate-100"></tbody>
+          </table>
           <div id="historyEmptyState" class="hidden p-12 text-center text-slate-400">
             <i class="fa-solid fa-box-open text-4xl mb-2 text-slate-300"></i>
             <p class="font-medium text-slate-500">No learning history found.</p>
@@ -256,6 +261,7 @@
         </div>
       </section>
 
+      <!-- TAB 5: TEACHER TO-DO -->
       <section id="tab-todos" class="tab-content hidden space-y-4">
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
           <div class="flex flex-col md:flex-row items-center justify-between gap-3">
@@ -269,7 +275,7 @@
               <button type="button" data-action="todoFilter" data-filter="Low" class="todo-filter-btn px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-800 bg-emerald-50 border border-emerald-200 btn-touch">Low</button>
             </div>
             <button type="button" data-action="addTodo" class="bg-rose-800 hover:bg-rose-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-sm flex items-center space-x-2 btn-touch ml-auto md:ml-0">
-              <i class="fa-solid fa-plus"></i><span>+ Add Task</span>
+              <i class="fa-solid fa-plus"></i><span> Add Task</span>
             </button>
           </div>
         </div>
@@ -282,6 +288,7 @@
         </div>
       </section>
 
+      <!-- TAB 6: BACKUP & SETTINGS -->
       <section id="tab-settings" class="tab-content hidden space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-4">
@@ -301,7 +308,7 @@
           <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
             <div class="flex items-center space-x-3 border-b border-slate-100 pb-3">
               <i class="fa-solid fa-file-arrow-down text-rose-800 text-xl"></i>
-              <div><h3 class="text-sm font-bold text-slate-800">Database Backup</h3><p class="text-xs text-slate-500">Export or restore via JSON.</p></div>
+              <div><h3 class="text-sm font-bold text-slate-800">Database Backup & Import</h3><p class="text-xs text-slate-500">Export or restore database via JSON.</p></div>
             </div>
             <div class="space-y-3 pt-2">
               <button type="button" data-action="export" class="w-full bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-3 px-4 rounded-xl shadow-sm flex items-center justify-center space-x-2 btn-touch">
@@ -318,7 +325,7 @@
           <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
             <div class="flex items-center space-x-3 border-b border-slate-100 pb-3">
               <i class="fa-solid fa-flask text-amber-600 text-xl"></i>
-              <div><h3 class="text-sm font-bold text-slate-800">Demo / Reset</h3><p class="text-xs text-slate-500">Populate sample data or reset.</p></div>
+              <div><h3 class="text-sm font-bold text-slate-800">Demo / Reset Data</h3><p class="text-xs text-slate-500">Populate sample data or perform reset.</p></div>
             </div>
             <div class="space-y-3 pt-2">
               <button type="button" data-action="seed" class="w-full bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-3 px-4 rounded-xl shadow-sm flex items-center justify-center space-x-2 btn-touch">
@@ -337,39 +344,36 @@
 
   <!-- ================= MODALS ================= -->
 
+  <!-- STUDENT EDIT/ADD MODAL -->
   <div id="studentModal" class="modal-backdrop fixed inset-0 bg-slate-900/60 z-50 items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
       <div class="bg-rose-900 px-6 py-4 text-white flex justify-between items-center flex-shrink-0">
         <h3 id="studentModalTitle" class="font-bold text-base">Add New Student</h3>
         <button type="button" data-action="close" data-close="studentModal" class="text-rose-200 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
-            <form id="studentForm" class="p-6 space-y-4">
+      <form id="studentForm" class="p-6 space-y-4 overflow-y-auto">
         <input type="hidden" id="studentEditId">
 
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Full Name</label>
-          <input type="text" id="studentFormName" required placeholder="e.g. John Doe"
-                 class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
+          <input type="text" id="studentFormName" required placeholder="e.g. John Doe" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div class="min-w-0">
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Emoji Avatar</label>
-            <input type="text" id="studentFormEmoji" maxlength="4" placeholder="🤖"
-                   class="w-20 text-sm text-center p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
+            <input type="text" id="studentFormEmoji" maxlength="4" placeholder="🤖" class="w-20 text-sm text-center p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
           </div>
           <div class="min-w-0">
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Date of Birth</label>
-            <input type="date" id="studentFormDob" required
-                   class="w-100 box-border text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
+            <input type="date" id="studentFormDob" required class="w-200 text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div class="min-w-0">
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Level</label>
-            <select id="studentFormLevel" required
-                    class="w-full text-sm p-3 border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
+            <select id="studentFormLevel" required class="w-full text-sm p-3 border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
               <optgroup label="Creativity (Rose)">
                 <option value="CR1">CR1 - Creativity 1</option>
                 <option value="CR2">CR2 - Creativity 2</option>
@@ -390,8 +394,7 @@
           </div>
           <div class="min-w-0">
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Regular Day</label>
-            <select id="studentFormDay" required
-                    class="w-full text-sm p-3 border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
+            <select id="studentFormDay" required class="w-full text-sm p-3 border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
               <option value="Monday">Monday</option>
               <option value="Tuesday">Tuesday</option>
               <option value="Wednesday">Wednesday</option>
@@ -403,41 +406,35 @@
         </div>
 
         <div class="min-w-0">
-  <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Time Slot</label>
-  <div class="flex items-center space-x-2">
-    <select id="studentFormTimeSlot" required
-            class="w-full text-sm p-3 border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
-    </select>
-    <button type="button" data-action="addTimeSlot" title="Add New Time Slot"
-            class="p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl flex items-center justify-center btn-touch">
-      <i class="fa-solid fa-plus text-xs"></i>
-    </button>
-  </div>
-</div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Time Slot</label>
+          <div class="flex items-center space-x-2">
+            <select id="studentFormTimeSlot" required class="w-full text-sm p-3 border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none"></select>
+            <button type="button" data-action="addTimeSlot" title="Manage Time Slots" class="p-3 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-xl flex items-center justify-center btn-touch">
+              <i class="fa-solid fa-clock-rotate-left text-xs"></i>
+            </button>
+          </div>
+        </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div class="min-w-0">
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Term Start Date</label>
-            <input type="date" id="studentFormTermStartDate" required
-                   class="w-100 text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
+            <input type="date" id="studentFormTermStartDate" required class="w-200 text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
           </div>
           <div class="min-w-0">
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Active Term</label>
-            <input type="text" id="studentFormTermName" readonly placeholder="Auto"
-                   class="w-full text-sm p-3 border border-slate-200 rounded-xl bg-slate-100 font-bold text-rose-900 focus:outline-none">
+            <input type="text" id="studentFormTermName" readonly placeholder="Auto" class="w-full text-sm p-3 border border-slate-200 rounded-xl bg-slate-100 font-bold text-rose-900 focus:outline-none">
           </div>
         </div>
 
         <div class="pt-4 flex justify-end space-x-2 border-t border-slate-100">
-          <button type="button" data-action="close" data-close="studentModal"
-                  class="px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl btn-touch">Cancel</button>
-          <button type="submit"
-                  class="px-5 py-2.5 text-sm font-bold text-white bg-rose-800 hover:bg-rose-900 rounded-xl shadow-sm btn-touch">Save Student</button>
+          <button type="button" data-action="close" data-close="studentModal" class="px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl btn-touch">Cancel</button>
+          <button type="submit" class="px-5 py-2.5 text-sm font-bold text-white bg-rose-800 hover:bg-rose-900 rounded-xl shadow-sm btn-touch">Save Student</button>
         </div>
       </form>
     </div>
   </div>
 
+  <!-- MAKE-UP RESOLUTION MODAL -->
   <div id="addMakeupModal" class="modal-backdrop fixed inset-0 bg-slate-900/60 z-50 items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg border border-slate-200 overflow-hidden">
       <div class="bg-amber-600 px-6 py-4 text-white flex justify-between items-center">
@@ -458,55 +455,73 @@
     </div>
   </div>
 
+  <!-- MANAGE TIME SLOTS MODAL (Add & Delete) -->
   <div id="timeSlotModal" class="modal-backdrop fixed inset-0 bg-slate-900/60 z-50 items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm border border-slate-200 overflow-hidden">
-      <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center">
-        <h3 class="font-bold text-sm">Add Time Slot</h3>
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="bg-slate-800 px-6 py-4 text-white flex justify-between items-center flex-shrink-0">
+        <h3 class="font-bold text-sm flex items-center space-x-2"><i class="fa-solid fa-clock"></i><span>Manage Time Slots</span></h3>
         <button type="button" data-action="close" data-close="timeSlotModal" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
-      <form id="timeSlotForm" class="p-6 space-y-4">
-        <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Time Slot String</label><input type="text" id="newTimeSlotInput" required placeholder="14:00 - 15:30" class="w-full text-xs p-3 border border-slate-300 rounded-xl"></div>
-        <div class="flex justify-end space-x-2 pt-2">
-          <button type="button" data-action="close" data-close="timeSlotModal" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl btn-touch">Cancel</button>
-          <button type="submit" class="px-4 py-2 text-xs font-bold text-white bg-slate-800 rounded-xl btn-touch">Add</button>
+      <div class="p-6 space-y-4 overflow-y-auto">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Existing Time Slots (Sorted)</label>
+          <div id="timeSlotsListContainer" class="space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
         </div>
-      </form>
+        <form id="timeSlotForm" class="pt-3 border-t border-slate-200 space-y-3">
+          <label class="block text-xs font-bold text-slate-700 uppercase">Add New Time Slot</label>
+          <div class="flex items-center gap-2">
+            <input type="text" id="newTimeSlotInput" required placeholder="e.g. 14:00 - 15:30" class="w-full text-xs p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-500 focus:outline-none">
+            <button type="submit" class="px-4 py-2.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 rounded-xl btn-touch whitespace-nowrap">+ Add</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
+  <!-- TODO EDIT / ADD MODAL -->
   <div id="todoModal" class="modal-backdrop fixed inset-0 bg-slate-900/60 z-50 items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md border border-slate-200 overflow-hidden">
       <div class="bg-rose-900 px-6 py-4 text-white flex justify-between items-center">
-        <h3 class="font-bold text-sm">Add Task</h3>
+        <h3 id="todoModalTitle" class="font-bold text-sm">Add Task</h3>
         <button type="button" data-action="close" data-close="todoModal" class="text-rose-200 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
       <form id="todoForm" class="p-6 space-y-4">
-        <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Task Description</label><textarea id="todoTaskInput" required rows="3" class="w-full text-xs p-3 border border-slate-300 rounded-xl"></textarea></div>
+        <input type="hidden" id="todoEditId">
+        <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Task Description</label><textarea id="todoTaskInput" required rows="3" class="w-full text-xs p-3 border border-slate-300 rounded-xl focus:ring-1 focus:ring-rose-500 focus:outline-none"></textarea></div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Priority</label>
-            <select id="todoPriorityInput" required class="w-full text-xs p-3 border border-slate-300 rounded-xl bg-white">
+            <select id="todoPriorityInput" required class="w-full text-xs p-3 border border-slate-300 rounded-xl bg-white focus:ring-1 focus:ring-rose-500 focus:outline-none">
               <option value="High">High</option><option value="Medium" selected>Medium</option><option value="Low">Low</option>
             </select>
           </div>
-          <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Deadline</label><input type="date" id="todoDeadlineInput" class="w-100 text-xs p-3 border border-slate-300 rounded-xl"></div>
+          <div><label class="block text-xs font-bold text-slate-700 uppercase mb-1">Deadline</label><input type="date" id="todoDeadlineInput" class="w-200 text-xs p-3 border border-slate-300 rounded-xl focus:ring-1 focus:ring-rose-500 focus:outline-none"></div>
         </div>
         <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
           <button type="button" data-action="close" data-close="todoModal" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl btn-touch">Cancel</button>
-          <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-rose-800 rounded-xl btn-touch">Create</button>
+          <button type="submit" id="todoSubmitBtn" class="px-5 py-2 text-xs font-bold text-white bg-rose-800 hover:bg-rose-900 rounded-xl btn-touch">Save Task</button>
         </div>
       </form>
     </div>
   </div>
 
+  <!-- TIMELINE / HISTORY MODAL WITH EXPORT SUMMARY -->
   <div id="timelineModal" class="modal-backdrop fixed inset-0 bg-slate-900/60 z-50 items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl border border-slate-200 overflow-hidden flex flex-col max-h-[90vh]">
-      <div class="bg-rose-900 px-6 py-4 text-white flex justify-between items-center flex-shrink-0">
+      <div class="bg-rose-900 px-6 py-4 text-white flex flex-wrap justify-between items-center gap-3 flex-shrink-0">
         <div class="flex items-center space-x-3">
           <div id="timelineAvatar" class="w-10 h-10 rounded-full bg-rose-700 text-white font-bold flex items-center justify-center border-2 border-rose-400">JD</div>
           <div><h3 id="timelineStudentName" class="font-bold text-base leading-tight">Student</h3><p id="timelineSubtext" class="text-xs text-rose-200">Level • Age • Schedule</p></div>
         </div>
-        <button type="button" data-action="close" data-close="timelineModal" class="text-rose-200 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <div class="flex items-center space-x-2 ml-auto">
+          <button type="button" id="copyTimelineBtn" class="px-3 py-1.5 text-xs font-bold bg-rose-800 hover:bg-rose-700 text-white rounded-lg flex items-center space-x-1 shadow-sm btn-touch border border-rose-700">
+            <i class="fa-solid fa-copy text-xs"></i><span>Copy Summary</span>
+          </button>
+          <button type="button" id="downloadTimelineBtn" class="px-3 py-1.5 text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white rounded-lg flex items-center space-x-1 shadow-sm btn-touch border border-slate-700">
+            <i class="fa-solid fa-file-arrow-down text-xs"></i><span>Download TXT</span>
+          </button>
+          <button type="button" data-action="close" data-close="timelineModal" class="text-rose-200 hover:text-white p-1 ml-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+        </div>
       </div>
       <div class="p-6 overflow-y-auto space-y-6 flex-grow">
         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
@@ -517,27 +532,36 @@
           <div id="timelineGrid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-11 gap-2"></div>
         </div>
         <div class="space-y-2">
-          <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Logs</h4>
+          <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Current Term Logs</h4>
           <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
-            <table class="w-full text-left text-xs">
-              <thead class="bg-slate-100 text-slate-600 font-bold border-b"><tr><th class="p-2.5 w-24">Date</th><th class="p-2.5 w-24">Status</th><th class="p-2.5 w-40">Project</th><th class="p-2.5 w-36">Media</th><th class="p-2.5">Notes</th></tr></thead>
+            <table class="w-full text-left text-xs table-fixed">
+              <thead class="bg-slate-100 text-slate-600 font-bold border-b">
+                <tr>
+                  <th class="p-2.5 w-24">Date</th>
+                  <th class="p-2.5 w-24">Status</th>
+                  <th class="p-2.5 w-36">Project</th>
+                  <th class="p-2.5 w-32">Media Link</th>
+                  <th class="p-2.5">Notes</th>
+                </tr>
+              </thead>
               <tbody id="timelineCurrentLogsBody" class="divide-y divide-slate-100"></tbody>
             </table>
           </div>
         </div>
         <div class="space-y-2">
-          <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Archives</h4>
+          <h4 class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Archived Terms History</h4>
           <div id="timelineArchivedTermsContainer" class="space-y-2"></div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- CONFIRMATION MODAL -->
   <div id="confirmModal" class="modal-backdrop fixed inset-0 bg-slate-900/60 z-50 items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md border border-slate-200 overflow-hidden">
       <div class="p-6 space-y-3 text-center">
         <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-800 flex items-center justify-center mx-auto text-xl"><i class="fa-solid fa-triangle-exclamation"></i></div>
-        <h3 id="confirmTitle" class="text-base font-bold text-slate-800">Confirm?</h3>
+        <h3 id="confirmTitle" class="text-base font-bold text-slate-800">Confirm Action</h3>
         <p id="confirmMessage" class="text-xs text-slate-500">This action cannot be undone.</p>
       </div>
       <div class="bg-slate-50 p-4 border-t border-slate-100 flex justify-end space-x-2">
@@ -547,9 +571,10 @@
     </div>
   </div>
 
+  <!-- ================= JAVASCRIPT ================= -->
   <script>
     // ============================================================
-    // CONSTANTS
+    // CONSTANTS & INITIALIZATION
     // ============================================================
     const MAX_SESSIONS = 11;
     const RENEWAL_THRESHOLD = 10;
@@ -557,37 +582,42 @@
     const STORAGE_KEY = 'classtrack_master_v2';
     const OLD_STORAGE_KEY = 'classtrack_master_v1';
 
-    // ============================================================
-    // STATE
-    // ============================================================
+    // State object
     window.appState = {
       settings: { className: "Robotics & Coding Academy", teacherName: "Ms. Clara" },
       timeSlots: ["09:00 - 10:30", "11:00 - 12:30", "14:00 - 15:30", "16:00 - 17:30"],
       students: [],
       todos: []
     };
+
     window.currentTab = 'attendance';
-    window.attendanceDateStr = formatDateLocal();
-    window.attendanceDay = 'Monday';
-    window.attendanceTime = 'ALL';
     window.directoryView = 'table';
     window.directoryRenewalOnly = false;
     window.todoFilter = 'ALL';
+    window.activeTimelineStudentId = null;
+
+    // Default Date to Today dynamically
+    const todayObj = new Date();
+    window.attendanceDateStr = formatDateLocal(todayObj);
+    window.attendanceDay = getDayOfWeekFromDateStr(window.attendanceDateStr);
+    window.attendanceTime = 'ALL';
 
     // ============================================================
-    // DATE UTILITIES (timezone-safe)
+    // DATE & TIME UTILITIES
     // ============================================================
     function formatDateLocal(d) {
       d = d || new Date();
       const pad = n => String(n).padStart(2, '0');
       return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
     }
+
     function parseDateLocal(str) {
       if (!str) return null;
       const p = str.split('-');
       const d = new Date(+p[0], +p[1] - 1, +p[2]);
       return isNaN(d) ? null : d;
     }
+
     function getDayOfWeekFromDateStr(dateStr) {
       const d = parseDateLocal(dateStr);
       if (!d) return 'Monday';
@@ -595,6 +625,7 @@
       const day = days[d.getDay()];
       return day === 'Sunday' ? 'Monday' : day;
     }
+
     function calculate3MonthTermName(startDateStr) {
       const start = parseDateLocal(startDateStr);
       if (!start) return '';
@@ -603,6 +634,7 @@
       const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
       return months[start.getMonth()] + '–' + months[end.getMonth()] + ' ' + end.getFullYear();
     }
+
     function calculateAge(dobStr) {
       const dob = parseDateLocal(dobStr);
       if (!dob) return 'N/A';
@@ -613,62 +645,111 @@
       return y + 'y ' + m + 'm';
     }
 
+    // Sort time slots chronologically
+    function sortTimeSlots() {
+      if (!Array.isArray(window.appState.timeSlots)) {
+        window.appState.timeSlots = [];
+        return;
+      }
+      window.appState.timeSlots.sort((a, b) => {
+        const getMinutes = (str) => {
+          const match = str.match(/(\d{1,2}):(\d{2})/);
+          if (!match) return 0;
+          return parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
+        };
+        return getMinutes(a) - getMinutes(b);
+      });
+    }
+
     // ============================================================
-    // DERIVED VALUES (replaces stored sessionsCompleted counter)
+    // DERIVED VALUES
     // ============================================================
     function getSessionsCompleted(student) {
       if (!student.attendanceLogs) return 0;
       return student.attendanceLogs.filter(l => l.status === 'Present' || l.status === 'Make-Up').length;
     }
+
     function getPendingTickets(student) {
       if (!student.makeupTickets) return [];
       return student.makeupTickets.filter(t => t.status === 'Pending');
     }
+
     function isRenewalDue(student) {
       return getSessionsCompleted(student) >= RENEWAL_THRESHOLD;
     }
 
     // ============================================================
-    // HTML UTILITIES
+    // HTML / FORMATTING UTILITIES
     // ============================================================
     function escapeHtml(str) {
       if (str === null || str === undefined) return '';
       return String(str).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
     }
-    function parseUrlsToLinks(text) {
-      if (!text) return '';
-      return text.replace(/(https?:\/\/[^\s]+)/g, url =>
-        '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener" class="text-rose-700 underline">' + escapeHtml(url) + '</a>');
+
+    // Formats media URLs as compact styled link buttons/chips (Prevents wide URL overflow)
+    function formatMediaLink(url) {
+      if (!url) return '<span class="text-slate-400 italic text-[11px]">-</span>';
+      const escapedUrl = escapeHtml(url);
+      return '<a href="' + escapedUrl + '" target="_blank" rel="noopener" title="' + escapedUrl + '" class="inline-flex items-center space-x-1 text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2 py-0.5 rounded text-[11px] font-semibold max-w-[120px] truncate transition"><i class="fa-solid fa-link text-[10px]"></i><span class="truncate">Link</span></a>';
     }
+
     function getInitials(name) {
       if (!name) return '??';
       const p = name.trim().split(/\s+/);
       if (p.length === 1) return p[0].substring(0, 2).toUpperCase();
       return (p[0][0] + p[p.length - 1][0]).toUpperCase();
     }
+
     function getLevelBadgeHtml(level) {
       if (!level) return '';
       let bg = 'bg-slate-100 text-slate-800 border-slate-200';
       if (level.startsWith('CR')) bg = 'bg-rose-100 text-rose-900 border-rose-200';
       else if (level.startsWith('CT')) bg = 'bg-amber-100 text-amber-900 border-amber-200';
       else if (level.startsWith('RB')) bg = 'bg-sky-100 text-sky-900 border-sky-200';
-      return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold border ' + bg + '">' + escapeHtml(level) + '</span>';
+      return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold border ' + bg + '">' + escapeHtml(level) + '</span>';
     }
+
     function getStatusBadgeHtml(status) {
       if (status === 'Present') return '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">Present</span>';
       if (status === 'Make-Up') return '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-100 text-sky-900 border border-sky-300">Make-Up</span>';
       return '<span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-rose-100 text-rose-900 border border-rose-300">' + escapeHtml(status) + '</span>';
     }
 
+    // Safe clipboard copy mechanism for iframe environment
+    function copyTextToClipboard(text, successMsg) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.top = '0';
+      textArea.style.left = '0';
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          showToast(successMsg || 'Copied to clipboard!', 'success');
+        } else {
+          showToast('Failed to copy to clipboard', 'error');
+        }
+      } catch (err) {
+        showToast('Copy error: ' + err.message, 'error');
+      }
+      document.body.removeChild(textArea);
+    }
+
     // ============================================================
-    // STORAGE (with migration + validation)
+    // LOCAL STORAGE & STATE MANAGEMENT
     // ============================================================
     function saveState() {
       try {
+        sortTimeSlots();
         localStorage.setItem(STORAGE_KEY, JSON.stringify(window.appState));
         updateStorageSizeDisplay();
       } catch (e) { console.error('Save error:', e); }
     }
+
     function loadState() {
       try {
         let saved = localStorage.getItem(STORAGE_KEY);
@@ -691,18 +772,30 @@
         populateSeedData();
       }
       validateState();
+      sortTimeSlots();
     }
+
     function migrateState(old) {
-      const fresh = { settings: old.settings || { className: '', teacherName: '' }, timeSlots: old.timeSlots || [], students: [], todos: old.todos || [] };
+      const fresh = {
+        settings: old.settings || { className: 'Robotics & Coding Academy', teacherName: 'Ms. Clara' },
+        timeSlots: old.timeSlots || ["09:00 - 10:30", "11:00 - 12:30", "14:00 - 15:30", "16:00 - 17:30"],
+        students: [],
+        todos: old.todos || []
+      };
       fresh.students = (old.students || []).map(s => {
         delete s.sessionsCompleted;
         return s;
       });
       return fresh;
     }
+
     function validateState() {
-      const students = window.appState.students || [];
-      students.forEach(s => {
+      if (!window.appState.settings) window.appState.settings = { className: "Robotics & Coding Academy", teacherName: "Ms. Clara" };
+      if (!Array.isArray(window.appState.timeSlots)) window.appState.timeSlots = ["09:00 - 10:30", "11:00 - 12:30", "14:00 - 15:30", "16:00 - 17:30"];
+      if (!Array.isArray(window.appState.students)) window.appState.students = [];
+      if (!Array.isArray(window.appState.todos)) window.appState.todos = [];
+
+      window.appState.students.forEach(s => {
         if (!Array.isArray(s.attendanceLogs)) s.attendanceLogs = [];
         if (!Array.isArray(s.makeupTickets)) s.makeupTickets = [];
         if (!Array.isArray(s.archivedTerms)) s.archivedTerms = [];
@@ -714,9 +807,9 @@
         });
         s.makeupTickets = s.makeupTickets.filter(t => t && t.absentDate && t.status);
       });
-      if (!Array.isArray(window.appState.todos)) window.appState.todos = [];
-      if (!Array.isArray(window.appState.timeSlots)) window.appState.timeSlots = [];
+      sortTimeSlots();
     }
+
     function updateStorageSizeDisplay() {
       try {
         const b = new Blob([JSON.stringify(window.appState)]).size;
@@ -726,7 +819,7 @@
     }
 
     // ============================================================
-    // CENTRAL MUTATION: ATTENDANCE
+    // CENTRAL ATTENDANCE MUTATION
     // ============================================================
     function updateStudentAttendance(studentId, date, status, projectTitle, driveLink, notes) {
       const s = window.appState.students.find(x => x.id === studentId);
@@ -746,7 +839,7 @@
         });
       }
 
-      // Ticket generation: absence statuses create a pending ticket
+      // Automatically generate a ticket if absent status
       if (status === 'Excused' || status === 'Sick' || status === 'Unexcused') {
         if (!s.makeupTickets) s.makeupTickets = [];
         const alreadyHas = s.makeupTickets.some(t => t.absentDate === date && t.status === 'Pending');
@@ -768,24 +861,23 @@
     }
 
     // ============================================================
-    // MODALS
+    // MODALS & TOASTS
     // ============================================================
     function openModal(id) {
       document.querySelectorAll('.modal-backdrop.active-modal').forEach(m => m.classList.remove('active-modal'));
       const m = document.getElementById(id);
       if (m) m.classList.add('active-modal');
     }
+
     function closeModal(id) {
       const m = document.getElementById(id);
       if (m) m.classList.remove('active-modal');
     }
+
     function closeAllModals() {
       document.querySelectorAll('.modal-backdrop.active-modal').forEach(m => m.classList.remove('active-modal'));
     }
 
-    // ============================================================
-    // TOAST & CONFIRM
-    // ============================================================
     function showToast(msg, type) {
       type = type || 'success';
       const c = document.getElementById('toastContainer');
@@ -793,12 +885,13 @@
       let bg = 'bg-slate-900 text-white', icon = 'fa-circle-check text-emerald-400';
       if (type === 'error') { bg = 'bg-rose-900 text-white'; icon = 'fa-circle-xmark text-rose-300'; }
       else if (type === 'info') { bg = 'bg-amber-900 text-white'; icon = 'fa-circle-info text-amber-300'; }
-      t.className = bg + ' p-3.5 rounded-xl shadow-lg flex items-center justify-between text-xs font-semibold pointer-events-auto';
+      t.className = bg + ' p-3.5 rounded-xl shadow-lg flex items-center justify-between text-xs font-semibold pointer-events-auto transition duration-200';
       t.innerHTML = '<div class="flex items-center space-x-2.5"><i class="fa-solid ' + icon + '"></i><span>' + escapeHtml(msg) + '</span></div><button type="button" class="text-white/60 hover:text-white ml-3"><i class="fa-solid fa-xmark"></i></button>';
       t.querySelector('button').onclick = () => t.remove();
       c.appendChild(t);
       setTimeout(() => t.remove(), 3500);
     }
+
     function showConfirmModal(title, msg, cb) {
       document.getElementById('confirmTitle').textContent = title;
       document.getElementById('confirmMessage').textContent = msg;
@@ -816,32 +909,33 @@
     function populateSeedData() {
       window.appState = {
         settings: { className: "Robotics & Coding Academy", teacherName: "Ms. Clara" },
-        timeSlots: ["09:00 - 10:00","10:00 - 11:00"],
+        timeSlots: ["09:00 - 10:30", "11:00 - 12:30", "14:00 - 15:30", "16:00 - 17:30"],
         students: [
-          { id:"std_101", name:"John Doe", emoji:"🤖", dob:"2018-04-12", level:"CR1", day:"Monday", timeSlot:"09:00 - 10:30", termStartDate:"2026-01-05", termName:"Jan–Mar 2026", archivedTerms:[], attendanceLogs:[{id:"l1",date:"2026-01-05",status:"Present",projectTitle:"Intro to Gears",driveLink:"",notes:"Great!"},{id:"l2",date:"2026-01-12",status:"Present",projectTitle:"Pulley System",driveLink:"",notes:"Good"},{id:"l3",date:"2026-01-19",status:"Excused",projectTitle:"Missed",driveLink:"",notes:"Travel"}], makeupTickets:[{id:"t_101",absentDate:"2026-01-19",status:"Pending",redeemedDate:""}] },
-          { id:"std_102", name:"Maya Lin", emoji:"🚀", dob:"2017-09-25", level:"CR3", day:"Monday", timeSlot:"09:00 - 10:30", termStartDate:"2026-01-05", termName:"Jan–Mar 2026", archivedTerms:[], attendanceLogs:[{id:"lm1",date:"2026-01-05",status:"Present",projectTitle:"Windmill",driveLink:"",notes:"Precise"}], makeupTickets:[] },
-          { id:"std_103", name:"Alex Rivera", emoji:"⚙️", dob:"2016-01-15", level:"CT2", day:"Tuesday", timeSlot:"11:00 - 12:30", termStartDate:"2026-01-06", termName:"Jan–Mar 2026", archivedTerms:[], attendanceLogs:[{id:"la1",date:"2026-01-06",status:"Present",projectTitle:"Bridge",driveLink:"",notes:"Solid"},{id:"la2",date:"2026-01-13",status:"Sick",projectTitle:"Absent",driveLink:"",notes:"Flu"}], makeupTickets:[{id:"t_102",absentDate:"2026-01-13",status:"Pending",redeemedDate:""}] },
-          { id:"std_104", name:"Ethan Zhang", emoji:"👾", dob:"2015-06-30", level:"RB1", day:"Wednesday", timeSlot:"14:00 - 15:30", termStartDate:"2026-01-07", termName:"Jan–Mar 2026", archivedTerms:[], attendanceLogs:[{id:"le1",date:"2026-01-07",status:"Present",projectTitle:"Rover",driveLink:"",notes:"Good"}], makeupTickets:[] },
+          { id:"std_101", name:"John Doe", emoji:"🤖", dob:"2018-04-12", level:"CR1", day:"Monday", timeSlot:"09:00 - 10:30", termStartDate:"2026-01-05", termName:"Jan–Mar 2026", archivedTerms:[], attendanceLogs:[{id:"l1",date:"2026-01-05",status:"Present",projectTitle:"Intro to Gears",driveLink:"https://drive.google.com/sample",notes:"Great enthusiasm with gear ratios!"},{id:"l2",date:"2026-01-12",status:"Present",projectTitle:"Pulley System",driveLink:"",notes:"Completed motorized crane model."},{id:"l3",date:"2026-01-19",status:"Excused",projectTitle:"Missed",driveLink:"",notes:"Family travel."}], makeupTickets:[{id:"t_101",absentDate:"2026-01-19",status:"Pending",redeemedDate:""}] },
+          { id:"std_102", name:"Maya Lin", emoji:"🚀", dob:"2017-09-25", level:"CR3", day:"Monday", timeSlot:"09:00 - 10:30", termStartDate:"2026-01-05", termName:"Jan–Mar 2026", archivedTerms:[], attendanceLogs:[{id:"lm1",date:"2026-01-05",status:"Present",projectTitle:"Windmill Turbine",driveLink:"",notes:"Built dual axis blades."}], makeupTickets:[] },
+          { id:"std_103", name:"Alex Rivera", emoji:"⚙️", dob:"2016-01-15", level:"CT2", day:"Tuesday", timeSlot:"11:00 - 12:30", termStartDate:"2026-01-06", termName:"Jan–Mar 2026", archivedTerms:[], attendanceLogs:[{id:"la1",date:"2026-01-06",status:"Present",projectTitle:"Suspension Bridge",driveLink:"",notes:"Solid truss design."},{id:"la2",date:"2026-01-13",status:"Sick",projectTitle:"Absent",driveLink:"",notes:"Flu."}], makeupTickets:[{id:"t_102",absentDate:"2026-01-13",status:"Pending",redeemedDate:""}] },
+          { id:"std_104", name:"Ethan Zhang", emoji:"👾", dob:"2015-06-30", level:"RB1", day:"Wednesday", timeSlot:"14:00 - 15:30", termStartDate:"2026-01-07", termName:"Jan–Mar 2026", archivedTerms:[], attendanceLogs:[{id:"le1",date:"2026-01-07",status:"Present",projectTitle:"Obstacle Rover",driveLink:"",notes:"Programmed ultrasonic sensor."}], makeupTickets:[] },
           { id:"std_105", name:"Sophia Chen", emoji:"🎨", dob:"2019-11-05", level:"CR2", day:"Monday", timeSlot:"09:00 - 10:30", termStartDate:"2026-01-05", termName:"Jan–Mar 2026", archivedTerms:[], attendanceLogs:[], makeupTickets:[] },
           { id:"std_106", name:"Lucas Vance", emoji:"🛸", dob:"2016-08-14", level:"RB3", day:"Saturday", timeSlot:"16:00 - 17:30", termStartDate:"2026-01-10", termName:"Jan–Mar 2026", archivedTerms:[], attendanceLogs:[], makeupTickets:[] }
         ],
         todos: [
-          { id:"td_1", task:"Prepare EV3 kits", priority:"High", deadline:"2026-02-25", completed:false },
-          { id:"td_2", task:"Send reports", priority:"Medium", deadline:"2026-02-28", completed:false },
-          { id:"td_3", task:"Order sensors", priority:"Low", deadline:"2026-03-05", completed:true }
+          { id:"td_1", task:"Prepare EV3 color sensor test kits", priority:"High", deadline:"2026-02-25", completed:false },
+          { id:"td_2", task:"Send mid-term progress updates to parents", priority:"Medium", deadline:"2026-02-28", completed:false },
+          { id:"td_3", task:"Reorder LEGO technic axle packs", priority:"Low", deadline:"2026-03-05", completed:true }
         ]
       };
       saveState();
     }
 
     // ============================================================
-    // INIT + RENDER
+    // HEADER & TAB CONTROLLERS
     // ============================================================
     function initHeader() {
       const c = document.getElementById('headerClassName'), t = document.getElementById('headerTeacherName');
       if (c && window.appState.settings) c.value = window.appState.settings.className || '';
       if (t && window.appState.settings) t.value = window.appState.settings.teacherName || '';
     }
+
     function switchTab(tab) {
       window.currentTab = tab;
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
@@ -855,6 +949,7 @@
       if (n) { n.classList.add('bg-rose-900', 'text-white'); n.classList.remove('text-rose-200'); }
       renderAll();
     }
+
     function renderAll() {
       updateBadges();
       try {
@@ -866,6 +961,7 @@
         else if (window.currentTab === 'settings') renderSettingsTab();
       } catch (e) { console.error('Render error:', e); }
     }
+
     function updateBadges() {
       let tickets = 0;
       window.appState.students.forEach(s => { tickets += getPendingTickets(s).length; });
@@ -877,7 +973,7 @@
     }
 
     // ============================================================
-    // RENDER: ATTENDANCE
+    // TAB 1: DAILY ATTENDANCE RENDER
     // ============================================================
     function renderAttendanceTab() {
       const di = document.getElementById('attendanceSelectedDate');
@@ -886,8 +982,8 @@
       if (db) db.textContent = window.attendanceDay;
 
       document.querySelectorAll('.day-btn').forEach(b => {
-        if (b.dataset.day === window.attendanceDay) b.className = "day-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-800 text-white shadow-sm btn-touch";
-        else b.className = "day-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 btn-touch";
+        if (b.dataset.day === window.attendanceDay) b.className = "day-btn px-3 py-1 rounded-lg text-xs font-bold bg-rose-800 text-white shadow-sm btn-touch";
+        else b.className = "day-btn px-3 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 btn-touch hover:bg-slate-200";
       });
 
       const ts = document.getElementById('timeSlotFilterSelect');
@@ -921,23 +1017,30 @@
         const log = (s.attendanceLogs || []).find(l => l.date === window.attendanceDateStr);
         const done = getSessionsCompleted(s);
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50";
+        tr.className = "hover:bg-slate-50 transition border-b border-slate-100";
         tr.innerHTML =
-          '<td class="p-3 font-semibold text-slate-900 truncate-cell"><span class="mr-1.5 text-base">' + (s.emoji || '👤') + '</span>' + escapeHtml(s.name) + '<span class="block text-[10px] text-slate-400 font-normal">' + escapeHtml(s.timeSlot) + '</span></td>' +
-          '<td class="p-3">' + getLevelBadgeHtml(s.level) + '</td>' +
-          '<td class="p-3 text-center font-mono font-bold"><span class="' + (done >= RENEWAL_THRESHOLD ? 'text-rose-700' : 'text-slate-700') + '">' + done + ' / ' + MAX_SESSIONS + '</span></td>' +
-          '<td class="p-3"><select id="status_' + s.id + '" class="text-xs p-1.5 border border-slate-300 rounded-lg bg-white w-full">' +
+          '<td class="p-2.5 font-semibold text-slate-900 truncate-cell">' +
+            '<button type="button" data-action="goToDirectory" data-name="' + escapeHtml(s.name) + '" class="text-left font-bold text-slate-900 hover:text-rose-800 hover:underline transition btn-touch inline-flex items-center space-x-1.5">' +
+              '<span class="text-base">' + (s.emoji || '👤') + '</span>' +
+              '<span>' + escapeHtml(s.name) + '</span>' +
+            '</button>' +
+            '<span class="block text-[10px] text-slate-400 font-normal">' + escapeHtml(s.timeSlot) + '</span>' +
+          '</td>' +
+          '<td class="p-2.5">' + getLevelBadgeHtml(s.level) + '</td>' +
+          '<td class="p-2.5 text-center font-mono font-bold"><span class="' + (done >= RENEWAL_THRESHOLD ? 'text-rose-700' : 'text-slate-700') + '">' + done + ' / ' + MAX_SESSIONS + '</span></td>' +
+          '<td class="p-2.5"><select id="status_' + s.id + '" class="text-xs p-1.5 border border-slate-300 rounded-lg bg-white w-full focus:ring-1 focus:ring-rose-500 focus:outline-none">' +
             ['Present','Excused','Sick','Unexcused','Make-Up'].map(opt =>
               '<option value="' + opt + '"' + (log && log.status === opt ? ' selected' : '') + '>' + opt + '</option>'
             ).join('') +
           '</select></td>' +
-          '<td class="p-3"><input type="text" id="project_' + s.id + '" value="' + (log ? escapeHtml(log.projectTitle || '') : '') + '" placeholder="Project" class="text-xs p-1.5 border border-slate-300 rounded-lg w-full"></td>' +
-          '<td class="p-3"><input type="url" id="link_' + s.id + '" value="' + (log ? escapeHtml(log.driveLink || '') : '') + '" placeholder="Link" class="text-xs p-1.5 border border-slate-300 rounded-lg w-full"></td>' +
-          '<td class="p-3"><input type="text" id="notes_' + s.id + '" value="' + (log ? escapeHtml(log.notes || '') : '') + '" placeholder="Notes" class="text-xs p-1.5 border border-slate-300 rounded-lg w-full"></td>' +
-          '<td class="p-3 text-center"><button type="button" data-action="saveAttendance" data-id="' + s.id + '" class="bg-slate-800 hover:bg-slate-900 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg inline-flex items-center space-x-1 btn-touch"><i class="fa-solid fa-floppy-disk text-xs"></i><span>Save</span></button></td>';
+          '<td class="p-2.5"><input type="text" id="project_' + s.id + '" value="' + (log ? escapeHtml(log.projectTitle || '') : '') + '" placeholder="Project Title" class="text-xs p-1.5 border border-slate-300 rounded-lg w-full focus:ring-1 focus:ring-rose-500 focus:outline-none"></td>' +
+          '<td class="p-2.5"><input type="url" id="link_' + s.id + '" value="' + (log ? escapeHtml(log.driveLink || '') : '') + '" placeholder="https://..." class="text-xs p-1.5 border border-slate-300 rounded-lg w-full focus:ring-1 focus:ring-rose-500 focus:outline-none"></td>' +
+          '<td class="p-2.5"><input type="text" id="notes_' + s.id + '" value="' + (log ? escapeHtml(log.notes || '') : '') + '" placeholder="Notes / Comments" class="text-xs p-1.5 border border-slate-300 rounded-lg w-full focus:ring-1 focus:ring-rose-500 focus:outline-none"></td>' +
+          '<td class="p-2.5 text-center"><button type="button" data-action="saveAttendance" data-id="' + s.id + '" class="bg-slate-800 hover:bg-slate-900 text-white text-[11px] font-bold px-3 py-1.5 rounded-lg inline-flex items-center space-x-1 btn-touch transition"><i class="fa-solid fa-floppy-disk text-xs"></i><span>Save</span></button></td>';
         tb.appendChild(tr);
       });
     }
+
     function saveAttendanceRow(id) {
       const status = document.getElementById('status_' + id).value;
       const projectTitle = document.getElementById('project_' + id).value.trim();
@@ -947,11 +1050,11 @@
       saveState();
       renderAll();
       const s = window.appState.students.find(x => x.id === id);
-      showToast('Saved ' + (s ? s.name : ''), 'success');
+      showToast('Saved attendance for ' + (s ? s.name : 'student'), 'success');
     }
 
     // ============================================================
-    // RENDER: DIRECTORY
+    // TAB 2: STUDENT DIRECTORY RENDER
     // ============================================================
     function renderDirectoryTab() {
       const sv = document.getElementById('directorySearchInput').value.toLowerCase().trim();
@@ -966,14 +1069,14 @@
       });
 
       if (list.length === 0) {
-        c.innerHTML = '<div class="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400"><i class="fa-solid fa-users-slash text-4xl mb-2"></i><p class="font-medium">No students match.</p></div>';
+        c.innerHTML = '<div class="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400"><i class="fa-solid fa-users-slash text-4xl mb-2"></i><p class="font-medium">No students match your filter criteria.</p></div>';
         return;
       }
 
       if (window.directoryView === 'table') {
         const w = document.createElement('div');
         w.className = "bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden";
-        w.innerHTML = '<div class="overflow-x-auto"><table class="table-fixed-layout text-left text-xs"><thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[11px] border-b border-slate-200"><tr><th class="p-3 w-48">Student</th><th class="p-3 w-28">Age</th><th class="p-3 w-28">Level</th><th class="p-3 w-40">Schedule</th><th class="p-3 w-28 text-center">Progress</th><th class="p-3 w-36 text-center">Debt</th><th class="p-3 w-48 text-right">Actions</th></tr></thead><tbody class="divide-y divide-slate-100" id="dirTableBody"></tbody></table></div>';
+        w.innerHTML = '<div class="overflow-x-auto"><table class="table-fixed-layout text-left text-xs"><thead class="bg-slate-100 text-slate-700 uppercase font-bold text-[11px] border-b border-slate-200"><tr><th class="p-3 w-48">Student</th><th class="p-3 w-28">Age</th><th class="p-3 w-28">Level</th><th class="p-3 w-40">Schedule</th><th class="p-3 w-28 text-center">Progress</th><th class="p-3 w-28 text-center">Debt</th><th class="p-3 w-48 text-right">Actions</th></tr></thead><tbody class="divide-y divide-slate-100" id="dirTableBody"></tbody></table></div>';
         c.appendChild(w);
         const tbody = document.getElementById('dirTableBody');
         list.forEach(s => {
@@ -982,16 +1085,16 @@
           const tr = document.createElement('tr');
           tr.className = "hover:bg-slate-50";
           tr.innerHTML =
-            '<td class="p-3"><div class="flex items-center space-x-2.5"><div class="w-8 h-8 rounded-full bg-slate-100 font-bold flex items-center justify-center border">' + (s.emoji || getInitials(s.name)) + '</div><div><button type="button" data-action="timeline" data-id="' + s.id + '" class="font-bold text-slate-900 text-left hover:underline btn-touch">' + escapeHtml(s.name) + '</button><span class="block text-[10px] text-slate-400">' + escapeHtml(s.termName) + '</span></div></div></td>' +
+            '<td class="p-3"><div class="flex items-center space-x-2.5"><div class="w-8 h-8 rounded-full bg-rose-50 text-rose-900 border border-rose-200 font-bold flex items-center justify-center text-sm">' + (s.emoji || getInitials(s.name)) + '</div><div><button type="button" data-action="timeline" data-id="' + s.id + '" class="font-bold text-slate-900 text-left hover:underline hover:text-rose-800 btn-touch">' + escapeHtml(s.name) + '</button><span class="block text-[10px] text-slate-400">' + escapeHtml(s.termName) + '</span></div></div></td>' +
             '<td class="p-3"><span class="font-bold">' + calculateAge(s.dob) + '</span><span class="block text-[10px] text-slate-400">' + escapeHtml(s.dob || 'N/A') + '</span></td>' +
             '<td class="p-3">' + getLevelBadgeHtml(s.level) + '</td>' +
             '<td class="p-3"><span class="font-semibold">' + escapeHtml(s.day) + '</span><span class="block text-[10px] text-slate-400">' + escapeHtml(s.timeSlot) + '</span></td>' +
             '<td class="p-3 text-center"><span class="px-2 py-0.5 rounded-full text-xs font-extrabold ' + (isRenewalDue(s) ? 'bg-amber-100 text-amber-900' : 'bg-slate-100 text-slate-700') + '">' + done + ' / ' + MAX_SESSIONS + '</span></td>' +
-            '<td class="p-3 text-center">' + (pending > 0 ? '<span class="text-[10px] font-bold bg-rose-100 text-rose-900 px-2 py-0.5 rounded-full">' + pending + '</span>' : '<span class="text-[10px] text-slate-400">Clear</span>') + '</td>' +
+            '<td class="p-3 text-center">' + (pending > 0 ? '<span class="text-[10px] font-bold bg-rose-100 text-rose-900 px-2 py-0.5 rounded-full">' + pending + ' ticket(s)</span>' : '<span class="text-[10px] text-slate-400">Clear</span>') + '</td>' +
             '<td class="p-3 text-right"><div class="flex items-center justify-end space-x-1.5">' +
-              '<button type="button" data-action="editStudent" data-id="' + s.id + '" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg btn-touch"><i class="fa-solid fa-pen-to-square"></i></button>' +
-              '<button type="button" data-action="archive" data-id="' + s.id + '" class="p-2 ' + (isRenewalDue(s) ? 'text-amber-700' : 'text-slate-300') + ' rounded-lg btn-touch"><i class="fa-solid fa-box-archive"></i></button>' +
-              '<button type="button" data-action="deleteStudent" data-id="' + s.id + '" class="p-2 text-rose-700 hover:bg-rose-50 rounded-lg btn-touch"><i class="fa-solid fa-trash"></i></button>' +
+              '<button type="button" data-action="editStudent" data-id="' + s.id + '" class="p-2 text-slate-600 hover:bg-slate-100 rounded-lg btn-touch" title="Edit Student"><i class="fa-solid fa-pen-to-square"></i></button>' +
+              '<button type="button" data-action="archive" data-id="' + s.id + '" class="p-2 ' + (isRenewalDue(s) ? 'text-amber-700 hover:bg-amber-50' : 'text-slate-300') + ' rounded-lg btn-touch" title="Archive Term"><i class="fa-solid fa-box-archive"></i></button>' +
+              '<button type="button" data-action="deleteStudent" data-id="' + s.id + '" class="p-2 text-rose-700 hover:bg-rose-50 rounded-lg btn-touch" title="Delete Student"><i class="fa-solid fa-trash"></i></button>' +
             '</div></td>';
           tbody.appendChild(tr);
         });
@@ -1000,7 +1103,6 @@
         g.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4";
         list.forEach(s => {
           const done = getSessionsCompleted(s);
-          const pending = getPendingTickets(s).length;
           const card = document.createElement('div');
           card.className = "bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4 relative overflow-hidden";
           if (isRenewalDue(s)) {
@@ -1012,7 +1114,7 @@
           card.innerHTML += '<div class="flex items-start justify-between ' + (isRenewalDue(s) ? 'pt-2' : '') + '"><div class="flex items-center space-x-3"><div class="w-12 h-12 rounded-2xl bg-rose-900 text-white font-bold flex items-center justify-center text-2xl">' + (s.emoji || getInitials(s.name)) + '</div><div><button type="button" data-action="timeline" data-id="' + s.id + '" class="font-bold text-slate-900 text-base hover:underline text-left btn-touch">' + escapeHtml(s.name) + '</button><p class="text-xs text-slate-500">Age: <span class="font-bold">' + calculateAge(s.dob) + '</span></p></div></div>' + getLevelBadgeHtml(s.level) + '</div>' +
           '<div class="bg-slate-50 p-3 rounded-xl border grid grid-cols-2 gap-2 text-xs"><div><span class="block text-[10px] font-bold text-slate-400 uppercase">Schedule</span><span class="font-bold">' + escapeHtml(s.day) + '</span><span class="block text-[10px] text-slate-500">' + escapeHtml(s.timeSlot) + '</span></div><div><span class="block text-[10px] font-bold text-slate-400 uppercase">Term</span><span class="font-bold">' + escapeHtml(s.termName) + '</span><span class="block text-[10px] text-slate-500">' + done + '/' + MAX_SESSIONS + '</span></div></div>' +
           '<div><div class="flex justify-between text-[11px] font-bold mb-1"><span>Progress</span><span>' + done + ' / ' + MAX_SESSIONS + '</span></div><div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden"><div class="h-full ' + (isRenewalDue(s) ? 'bg-amber-500' : 'bg-rose-800') + '" style="width:' + (done / MAX_SESSIONS * 100) + '%"></div></div></div>' +
-          '<div class="pt-2 border-t flex items-center justify-between"><button type="button" data-action="timeline" data-id="' + s.id + '" class="text-xs font-bold text-rose-800 btn-touch">Timeline</button><div class="flex space-x-2"><button type="button" data-action="editStudent" data-id="' + s.id + '" class="px-3 py-1.5 text-xs bg-slate-100 rounded-lg btn-touch">Edit</button><button type="button" data-action="archive" data-id="' + s.id + '" class="px-3 py-1.5 text-xs font-bold bg-amber-600 text-white rounded-lg btn-touch">Archive</button><button type="button" data-action="deleteStudent" data-id="' + s.id + '" class="p-1.5 text-rose-700 rounded-lg btn-touch"><i class="fa-solid fa-trash"></i></button></div></div>';
+          '<div class="pt-2 border-t flex items-center justify-between"><button type="button" data-action="timeline" data-id="' + s.id + '" class="text-xs font-bold text-rose-800 btn-touch">View Timeline</button><div class="flex space-x-2"><button type="button" data-action="editStudent" data-id="' + s.id + '" class="px-3 py-1.5 text-xs bg-slate-100 rounded-lg btn-touch">Edit</button><button type="button" data-action="archive" data-id="' + s.id + '" class="px-3 py-1.5 text-xs font-bold bg-amber-600 text-white rounded-lg btn-touch">Archive</button><button type="button" data-action="deleteStudent" data-id="' + s.id + '" class="p-1.5 text-rose-700 rounded-lg btn-touch"><i class="fa-solid fa-trash"></i></button></div></div>';
           g.appendChild(card);
         });
         c.appendChild(g);
@@ -1020,7 +1122,7 @@
     }
 
     // ============================================================
-    // RENDER: TICKETS
+    // TAB 3: TICKETS RENDER
     // ============================================================
     function renderTicketsTab() {
       const tb = document.getElementById('makeupTicketsTableBody');
@@ -1038,18 +1140,18 @@
         const tr = document.createElement('tr');
         tr.className = "hover:bg-amber-50/50";
         tr.innerHTML =
-          '<td class="p-3"><button type="button" data-action="timeline" data-id="' + s.id + '" class="font-bold hover:underline btn-touch">' + escapeHtml(s.name) + '</button></td>' +
+          '<td class="p-3"><button type="button" data-action="timeline" data-id="' + s.id + '" class="font-bold hover:underline hover:text-rose-800 btn-touch">' + escapeHtml(s.name) + '</button></td>' +
           '<td class="p-3">' + getLevelBadgeHtml(s.level) + '</td>' +
           '<td class="p-3 font-medium">' + escapeHtml(s.day) + ' (' + escapeHtml(s.timeSlot) + ')</td>' +
           '<td class="p-3 font-mono font-semibold text-rose-800 bg-rose-50 rounded">' + escapeHtml(t.absentDate) + '</td>' +
-          '<td class="p-3 text-slate-500 font-mono text-[11px]">' + escapeHtml(t.absentDate) + '</td>' +
+          '<td class="p-3 text-slate-500 font-mono text-[11px]"><span class="px-2 py-0.5 rounded bg-amber-100 text-amber-900 font-bold">Pending</span></td>' +
           '<td class="p-3 text-center"><button type="button" data-action="quickMakeup" data-id="' + s.id + '" data-ticket="' + t.id + '" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs inline-flex items-center space-x-1 btn-touch"><i class="fa-solid fa-circle-check"></i><span>+ Execute</span></button></td>';
         tb.appendChild(tr);
       });
     }
 
     // ============================================================
-    // RENDER: HISTORY
+    // TAB 4: LEARNING HISTORY RENDER
     // ============================================================
     function renderHistoryTab() {
       const sv = document.getElementById('historySearchInput').value.toLowerCase().trim();
@@ -1067,21 +1169,21 @@
       filtered.forEach(item => {
         const { s, l } = item;
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50";
+        tr.className = "hover:bg-slate-50 border-b border-slate-100";
         tr.innerHTML =
           '<td class="p-3 font-mono text-slate-600">' + escapeHtml(l.date) + '</td>' +
-          '<td class="p-3"><button type="button" data-action="timeline" data-id="' + s.id + '" class="font-bold hover:underline btn-touch">' + escapeHtml(s.name) + '</button></td>' +
+          '<td class="p-3"><button type="button" data-action="timeline" data-id="' + s.id + '" class="font-bold text-slate-900 hover:text-rose-800 hover:underline btn-touch">' + escapeHtml(s.name) + '</button></td>' +
           '<td class="p-3">' + getLevelBadgeHtml(s.level) + '</td>' +
           '<td class="p-3">' + getStatusBadgeHtml(l.status) + '</td>' +
           '<td class="p-3 font-semibold truncate-cell">' + escapeHtml(l.projectTitle || '-') + '</td>' +
-          '<td class="p-3 truncate-cell">' + (l.driveLink ? parseUrlsToLinks(l.driveLink) : '<span class="text-slate-400">-</span>') + '</td>' +
-          '<td class="p-3 text-slate-600 truncate-cell">' + escapeHtml(l.notes || '-') + '</td>';
+          '<td class="p-3 whitespace-nowrap">' + formatMediaLink(l.driveLink) + '</td>' +
+          '<td class="p-3 text-slate-600 truncate-cell max-w-[220px]" title="' + escapeHtml(l.notes || '') + '">' + escapeHtml(l.notes || '-') + '</td>';
         tb.appendChild(tr);
       });
     }
 
     // ============================================================
-    // RENDER: TODOS
+    // TAB 5: TEACHER TO-DO RENDER (With Edit Task Feature)
     // ============================================================
     function renderTodosTab() {
       document.querySelectorAll('.todo-filter-btn').forEach(b => b.classList.remove('bg-rose-800', 'text-white'));
@@ -1104,23 +1206,26 @@
 
       list.forEach(t => {
         const card = document.createElement('div');
-        card.className = 'p-4 rounded-xl border ' + (t.completed ? 'bg-slate-50 opacity-70' : 'bg-white shadow-sm') + ' flex items-start justify-between gap-3';
+        card.className = 'p-4 rounded-xl border ' + (t.completed ? 'bg-slate-50 opacity-70 border-slate-200' : 'bg-white shadow-sm border-slate-200') + ' flex items-start justify-between gap-3';
         let pb = '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300">Low</span>';
         if (t.priority === 'High') pb = '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-rose-100 text-rose-900 border border-rose-300">High</span>';
         else if (t.priority === 'Medium') pb = '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">Medium</span>';
         const deadlineStr = t.deadline ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Due ' + escapeHtml(t.deadline) + '</span>' : '';
         card.innerHTML =
           '<div class="flex items-start space-x-3 w-full">' +
-            '<input type="checkbox" ' + (t.completed ? 'checked' : '') + ' data-action="todoToggle" data-id="' + t.id + '" class="mt-1 w-4 h-4">' +
-            '<div class="space-y-1 w-full"><div class="flex flex-wrap items-center gap-2">' + pb + deadlineStr + '</div><p class="text-xs ' + (t.completed ? 'line-through text-slate-400' : 'text-slate-800') + '">' + parseUrlsToLinks(escapeHtml(t.task)) + '</p></div>' +
+            '<input type="checkbox" ' + (t.completed ? 'checked' : '') + ' data-action="todoToggle" data-id="' + t.id + '" class="mt-1 w-4 h-4 rounded border-slate-300 text-rose-800 focus:ring-rose-500 cursor-pointer">' +
+            '<div class="space-y-1 w-full"><div class="flex flex-wrap items-center gap-2">' + pb + deadlineStr + '</div><p class="text-xs ' + (t.completed ? 'line-through text-slate-400' : 'text-slate-800 font-medium') + '">' + escapeHtml(t.task) + '</p></div>' +
           '</div>' +
-          '<button type="button" data-action="todoDelete" data-id="' + t.id + '" class="text-slate-400 hover:text-rose-700 p-1.5 btn-touch"><i class="fa-solid fa-trash-can text-xs"></i></button>';
+          '<div class="flex items-center space-x-1 flex-shrink-0">' +
+            '<button type="button" data-action="todoEdit" data-id="' + t.id + '" class="text-slate-500 hover:text-slate-800 p-1.5 rounded-lg btn-touch" title="Edit Task"><i class="fa-solid fa-pen-to-square text-xs"></i></button>' +
+            '<button type="button" data-action="todoDelete" data-id="' + t.id + '" class="text-slate-400 hover:text-rose-700 p-1.5 rounded-lg btn-touch" title="Delete Task"><i class="fa-solid fa-trash-can text-xs"></i></button>' +
+          '</div>';
         c.appendChild(card);
       });
     }
 
     // ============================================================
-    // RENDER: SETTINGS
+    // TAB 6: SETTINGS RENDER
     // ============================================================
     function renderSettingsTab() {
       document.getElementById('statStudentCount').textContent = window.appState.students.length;
@@ -1131,18 +1236,47 @@
     }
 
     // ============================================================
-    // MODAL OPENERS
+    // TIME SLOT MANAGEMENT (Add, List & Delete)
+    // ============================================================
+    function renderTimeSlotsModalList() {
+      const container = document.getElementById('timeSlotsListContainer');
+      if (!container) return;
+      container.innerHTML = '';
+      sortTimeSlots();
+      if (window.appState.timeSlots.length === 0) {
+        container.innerHTML = '<p class="text-xs text-slate-400 italic">No custom time slots configured.</p>';
+        return;
+      }
+      window.appState.timeSlots.forEach(slot => {
+        const item = document.createElement('div');
+        item.className = "flex items-center justify-between bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-800";
+        item.innerHTML =
+          '<span>' + escapeHtml(slot) + '</span>' +
+          '<button type="button" data-action="deleteTimeSlot" data-slot="' + escapeHtml(slot) + '" class="text-rose-600 hover:text-rose-800 p-1 rounded btn-touch" title="Delete Slot"><i class="fa-solid fa-trash-can text-xs"></i></button>';
+        container.appendChild(item);
+      });
+    }
+
+    function openManageTimeSlotsModal() {
+      renderTimeSlotsModalList();
+      openModal('timeSlotModal');
+    }
+
+    // ============================================================
+    // MODAL OPENERS & PREFILLS
     // ============================================================
     function populateTimeSlotDropdown(id) {
       const s = document.getElementById(id);
       if (!s) return;
       s.innerHTML = '';
+      sortTimeSlots();
       window.appState.timeSlots.forEach(slot => {
         const o = document.createElement('option');
         o.value = slot; o.textContent = slot;
         s.appendChild(o);
       });
     }
+
     function openAddStudentModal() {
       document.getElementById('studentModalTitle').textContent = 'Add New Student';
       document.getElementById('studentEditId').value = '';
@@ -1153,10 +1287,11 @@
       document.getElementById('studentFormTermName').value = calculate3MonthTermName(today);
       openModal('studentModal');
     }
+
     function openEditStudentModal(id) {
       const s = window.appState.students.find(x => x.id === id);
       if (!s) return;
-      document.getElementById('studentModalTitle').textContent = 'Edit Student';
+      document.getElementById('studentModalTitle').textContent = 'Edit Student Details';
       document.getElementById('studentEditId').value = s.id;
       document.getElementById('studentFormName').value = s.name;
       document.getElementById('studentFormEmoji').value = s.emoji || '';
@@ -1169,11 +1304,12 @@
       document.getElementById('studentFormTermName').value = s.termName || calculate3MonthTermName(s.termStartDate);
       openModal('studentModal');
     }
+
     function openAddMakeupModal() {
       const sel = document.getElementById('makeupStudentSelect');
-      sel.innerHTML = '<option value="">-- Select --</option>';
+      sel.innerHTML = '<option value="">-- Select Student --</option>';
       const eligible = window.appState.students.filter(s => getPendingTickets(s).length > 0);
-      if (eligible.length === 0) { showToast('No pending tickets', 'info'); return; }
+      if (eligible.length === 0) { showToast('No students with pending tickets.', 'info'); return; }
       eligible.forEach(s => {
         const o = document.createElement('option');
         o.value = s.id;
@@ -1183,6 +1319,7 @@
       populateMakeupTicketDropdown();
       openModal('addMakeupModal');
     }
+
     function populateMakeupTicketDropdown() {
       const sid = document.getElementById('makeupStudentSelect').value;
       const ts = document.getElementById('makeupTicketSelect');
@@ -1196,13 +1333,37 @@
         ts.appendChild(o);
       });
     }
+
+    function openAddTodoModal() {
+      document.getElementById('todoModalTitle').textContent = 'Add Task';
+      document.getElementById('todoEditId').value = '';
+      document.getElementById('todoSubmitBtn').textContent = 'Create Task';
+      document.getElementById('todoForm').reset();
+      openModal('todoModal');
+    }
+
+    function openEditTodoModal(id) {
+      const t = window.appState.todos.find(x => x.id === id);
+      if (!t) return;
+      document.getElementById('todoModalTitle').textContent = 'Edit Task';
+      document.getElementById('todoEditId').value = t.id;
+      document.getElementById('todoTaskInput').value = t.task;
+      document.getElementById('todoPriorityInput').value = t.priority;
+      document.getElementById('todoDeadlineInput').value = t.deadline || '';
+      document.getElementById('todoSubmitBtn').textContent = 'Update Task';
+      openModal('todoModal');
+    }
+
     function openTimelineModal(id) {
       const s = window.appState.students.find(x => x.id === id);
       if (!s) return;
+      window.activeTimelineStudentId = s.id;
       document.getElementById('timelineAvatar').textContent = s.emoji || getInitials(s.name);
       document.getElementById('timelineStudentName').textContent = s.name;
       document.getElementById('timelineSubtext').textContent = s.level + ' • Age: ' + calculateAge(s.dob) + ' • ' + s.day + ' (' + s.timeSlot + ')';
       document.getElementById('timelineTermNameBadge').textContent = s.termName;
+
+      // Render 11 Session Grid
       const g = document.getElementById('timelineGrid');
       g.innerHTML = '';
       const logs = s.attendanceLogs || [];
@@ -1219,22 +1380,31 @@
         }
         g.appendChild(b);
       }
+
+      // Render Logs Table with Compact Media Links
       const lb = document.getElementById('timelineCurrentLogsBody');
       lb.innerHTML = '';
-      if (logs.length === 0) lb.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">No logs yet.</td></tr>';
+      if (logs.length === 0) lb.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">No logs recorded for this term.</td></tr>';
       else logs.forEach(l => {
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50";
-        tr.innerHTML = '<td class="p-2.5 font-mono text-slate-600">' + escapeHtml(l.date) + '</td><td class="p-2.5">' + getStatusBadgeHtml(l.status) + '</td><td class="p-2.5 font-semibold">' + escapeHtml(l.projectTitle || '-') + '</td><td class="p-2.5">' + (l.driveLink ? parseUrlsToLinks(l.driveLink) : '-') + '</td><td class="p-2.5 text-slate-600">' + escapeHtml(l.notes || '-') + '</td>';
+        tr.innerHTML =
+          '<td class="p-2.5 font-mono text-slate-600">' + escapeHtml(l.date) + '</td>' +
+          '<td class="p-2.5">' + getStatusBadgeHtml(l.status) + '</td>' +
+          '<td class="p-2.5 font-semibold text-slate-800">' + escapeHtml(l.projectTitle || '-') + '</td>' +
+          '<td class="p-2.5 whitespace-nowrap">' + formatMediaLink(l.driveLink) + '</td>' +
+          '<td class="p-2.5 text-slate-600 max-w-[220px] break-words">' + escapeHtml(l.notes || '-') + '</td>';
         lb.appendChild(tr);
       });
+
+      // Render Archived Terms
       const ac = document.getElementById('timelineArchivedTermsContainer');
       ac.innerHTML = '';
-      if ((s.archivedTerms || []).length === 0) ac.innerHTML = '<p class="text-xs text-slate-400 italic">No archives.</p>';
+      if ((s.archivedTerms || []).length === 0) ac.innerHTML = '<p class="text-xs text-slate-400 italic">No archived terms found.</p>';
       else s.archivedTerms.forEach((term, idx) => {
         const box = document.createElement('div');
         box.className = "border border-slate-200 rounded-xl overflow-hidden bg-slate-50";
-        box.innerHTML = '<button type="button" data-action="archiveToggle" data-target="arc_' + idx + '" class="w-full px-4 py-3 text-left font-bold text-xs bg-slate-100 hover:bg-slate-200 btn-touch"><i class="fa-solid fa-box-archive mr-2 text-rose-800"></i>' + escapeHtml(term.termName) + '</button><div id="arc_' + idx + '" class="hidden p-3 bg-white border-t overflow-x-auto"><table class="w-full text-xs"><thead class="text-slate-500 font-bold border-b"><tr><th class="p-2">Date</th><th class="p-2">Status</th><th class="p-2">Project</th></tr></thead><tbody>' + (term.logs || []).map(l =>
+        box.innerHTML = '<button type="button" data-action="archiveToggle" data-target="arc_' + idx + '" class="w-full px-4 py-3 text-left font-bold text-xs bg-slate-100 hover:bg-slate-200 btn-touch flex items-center justify-between"><span><i class="fa-solid fa-box-archive mr-2 text-rose-800"></i>' + escapeHtml(term.termName) + '</span><i class="fa-solid fa-chevron-down text-slate-400"></i></button><div id="arc_' + idx + '" class="hidden p-3 bg-white border-t overflow-x-auto"><table class="w-full text-xs"><thead class="text-slate-500 font-bold border-b"><tr><th class="p-2">Date</th><th class="p-2">Status</th><th class="p-2">Project</th></tr></thead><tbody>' + (term.logs || []).map(l =>
           '<tr><td class="p-2 font-mono">' + escapeHtml(l.date) + '</td><td class="p-2">' + escapeHtml(l.status) + '</td><td class="p-2">' + escapeHtml(l.projectTitle || '-') + '</td></tr>'
         ).join('') + '</tbody></table></div>';
         ac.appendChild(box);
@@ -1243,7 +1413,81 @@
     }
 
     // ============================================================
-    // FORM HANDLERS
+    // EXPORT STUDENT SUMMARY / TIMELINE REPORT (TXT & COPY)
+    // ============================================================
+    function generateStudentReportText(student) {
+      if (!student) return '';
+      const done = getSessionsCompleted(student);
+      let txt = `==================================================\n`;
+      txt += `CLASSTRACK - STUDENT TERM SUMMARY REPORT\n`;
+      txt += `==================================================\n`;
+      txt += `Student Name : ${student.name}\n`;
+      txt += `Level        : ${student.level}\n`;
+      txt += `Schedule     : ${student.day} (${student.timeSlot})\n`;
+      txt += `Active Term  : ${student.termName}\n`;
+      txt += `Term Progress: ${done} / ${MAX_SESSIONS} Sessions Completed\n`;
+      txt += `Age          : ${calculateAge(student.dob)}\n`;
+      txt += `--------------------------------------------------\n`;
+      txt += `CURRENT TERM LESSON LOGS:\n`;
+      txt += `--------------------------------------------------\n`;
+      if (!student.attendanceLogs || student.attendanceLogs.length === 0) {
+        txt += `(No lesson logs recorded for this term)\n`;
+      } else {
+        student.attendanceLogs.forEach((l, idx) => {
+          txt += `${idx + 1}. [Date: ${l.date}] Status: ${l.status}\n`;
+          txt += `   Project : ${l.projectTitle || '-'}\n`;
+          txt += `   Notes   : ${l.notes || '-'}\n`;
+          if (l.driveLink) txt += `   Media   : ${l.driveLink}\n`;
+          txt += `\n`;
+        });
+      }
+      if (student.archivedTerms && student.archivedTerms.length > 0) {
+        txt += `--------------------------------------------------\n`;
+        txt += `ARCHIVED TERMS HISTORY:\n`;
+        txt += `--------------------------------------------------\n`;
+        student.archivedTerms.forEach(arch => {
+          txt += `Term: ${arch.termName} (Archived Date: ${arch.archivedDate || '-'})\n`;
+          (arch.logs || []).forEach((al, i) => {
+            txt += `  ${i+1}. [${al.date}] Status: ${al.status} | Project: ${al.projectTitle || '-'}\n`;
+          });
+          txt += `\n`;
+        });
+      }
+      txt += `==================================================\n`;
+      txt += `Exported on: ${new Date().toLocaleString()}\n`;
+      return txt;
+    }
+
+    function copyTimelineSummary() {
+      if (!window.activeTimelineStudentId) return;
+      const student = window.appState.students.find(x => x.id === window.activeTimelineStudentId);
+      if (!student) return;
+      const text = generateStudentReportText(student);
+      copyTextToClipboard(text, 'Copied ' + student.name + '\'s term summary to clipboard!');
+    }
+
+    function downloadTimelineReport() {
+      if (!window.activeTimelineStudentId) return;
+      const student = window.appState.students.find(x => x.id === window.activeTimelineStudentId);
+      if (!student) return;
+      const text = generateStudentReportText(student);
+      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      const cleanName = (student.name || 'Student').replace(/[^a-z0-9]/gi, '_');
+      a.download = cleanName + '_Term_Report.txt';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 1000);
+      showToast('Downloaded ' + cleanName + '_Term_Report.txt', 'success');
+    }
+
+    // ============================================================
+    // FORM EVENT HANDLERS
     // ============================================================
     document.getElementById('studentForm').addEventListener('submit', function(e) {
       e.preventDefault();
@@ -1260,13 +1504,13 @@
       if (id) {
         const s = window.appState.students.find(x => x.id === id);
         if (s) Object.assign(s, { name, emoji, dob, level, day, timeSlot, termStartDate, termName });
-        showToast('Updated', 'success');
+        showToast('Updated student details for ' + name, 'success');
       } else {
         window.appState.students.push({
           id: 'std_' + Date.now(), name, emoji, dob, level, day, timeSlot,
           termStartDate, termName, archivedTerms: [], attendanceLogs: [], makeupTickets: []
         });
-        showToast('Added', 'success');
+        showToast('Added new student ' + name, 'success');
       }
       saveState(); closeModal('studentModal'); renderAll();
     });
@@ -1278,49 +1522,53 @@
       const pt = document.getElementById('makeupProjectTitle').value.trim();
       const dl = document.getElementById('makeupDriveLink').value.trim();
       const nt = document.getElementById('makeupNotes').value.trim();
-      if (!sid || !tid) return showToast('Select student and ticket', 'error');
+      if (!sid || !tid) return showToast('Please select a student and ticket.', 'error');
       resolveTicket(sid, tid, formatDateLocal(), pt, dl, nt);
       saveState(); closeModal('addMakeupModal');
       document.getElementById('addMakeupForm').reset();
       renderAll();
-      showToast('Make-Up resolved', 'success');
+      showToast('Make-Up session successfully logged!', 'success');
     });
 
     document.getElementById('timeSlotForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const v = document.getElementById('newTimeSlotInput').value.trim();
-  if (!v) return;
-  if (!window.appState.timeSlots.includes(v)) window.appState.timeSlots.push(v);
-  saveState(); 
-  closeModal('timeSlotModal');
-  document.getElementById('newTimeSlotInput').value = '';
-
-  // Render ulang dropdown di tab Attendance & Modal Student
-  renderAttendanceTab();
-  populateTimeSlotDropdown('studentFormTimeSlot');
-  
-  // Pilih slot baru secara otomatis jika modal Student sedang terbuka
-  const studentSlotSelect = document.getElementById('studentFormTimeSlot');
-  if (studentSlotSelect) studentSlotSelect.value = v;
-
-  showToast('Time slot added', 'success');
-});
+      e.preventDefault();
+      const v = document.getElementById('newTimeSlotInput').value.trim();
+      if (!v) return;
+      if (!window.appState.timeSlots.includes(v)) {
+        window.appState.timeSlots.push(v);
+        sortTimeSlots();
+      }
+      saveState();
+      document.getElementById('newTimeSlotInput').value = '';
+      renderTimeSlotsModalList();
+      renderAttendanceTab();
+      populateTimeSlotDropdown('studentFormTimeSlot');
+      showToast('Time slot added & sorted', 'success');
+    });
 
     document.getElementById('todoForm').addEventListener('submit', function(e) {
       e.preventDefault();
+      const id = document.getElementById('todoEditId').value;
       const task = document.getElementById('todoTaskInput').value.trim();
       const priority = document.getElementById('todoPriorityInput').value;
       const deadline = document.getElementById('todoDeadlineInput').value;
       if (!task) return;
-      window.appState.todos.push({ id: 'td_' + Date.now(), task, priority, deadline, completed: false });
+
+      if (id) {
+        const t = window.appState.todos.find(x => x.id === id);
+        if (t) Object.assign(t, { task, priority, deadline });
+        showToast('Task updated', 'success');
+      } else {
+        window.appState.todos.push({ id: 'td_' + Date.now(), task, priority, deadline, completed: false });
+        showToast('Task created', 'success');
+      }
       saveState(); closeModal('todoModal');
       document.getElementById('todoForm').reset();
       renderAll();
-      showToast('Task added', 'success');
     });
 
     // ============================================================
-    // CENTRAL ACTION HANDLER (event delegation)
+    // CENTRAL EVENT DELEGATION
     // ============================================================
     document.addEventListener('click', function(e) {
       let el = e.target;
@@ -1337,9 +1585,27 @@
       switch (action) {
         case 'tab': e.preventDefault(); switchTab(el.dataset.tab); break;
         case 'day': e.preventDefault(); window.attendanceDay = el.dataset.day; renderAttendanceTab(); break;
-        case 'addTimeSlot': e.preventDefault(); openModal('timeSlotModal'); break;
+        case 'addTimeSlot': e.preventDefault(); openManageTimeSlotsModal(); break;
+        case 'deleteTimeSlot':
+          e.preventDefault();
+          const slotToDelete = el.dataset.slot;
+          if (slotToDelete) {
+            window.appState.timeSlots = window.appState.timeSlots.filter(s => s !== slotToDelete);
+            saveState();
+            renderTimeSlotsModalList();
+            renderAttendanceTab();
+            populateTimeSlotDropdown('studentFormTimeSlot');
+            showToast('Time slot removed', 'info');
+          }
+          break;
         case 'addMakeup': e.preventDefault(); openAddMakeupModal(); break;
         case 'saveAttendance': e.preventDefault(); saveAttendanceRow(el.dataset.id); break;
+        case 'goToDirectory':
+          e.preventDefault();
+          const searchInput = document.getElementById('directorySearchInput');
+          if (searchInput) searchInput.value = el.dataset.name || '';
+          switchTab('directory');
+          break;
         case 'toggleRenewal': e.preventDefault(); window.directoryRenewalOnly = !window.directoryRenewalOnly; renderDirectoryTab(); break;
         case 'dirView': e.preventDefault(); window.directoryView = el.dataset.view; renderDirectoryTab(); break;
         case 'addStudent': e.preventDefault(); openAddStudentModal(); break;
@@ -1348,9 +1614,9 @@
           e.preventDefault();
           const s = window.appState.students.find(x => x.id === el.dataset.id);
           if (!s) break;
-          showConfirmModal('Delete Student', 'Delete ' + s.name + '?', () => {
+          showConfirmModal('Delete Student', 'Delete ' + s.name + '? All logs will be permanently erased.', () => {
             window.appState.students = window.appState.students.filter(x => x.id !== el.dataset.id);
-            saveState(); renderAll(); showToast('Deleted', 'info');
+            saveState(); renderAll(); showToast('Student removed', 'info');
           });
           break;
         }
@@ -1358,16 +1624,16 @@
           e.preventDefault();
           const s = window.appState.students.find(x => x.id === el.dataset.id);
           if (!s) break;
-          if (!isRenewalDue(s)) { showToast('Not enough sessions', 'info'); break; }
+          if (!isRenewalDue(s)) { showToast('Student has not reached 10 sessions yet.', 'info'); break; }
           const today = formatDateLocal();
           const next = calculate3MonthTermName(today);
-          showConfirmModal('Archive Term', 'Archive ' + s.name + ' and start ' + next + '?', () => {
+          showConfirmModal('Archive Term', 'Archive current term for ' + s.name + ' and start ' + next + '?', () => {
             if (!s.archivedTerms) s.archivedTerms = [];
             s.archivedTerms.push({ termName: s.termName, archivedDate: today, logs: (s.attendanceLogs || []).slice() });
             s.attendanceLogs = [];
             s.termStartDate = today;
             s.termName = next;
-            saveState(); renderAll(); showToast('Archived', 'success');
+            saveState(); renderAll(); showToast('Term archived successfully', 'success');
           });
           break;
         }
@@ -1380,7 +1646,8 @@
           document.getElementById('makeupTicketSelect').value = el.dataset.ticket;
           break;
         case 'todoFilter': e.preventDefault(); window.todoFilter = el.dataset.filter; renderTodosTab(); break;
-        case 'addTodo': e.preventDefault(); openModal('todoModal'); break;
+        case 'addTodo': e.preventDefault(); openAddTodoModal(); break;
+        case 'todoEdit': e.preventDefault(); openEditTodoModal(el.dataset.id); break;
         case 'todoToggle': {
           e.preventDefault();
           const t = window.appState.todos.find(x => x.id === el.dataset.id);
@@ -1390,44 +1657,39 @@
         case 'todoDelete':
           e.preventDefault();
           window.appState.todos = window.appState.todos.filter(x => x.id !== el.dataset.id);
-          saveState(); renderAll(); showToast('Deleted', 'info');
+          saveState(); renderAll(); showToast('Task deleted', 'info');
           break;
-                case 'export':
+        case 'export':
           e.preventDefault();
           (function() {
             try {
-              // Inline date — no external helper needed
               var now = new Date();
               var pad = function(n) { return String(n).padStart(2, '0'); };
               var dateStr = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
-              var timeStr = pad(now.getHours()) + pad(now.getMinutes());
-
               var json = JSON.stringify(window.appState, null, 2);
-              var blob = new Blob([json], { type: 'application/octet-stream' });
+              var blob = new Blob([json], { type: 'application/json' });
               var url = URL.createObjectURL(blob);
               var a = document.createElement('a');
               a.href = url;
-              a.download = 'classtrack_backup_' + dateStr + '_' + timeStr + '.json';
-              a.rel = 'noopener';
-              a.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0;';
+              a.download = 'classtrack_backup_' + dateStr + '.json';
+              a.style.display = 'none';
               document.body.appendChild(a);
-              a.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: window }));
+              a.click();
               setTimeout(function() {
-                if (a.parentNode) a.parentNode.removeChild(a);
+                document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-              }, 2000);
-              showToast('Download started — check Files → Downloads', 'success');
+              }, 1500);
+              showToast('Backup JSON downloaded successfully!', 'success');
             } catch(err) {
               showToast('Export failed: ' + err.message, 'error');
-              console.error('Export error:', err);
             }
           })();
           break;
         case 'import': e.preventDefault(); document.getElementById('importJsonFileInput').click(); break;
-        case 'seed': e.preventDefault(); showConfirmModal('Populate Demo', 'Replace all data with demo?', () => { populateSeedData(); initHeader(); renderAll(); showToast('Demo loaded', 'success'); }); break;
-        case 'clear': e.preventDefault(); showConfirmModal('Factory Reset', 'Erase ALL data?', () => {
+        case 'seed': e.preventDefault(); showConfirmModal('Populate Demo Data', 'Replace current data with sample data?', () => { populateSeedData(); initHeader(); renderAll(); showToast('Demo data loaded', 'success'); }); break;
+        case 'clear': e.preventDefault(); showConfirmModal('Factory Reset', 'Erase ALL database records?', () => {
           window.appState = { settings: { className: "Robotics & Coding Academy", teacherName: "Ms. Clara" }, timeSlots: ["09:00 - 10:30","11:00 - 12:30","14:00 - 15:30","16:00 - 17:30"], students: [], todos: [] };
-          saveState(); initHeader(); renderAll(); showToast('Cleared', 'info');
+          saveState(); initHeader(); renderAll(); showToast('Database cleared', 'info');
         }); break;
         case 'close': e.preventDefault(); closeModal(el.dataset.close); break;
         case 'archiveToggle': e.preventDefault(); {
@@ -1438,8 +1700,12 @@
       }
     }
 
+    // Attach Timeline summary listeners
+    document.getElementById('copyTimelineBtn').addEventListener('click', copyTimelineSummary);
+    document.getElementById('downloadTimelineBtn').addEventListener('click', downloadTimelineReport);
+
     // ============================================================
-    // INPUT HANDLERS
+    // INPUT LISTENERS & JSON IMPORT FIX
     // ============================================================
     document.getElementById('attendanceSelectedDate').addEventListener('change', function() {
       window.attendanceDateStr = this.value;
@@ -1460,6 +1726,8 @@
       window.appState.settings.teacherName = this.value; saveState();
     });
     document.getElementById('makeupStudentSelect').addEventListener('change', populateMakeupTicketDropdown);
+
+    // Robust JSON File Import Logic
     document.getElementById('importJsonFileInput').addEventListener('change', function(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1467,16 +1735,24 @@
       r.onload = function(e) {
         try {
           const d = JSON.parse(e.target.result);
-          if (d && Array.isArray(d.students)) {
+          if (d && (Array.isArray(d.students) || d.settings)) {
             window.appState = d;
             validateState();
-            saveState(); initHeader(); renderAll();
-            showToast('Restored', 'success');
-          } else showToast('Invalid file', 'error');
-        } catch (err) { showToast('Parse error', 'error'); }
+            saveState();
+            initHeader();
+            renderAll();
+            showToast('Database successfully restored from JSON!', 'success');
+          } else {
+            showToast('Invalid backup file structure.', 'error');
+          }
+        } catch (err) {
+          showToast('JSON Import Error: ' + err.message, 'error');
+        }
       };
       r.readAsText(file);
+      this.value = ''; // Reset input to allow re-importing same file if needed
     });
+
     document.getElementById('studentFormTermStartDate').addEventListener('change', function() {
       document.getElementById('studentFormTermName').value = calculate3MonthTermName(this.value);
     });
@@ -1486,7 +1762,7 @@
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllModals(); });
 
     // ============================================================
-    // BOOT
+    // APPLICATION BOOTSTRAP
     // ============================================================
     loadState();
     initHeader();
