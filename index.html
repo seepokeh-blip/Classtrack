@@ -36,13 +36,19 @@
   </style>
 </head>
 <body class="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased">
-<div id="authScreen" style="position:fixed; inset:0; background:white; z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px;">
+<div id="authScreen" style="position:fixed; inset:0; background:white; z-index:10000; display:flex; align-items:center; justify-content:center; padding:20px;">
   <div style="width:100%; max-width:320px; display:flex; flex-direction:column; gap:12px;">
     <h2 style="font-size:20px; font-weight:bold; text-align:center;">Login ClassTrack</h2>
     <input type="email" id="authEmail" placeholder="Email" style="padding:12px; border:1px solid #ccc; border-radius:12px; font-size:16px;">
     <input type="password" id="authPassword" placeholder="Password" style="padding:12px; border:1px solid #ccc; border-radius:12px; font-size:16px;">
     <button onclick="signIn(document.getElementById('authEmail').value, document.getElementById('authPassword').value)" style="padding:12px; background:#991B1B; color:white; border:none; border-radius:12px; font-size:16px; font-weight:bold;">Masuk</button>
-    <button onclick="signUp(document.getElementById('authEmail').value, document.getElementById('authPassword').value)" style="padding:8px; background:none; border:none; color:#666; font-size:14px;">Belum punya akun? Daftar</button>
+    <p style="text-align:center; font-size:14px; color:#666; margin:8px 0;">
+  Belum punya akun? 
+  <a href="#" onclick="event.preventDefault(); signUp(document.getElementById('authEmail').value, document.getElementById('authPassword').value); return false;" 
+     style="color:#991B1B; font-weight:bold; text-decoration:underline; padding:8px; display:inline-block; cursor:pointer;">
+    Daftar di sini
+  </a>
+</p>
   </div>
 </div>
   <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-md w-full px-4"></div>
