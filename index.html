@@ -232,12 +232,25 @@
 
       <!-- TAB 4: LEARNING HISTORY -->
       <section id="tab-history" class="tab-content hidden space-y-4">
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div class="relative w-full sm:w-80">
-            <i class="fa-solid fa-search absolute left-3 top-3 text-slate-400 text-xs"></i>
-            <input type="text" id="historySearchInput" placeholder="Filter history..." class="pl-8 pr-3 py-2 text-xs border border-slate-300 rounded-lg w-full bg-slate-50 focus:outline-none">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div class="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+            <div class="relative w-full sm:w-72">
+              <i class="fa-solid fa-search absolute left-3 top-3.5 text-slate-400 text-xs"></i>
+              <input type="text" id="historySearchInput" placeholder="Search student, level or project..." class="pl-8 pr-3 py-2.5 text-xs border border-slate-300 rounded-lg w-full bg-slate-50 focus:ring-1 focus:ring-rose-500 focus:outline-none">
+            </div>
+            <select id="historyStatusFilter" class="py-2.5 px-3 text-xs border border-slate-300 rounded-lg bg-slate-50 w-full sm:w-44 focus:ring-1 focus:ring-rose-500 focus:outline-none">
+              <option value="ALL">All Statuses</option>
+              <option value="Present">Present</option>
+              <option value="Make-Up">Make-Up</option>
+              <option value="Excused">Excused</option>
+              <option value="Sick">Sick</option>
+              <option value="Unexcused">Unexcused</option>
+            </select>
           </div>
-          <p class="text-xs text-slate-500 font-medium"><i class="fa-solid fa-circle-info text-rose-800 mr-1"></i>Tap student name to view timeline modal.</p>
+          <div class="text-xs text-slate-500 font-medium lg:text-right space-y-0.5">
+            <p id="historyCount" class="font-bold text-slate-700"></p>
+            <p><i class="fa-solid fa-circle-info text-rose-800 mr-1"></i>Tap a student name for the timeline. Use <i class="fa-solid fa-pen-to-square text-slate-600 mx-0.5"></i> to correct or <i class="fa-solid fa-trash-can text-rose-700 mx-0.5"></i> to remove a record.</p>
+          </div>
         </div>
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden max-h-[600px] overflow-y-auto relative">
           <table class="table-fixed-layout text-left text-xs">
@@ -250,13 +263,14 @@
                 <th class="p-3 w-48 bg-slate-100">Project</th>
                 <th class="p-3 w-36 bg-slate-100">Media</th>
                 <th class="p-3 w-64 bg-slate-100">Comments / Notes</th>
+                <th class="p-3 w-24 bg-slate-100 text-center sticky right-0 z-20">Actions</th>
               </tr>
             </thead>
             <tbody id="historyTableBody" class="divide-y divide-slate-100"></tbody>
           </table>
           <div id="historyEmptyState" class="hidden p-12 text-center text-slate-400">
             <i class="fa-solid fa-box-open text-4xl mb-2 text-slate-300"></i>
-            <p class="font-medium text-slate-500">No learning history found.</p>
+            <p id="historyEmptyText" class="font-medium text-slate-500">No learning history found.</p>
           </div>
         </div>
       </section>
@@ -553,6 +567,59 @@
           <div id="timelineArchivedTermsContainer" class="space-y-2"></div>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- EDIT ATTENDANCE RECORD MODAL (Learning History) -->
+  <div id="historyLogModal" class="modal-backdrop fixed inset-0 bg-slate-900/60 z-50 items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg border border-slate-200 overflow-hidden flex flex-col max-h-[92vh]">
+      <div class="bg-rose-900 px-6 py-4 text-white flex justify-between items-center flex-shrink-0">
+        <div>
+          <h3 class="font-bold text-base leading-tight">Edit Attendance Record</h3>
+          <p id="historyLogSubtitle" class="text-xs text-rose-200 mt-0.5">Student</p>
+        </div>
+        <button type="button" data-action="close" data-close="historyLogModal" class="text-rose-200 hover:text-white p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <form id="historyLogForm" class="p-6 space-y-4 overflow-y-auto">
+        <input type="hidden" id="historyLogStudentId">
+        <input type="hidden" id="historyLogId">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Date</label>
+            <input type="date" id="historyLogDate" required class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Status</label>
+            <select id="historyLogStatus" required class="w-full text-sm p-3 border border-slate-300 rounded-xl bg-white focus:ring-2 focus:ring-rose-500 focus:outline-none">
+              <option value="Present">Present</option>
+              <option value="Excused">Excused</option>
+              <option value="Sick">Sick</option>
+              <option value="Unexcused">Unexcused</option>
+              <option value="Make-Up">Make-Up</option>
+            </select>
+          </div>
+        </div>
+        <p id="historyLogHint" class="text-[11px] text-slate-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 hidden"></p>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Project Title</label>
+          <input type="text" id="historyLogProject" placeholder="e.g. Maze Rover" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Media Link</label>
+          <input type="url" id="historyLogLink" placeholder="https://..." class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Notes</label>
+          <textarea id="historyLogNotes" rows="3" class="w-full text-sm p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-rose-500 focus:outline-none"></textarea>
+        </div>
+        <div class="pt-4 flex flex-col-reverse sm:flex-row sm:justify-between gap-2 border-t border-slate-100">
+          <button type="button" id="historyLogDeleteBtn" class="px-4 py-2.5 text-sm font-semibold text-rose-800 hover:bg-rose-50 rounded-xl btn-touch"><i class="fa-solid fa-trash-can mr-2 text-xs"></i>Delete Record</button>
+          <div class="flex gap-2 sm:justify-end">
+            <button type="button" data-action="close" data-close="historyLogModal" class="flex-1 sm:flex-none px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl btn-touch">Cancel</button>
+            <button type="submit" class="flex-1 sm:flex-none px-5 py-2.5 text-sm font-bold text-white bg-rose-800 hover:bg-rose-900 rounded-xl btn-touch">Save Changes</button>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -1155,31 +1222,139 @@
     // ============================================================
     function renderHistoryTab() {
       const sv = document.getElementById('historySearchInput').value.toLowerCase().trim();
+      const sf = document.getElementById('historyStatusFilter').value;
       const tb = document.getElementById('historyTableBody');
       const es = document.getElementById('historyEmptyState');
+      const et = document.getElementById('historyEmptyText');
+      const cnt = document.getElementById('historyCount');
       tb.innerHTML = '';
       const all = [];
-      window.appState.students.forEach(s => (s.attendanceLogs || []).forEach(l => all.push({ s, l })));
+      window.appState.students.forEach(s => (s.attendanceLogs || []).forEach(l => {
+        if (!l.id) l.id = 'log_' + Date.now() + Math.random().toString(36).substring(2, 8);
+        all.push({ s, l });
+      }));
       all.sort((a, b) => new Date(b.l.date) - new Date(a.l.date));
       const filtered = all.filter(i =>
-        i.s.name.toLowerCase().includes(sv) || i.s.level.toLowerCase().includes(sv) || (i.l.projectTitle || '').toLowerCase().includes(sv)
+        (i.s.name.toLowerCase().includes(sv) || i.s.level.toLowerCase().includes(sv) || (i.l.projectTitle || '').toLowerCase().includes(sv)) &&
+        (sf === 'ALL' || i.l.status === sf)
       );
-      if (filtered.length === 0) { es.classList.remove('hidden'); return; }
+      cnt.textContent = filtered.length === all.length
+        ? all.length + (all.length === 1 ? ' record' : ' records')
+        : 'Showing ' + filtered.length + ' of ' + all.length + ' records';
+      if (filtered.length === 0) {
+        et.textContent = all.length === 0 ? 'No learning history found.' : 'No records match your search or filter.';
+        es.classList.remove('hidden');
+        return;
+      }
       es.classList.add('hidden');
       filtered.forEach(item => {
         const { s, l } = item;
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50 border-b border-slate-100";
+        tr.className = "group hover:bg-slate-50 border-b border-slate-100";
+        const dObj = parseDateLocal(l.date);
+        const wd = dObj ? ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][dObj.getDay()] : '';
         tr.innerHTML =
-          '<td class="p-3 font-mono text-slate-600">' + escapeHtml(l.date) + '</td>' +
+          '<td class="p-3 font-mono text-slate-600">' + escapeHtml(l.date) + (wd ? '<span class="block text-[10px] text-slate-400 font-sans">' + wd + '</span>' : '') + '</td>' +
           '<td class="p-3"><button type="button" data-action="timeline" data-id="' + s.id + '" class="font-bold text-slate-900 hover:text-rose-800 hover:underline btn-touch">' + escapeHtml(s.name) + '</button></td>' +
           '<td class="p-3">' + getLevelBadgeHtml(s.level) + '</td>' +
           '<td class="p-3">' + getStatusBadgeHtml(l.status) + '</td>' +
-          '<td class="p-3 font-semibold truncate-cell">' + escapeHtml(l.projectTitle || '-') + '</td>' +
+          '<td class="p-3 font-semibold truncate-cell" title="' + escapeHtml(l.projectTitle || '') + '">' + escapeHtml(l.projectTitle || '-') + '</td>' +
           '<td class="p-3 whitespace-nowrap">' + formatMediaLink(l.driveLink) + '</td>' +
-          '<td class="p-3 text-slate-600 truncate-cell max-w-[220px]" title="' + escapeHtml(l.notes || '') + '">' + escapeHtml(l.notes || '-') + '</td>';
+          '<td class="p-3 text-slate-600" title="' + escapeHtml(l.notes || '') + '"><div style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;">' + escapeHtml(l.notes || '-') + '</div></td>' +
+          '<td class="p-1.5 text-center whitespace-nowrap sticky right-0 bg-white group-hover:bg-slate-50 shadow-[-6px_0_6px_-6px_rgba(15,23,42,0.18)]">' +
+            '<button type="button" data-action="historyEdit" data-sid="' + s.id + '" data-lid="' + l.id + '" class="w-10 h-10 text-slate-600 hover:bg-slate-100 rounded-lg btn-touch" title="Edit record" aria-label="Edit record"><i class="fa-solid fa-pen-to-square"></i></button>' +
+            '<button type="button" data-action="historyDelete" data-sid="' + s.id + '" data-lid="' + l.id + '" class="w-10 h-10 text-rose-700 hover:bg-rose-50 rounded-lg btn-touch" title="Delete record" aria-label="Delete record"><i class="fa-solid fa-trash-can"></i></button>' +
+          '</td>';
         tb.appendChild(tr);
       });
+    }
+
+    // ---- Edit / delete a single attendance record (Learning History) ----
+    const ABSENT_STATUSES = ['Excused', 'Sick', 'Unexcused'];
+
+    function findHistoryLog(studentId, logId) {
+      const s = window.appState.students.find(x => x.id === studentId);
+      if (!s) return null;
+      const l = (s.attendanceLogs || []).find(x => x.id === logId);
+      return l ? { s, l } : null;
+    }
+
+    // Keeps make-up tickets consistent when a record is changed (newLog = null means deleted)
+    function syncTicketsForLogChange(s, oldLog, newLog) {
+      if (!Array.isArray(s.makeupTickets)) s.makeupTickets = [];
+      const wasAbsent = ABSENT_STATUSES.includes(oldLog.status);
+      const isAbsent = !!newLog && ABSENT_STATUSES.includes(newLog.status);
+      const sameDate = !!newLog && newLog.date === oldLog.date;
+
+      if (wasAbsent && (!isAbsent || !sameDate)) {
+        s.makeupTickets = s.makeupTickets.filter(t => !(t.absentDate === oldLog.date && t.status === 'Pending'));
+      }
+      if (oldLog.status === 'Make-Up') {
+        const t = s.makeupTickets.find(x => x.status === 'Resolved' && x.redeemedDate === oldLog.date);
+        if (t) {
+          if (newLog && newLog.status === 'Make-Up') t.redeemedDate = newLog.date;
+          else { t.status = 'Pending'; t.redeemedDate = ''; }
+        }
+      }
+      if (isAbsent && (!wasAbsent || !sameDate)) {
+        const has = s.makeupTickets.some(t => t.absentDate === newLog.date && t.status === 'Pending');
+        if (!has) {
+          s.makeupTickets.push({
+            id: 't_' + Date.now() + Math.random().toString(36).substring(2, 6),
+            absentDate: newLog.date, status: 'Pending', redeemedDate: ''
+          });
+        }
+      }
+    }
+
+    function updateHistoryLogHint() {
+      const ref = findHistoryLog(document.getElementById('historyLogStudentId').value, document.getElementById('historyLogId').value);
+      const hint = document.getElementById('historyLogHint');
+      if (!ref) { hint.classList.add('hidden'); return; }
+      const ns = document.getElementById('historyLogStatus').value;
+      const nd = document.getElementById('historyLogDate').value;
+      const os = ref.l.status, od = ref.l.date;
+      const msgs = [];
+      if (ABSENT_STATUSES.includes(ns) && (!ABSENT_STATUSES.includes(os) || nd !== od)) msgs.push('A pending make-up ticket will be created for this date.');
+      if (ABSENT_STATUSES.includes(os) && (!ABSENT_STATUSES.includes(ns) || nd !== od)) msgs.push('The old pending make-up ticket for ' + od + ' will be removed.');
+      if (os === 'Make-Up' && ns !== 'Make-Up') msgs.push('The make-up ticket redeemed by this session will return to Pending.');
+      if (msgs.length) { hint.textContent = msgs.join(' '); hint.classList.remove('hidden'); }
+      else hint.classList.add('hidden');
+    }
+
+    function openHistoryLogModal(studentId, logId) {
+      const ref = findHistoryLog(studentId, logId);
+      if (!ref) return showToast('Record not found.', 'error');
+      const { s, l } = ref;
+      document.getElementById('historyLogStudentId').value = s.id;
+      document.getElementById('historyLogId').value = l.id;
+      document.getElementById('historyLogSubtitle').textContent = s.name + ' • ' + s.level;
+      document.getElementById('historyLogDate').value = l.date;
+      document.getElementById('historyLogStatus').value = l.status;
+      document.getElementById('historyLogProject').value = l.projectTitle || '';
+      document.getElementById('historyLogLink').value = l.driveLink || '';
+      document.getElementById('historyLogNotes').value = l.notes || '';
+      updateHistoryLogHint();
+      openModal('historyLogModal');
+    }
+
+    function confirmDeleteHistoryLog(studentId, logId) {
+      const ref = findHistoryLog(studentId, logId);
+      if (!ref) return showToast('Record not found.', 'error');
+      const { s, l } = ref;
+      let extra = '';
+      if (ABSENT_STATUSES.includes(l.status)) extra = ' Its pending make-up ticket (if any) will be removed too.';
+      else if (l.status === 'Make-Up') extra = ' The make-up ticket it redeemed will return to Pending.';
+      showConfirmModal('Delete Attendance Record',
+        'Delete ' + s.name + '\'s ' + l.status + ' record on ' + l.date + '?' + extra + ' This cannot be undone.',
+        () => {
+          const cur = findHistoryLog(studentId, logId);
+          if (!cur) return;
+          syncTicketsForLogChange(cur.s, cur.l, null);
+          cur.s.attendanceLogs = cur.s.attendanceLogs.filter(x => x.id !== logId);
+          saveState(); renderAll();
+          showToast('Attendance record deleted', 'info');
+        });
     }
 
     // ============================================================
@@ -1530,6 +1705,34 @@
       showToast('Make-Up session successfully logged!', 'success');
     });
 
+    document.getElementById('historyLogForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const ref = findHistoryLog(document.getElementById('historyLogStudentId').value, document.getElementById('historyLogId').value);
+      if (!ref) { closeModal('historyLogModal'); return showToast('Record not found.', 'error'); }
+      const { s, l } = ref;
+      const date = document.getElementById('historyLogDate').value;
+      if (!date) return showToast('Please choose a date.', 'error');
+      if (s.attendanceLogs.some(x => x !== l && x.date === date)) {
+        return showToast(s.name + ' already has a record on ' + date + '. Edit or delete that one instead.', 'error');
+      }
+      const oldLog = { date: l.date, status: l.status };
+      l.date = date;
+      l.status = document.getElementById('historyLogStatus').value;
+      l.projectTitle = document.getElementById('historyLogProject').value.trim();
+      l.driveLink = document.getElementById('historyLogLink').value.trim();
+      l.notes = document.getElementById('historyLogNotes').value.trim();
+      syncTicketsForLogChange(s, oldLog, l);
+      saveState(); closeModal('historyLogModal'); renderAll();
+      showToast('Attendance record updated', 'success');
+    });
+    document.getElementById('historyLogDeleteBtn').addEventListener('click', function() {
+      const sid = document.getElementById('historyLogStudentId').value;
+      const lid = document.getElementById('historyLogId').value;
+      confirmDeleteHistoryLog(sid, lid);
+    });
+    document.getElementById('historyLogStatus').addEventListener('change', updateHistoryLogHint);
+    document.getElementById('historyLogDate').addEventListener('change', updateHistoryLogHint);
+
     document.getElementById('timeSlotForm').addEventListener('submit', function(e) {
       e.preventDefault();
       const v = document.getElementById('newTimeSlotInput').value.trim();
@@ -1638,6 +1841,8 @@
           break;
         }
         case 'timeline': e.preventDefault(); openTimelineModal(el.dataset.id); break;
+        case 'historyEdit': e.preventDefault(); openHistoryLogModal(el.dataset.sid, el.dataset.lid); break;
+        case 'historyDelete': e.preventDefault(); confirmDeleteHistoryLog(el.dataset.sid, el.dataset.lid); break;
         case 'quickMakeup':
           e.preventDefault();
           openAddMakeupModal();
@@ -1719,6 +1924,7 @@
     });
     document.getElementById('directorySearchInput').addEventListener('input', renderDirectoryTab);
     document.getElementById('historySearchInput').addEventListener('input', renderHistoryTab);
+    document.getElementById('historyStatusFilter').addEventListener('change', renderHistoryTab);
     document.getElementById('headerClassName').addEventListener('change', function() {
       window.appState.settings.className = this.value; saveState();
     });
