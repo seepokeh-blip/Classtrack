@@ -262,7 +262,9 @@
   /* --- toolbar --- */
   .toolbar{ display:flex; flex-direction:column; gap:12px; }
 
-  .search-wrap{ position:relative; }
+  .search-row{ display:flex; gap:8px; align-items:stretch; }
+
+  .search-wrap{ position:relative; flex:1; min-width:0; }
   .search-wrap > svg{
     position:absolute;
     left:15px; top:50%;
@@ -273,11 +275,12 @@
   }
   .search-input{
     width:100%;
+    height:50px;
     font-family:inherit;
     font-size:16px;
     font-weight:500;
     color:var(--ink);
-    padding:14px 16px 14px 44px;
+    padding:0 16px 0 44px;
     border-radius:18px;
     border:1px solid rgba(255,255,255,.95);
     background:rgba(255,255,255,.7);
@@ -297,11 +300,40 @@
     box-shadow:0 0 0 4px rgba(59,130,246,.14), 0 8px 22px rgba(37,99,235,.12);
   }
 
+  .btn-add-top{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    flex-shrink:0;
+    height:50px;
+    padding:0 16px;
+    border:none;
+    border-radius:18px;
+    font-family:inherit;
+    font-size:13.5px;
+    font-weight:700;
+    letter-spacing:.1px;
+    color:#fff;
+    white-space:nowrap;
+    background:linear-gradient(140deg, var(--blue-500) 0%, var(--blue-600) 55%, var(--blue-700) 100%);
+    box-shadow:
+      0 8px 22px rgba(37,99,235,.30),
+      inset 0 1px 0 rgba(255,255,255,.35);
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .2s ease;
+  }
+  .btn-add-top svg{ width:18px; height:18px; flex-shrink:0; }
+  .btn-add-top:active{
+    transform:scale(.97);
+    box-shadow:0 4px 12px rgba(37,99,235,.28);
+  }
+
   .toolbar-row{
     display:flex;
     align-items:center;
     justify-content:space-between;
-    gap:10px;
+    gap:8px;
     padding:0 4px;
   }
 
@@ -310,8 +342,97 @@
     font-weight:600;
     color:var(--muted);
     white-space:nowrap;
+    flex-shrink:0;
   }
 
+  .toolbar-actions{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    min-width:0;
+  }
+
+  /* --- sort button + menu --- */
+  .sort-wrap{ position:relative; flex-shrink:0; }
+
+  .sort-btn{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    padding:7px 11px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.95);
+    background:rgba(255,255,255,.65);
+    box-shadow:0 4px 14px rgba(37,99,235,.08), inset 0 1px 0 #fff;
+    font-family:inherit;
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--blue-700);
+    cursor:pointer;
+    white-space:nowrap;
+    transition:background .2s, box-shadow .2s, transform .15s;
+  }
+  .sort-btn svg{ width:15px; height:15px; flex-shrink:0; }
+  .sort-btn:active{ transform:scale(.96); }
+  .sort-btn.open{
+    background:#fff;
+    box-shadow:0 0 0 3px rgba(59,130,246,.15), 0 4px 14px rgba(37,99,235,.12);
+  }
+
+  .sort-menu{
+    position:absolute;
+    top:calc(100% + 8px);
+    right:0;
+    min-width:180px;
+    padding:6px;
+    border-radius:16px;
+    background:rgba(255,255,255,.97);
+    backdrop-filter:blur(24px) saturate(190%);
+    -webkit-backdrop-filter:blur(24px) saturate(190%);
+    border:1px solid rgba(255,255,255,.95);
+    box-shadow:0 18px 44px rgba(15,23,42,.20), inset 0 1px 0 #fff;
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(-6px) scale(.98);
+    transform-origin:top right;
+    transition:opacity .2s ease, visibility .2s ease, transform .22s cubic-bezier(.22,.9,.35,1);
+    z-index:40;
+  }
+  .sort-menu.open{ opacity:1; visibility:visible; transform:translateY(0) scale(1); }
+
+  .sort-opt{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    width:100%;
+    padding:10px 12px;
+    border:none;
+    border-radius:11px;
+    background:transparent;
+    font-family:inherit;
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink);
+    text-align:left;
+    cursor:pointer;
+    transition:background .18s, color .18s;
+  }
+  .sort-opt:hover{ background:rgba(59,130,246,.08); }
+  .sort-opt .check{
+    width:15px; height:15px;
+    color:var(--blue-600);
+    opacity:0;
+    flex-shrink:0;
+  }
+  .sort-opt.active{
+    background:linear-gradient(140deg, var(--blue-500), var(--blue-600));
+    color:#fff;
+    box-shadow:0 6px 14px rgba(37,99,235,.28);
+  }
+  .sort-opt.active .check{ opacity:1; color:#fff; }
+
+  /* --- segmented view toggle --- */
   .segmented{
     display:flex;
     gap:3px;
@@ -320,12 +441,13 @@
     background:rgba(255,255,255,.65);
     border:1px solid rgba(255,255,255,.95);
     box-shadow:0 4px 14px rgba(37,99,235,.08), inset 0 1px 0 #fff;
+    flex-shrink:0;
   }
   .seg-btn{
     display:flex;
     align-items:center;
     gap:5px;
-    padding:7px 12px;
+    padding:7px 11px;
     border:none;
     border-radius:10px;
     background:transparent;
@@ -413,7 +535,13 @@
     text-overflow:ellipsis;
   }
 
-  .item-schedule{ flex-shrink:0; }
+  .item-schedule{ flex-shrink:0; max-width:46%; }
+  .item-schedule .chip{
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    display:block;
+  }
 
   .item-del{
     width:30px; height:30px;
@@ -507,36 +635,6 @@
   .empty-sub{ font-size:12.5px; color:var(--muted); margin-top:5px; line-height:1.5; }
 
   .is-hidden{ display:none !important; }
-
-  /* =========================================================
-     FLOATING ADD BUTTON
-     ========================================================= */
-  .fab{
-    position:fixed;
-    z-index:60;
-    bottom:calc(96px + env(safe-area-inset-bottom));
-    right:max(18px, calc((100vw - 860px) / 2 + 22px));
-    width:58px; height:58px;
-    border-radius:20px;
-    border:none;
-    display:grid; place-items:center;
-    color:#fff;
-    background:linear-gradient(140deg, var(--blue-500), var(--blue-600) 55%, var(--blue-700));
-    box-shadow:
-      0 14px 32px rgba(37,99,235,.42),
-      inset 0 1px 0 rgba(255,255,255,.42);
-    cursor:pointer;
-    transition:transform .22s cubic-bezier(.34,1.56,.64,1),
-               opacity .22s ease,
-               box-shadow .2s;
-  }
-  .fab svg{ width:26px; height:26px; }
-  .fab:active{ transform:scale(.92); }
-  .fab.off{
-    opacity:0;
-    transform:scale(.7) translateY(12px);
-    pointer-events:none;
-  }
 
   /* =========================================================
      MODAL (POPUP FORM)
@@ -670,6 +768,20 @@
     background-position:right 13px center;
   }
 
+  /* --- time range --- */
+  .time-range{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .time-range input{ flex:1; min-width:0; text-align:center; }
+  .time-sep{
+    font-size:15px;
+    font-weight:700;
+    color:var(--muted);
+    flex-shrink:0;
+  }
+
   .term-preview{
     display:flex;
     padding-left:3px;
@@ -706,6 +818,13 @@
   }
 
   /* ---------- responsive ---------- */
+  @media (max-width:400px){
+    .btn-add-top{ padding:0 12px; font-size:13px; gap:5px; }
+    .sort-btn span{ display:none; }
+    .sort-btn{ padding:8px; }
+    .seg-btn{ padding:7px 9px; }
+  }
+
   @media (max-width:360px){
     .tab{ font-size:8.5px; }
     .tab svg{ width:20px; height:20px; }
@@ -714,13 +833,9 @@
     .field input, .field select{ padding:11px 12px; font-size:16px; }
     .field select{ padding-right:32px; background-position:right 10px center; }
     .item-schedule{ display:none; }
-    .seg-btn{ padding:7px 10px; font-size:11px; }
+    .seg-btn{ padding:7px 8px; font-size:10.5px; }
     .modal-overlay{ padding:12px; }
     .modal-card{ padding:16px; border-radius:24px; }
-  }
-
-  @media (max-width:420px){
-    .fab{ bottom:calc(92px + env(safe-area-inset-bottom)); width:54px; height:54px; border-radius:18px; }
   }
 
   @media (min-width:700px){
@@ -735,6 +850,7 @@
     .field.span-2{ grid-column:span 2; }
     .student-board{ grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); }
     .modal-card{ padding:26px; }
+    .btn-add-top{ padding:0 20px; font-size:14px; }
   }
 </style>
 </head>
@@ -783,38 +899,88 @@
       <section class="page" id="page-student">
         <div class="student-page">
 
-          <!-- ---------- Search + view toggle ---------- -->
+          <!-- ---------- Search + Tambah + Sort + view toggle ---------- -->
           <div class="toolbar">
-            <div class="search-wrap">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="11" cy="11" r="7"/>
-                <path d="m20 20-3.5-3.5"/>
-              </svg>
-              <input id="searchInput" class="search-input" type="search"
-                     placeholder="Cari nama, level, hari, jam, term…"
-                     autocomplete="off" enterkeyhint="search">
+            <div class="search-row">
+              <div class="search-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="7"/>
+                  <path d="m20 20-3.5-3.5"/>
+                </svg>
+                <input id="searchInput" class="search-input" type="search"
+                       placeholder="Cari nama, level, hari, jam, term…"
+                       autocomplete="off" enterkeyhint="search">
+              </div>
+
+              <button type="button" class="btn-add-top" id="addStudentBtn" aria-label="Tambah siswa">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+                <span>Tambah</span>
+              </button>
             </div>
 
             <div class="toolbar-row">
               <span class="result-count" id="resultCount">0 siswa</span>
 
-              <div class="segmented" role="group" aria-label="Tampilan">
-                <button type="button" class="seg-btn active" data-view="list">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M8 6h13M8 12h13M8 18h13"/>
-                    <path d="M3 6h.01M3 12h.01M3 18h.01"/>
-                  </svg>
-                  List
-                </button>
-                <button type="button" class="seg-btn" data-view="board">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="3" width="7" height="7" rx="1.6"/>
-                    <rect x="14" y="3" width="7" height="7" rx="1.6"/>
-                    <rect x="3" y="14" width="7" height="7" rx="1.6"/>
-                    <rect x="14" y="14" width="7" height="7" rx="1.6"/>
-                  </svg>
-                  Board
-                </button>
+              <div class="toolbar-actions">
+                <!-- Sort -->
+                <div class="sort-wrap">
+                  <button type="button" class="sort-btn" id="sortBtn" aria-haspopup="true" aria-expanded="false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M3 6h13M3 12h9M3 18h5"/>
+                      <path d="m17 8 3-3 3 3M20 5v14"/>
+                    </svg>
+                    <span id="sortLabel">Terbaru</span>
+                  </button>
+
+                  <div class="sort-menu" id="sortMenu" role="menu">
+                    <button type="button" class="sort-opt active" data-sort="newest" role="menuitem">
+                      Terbaru
+                      <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
+                    </button>
+                    <button type="button" class="sort-opt" data-sort="name-asc" role="menuitem">
+                      Nama A–Z
+                      <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
+                    </button>
+                    <button type="button" class="sort-opt" data-sort="name-desc" role="menuitem">
+                      Nama Z–A
+                      <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
+                    </button>
+                    <button type="button" class="sort-opt" data-sort="level" role="menuitem">
+                      Level
+                      <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
+                    </button>
+                    <button type="button" class="sort-opt" data-sort="day" role="menuitem">
+                      Hari
+                      <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
+                    </button>
+                    <button type="button" class="sort-opt" data-sort="time" role="menuitem">
+                      Jam
+                      <svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- View toggle -->
+                <div class="segmented" role="group" aria-label="Tampilan">
+                  <button type="button" class="seg-btn active" data-view="list">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M8 6h13M8 12h13M8 18h13"/>
+                      <path d="M3 6h.01M3 12h.01M3 18h.01"/>
+                    </svg>
+                    List
+                  </button>
+                  <button type="button" class="seg-btn" data-view="board">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="7" height="7" rx="1.6"/>
+                      <rect x="14" y="3" width="7" height="7" rx="1.6"/>
+                      <rect x="3" y="14" width="7" height="7" rx="1.6"/>
+                      <rect x="14" y="14" width="7" height="7" rx="1.6"/>
+                    </svg>
+                    Board
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -833,7 +999,7 @@
               </svg>
             </div>
             <p class="empty-title" id="emptyTitle">Belum ada siswa</p>
-            <p class="empty-sub" id="emptySub">Tambahkan siswa pertama lewat tombol + di kanan bawah.</p>
+            <p class="empty-sub" id="emptySub">Tambahkan siswa pertama lewat tombol Tambah di atas.</p>
           </div>
 
         </div>
@@ -901,13 +1067,6 @@
 
   </div>
 
-  <!-- ===== Floating Add Button ===== -->
-  <button class="fab off" id="fabAdd" aria-label="Tambah siswa">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-      <path d="M12 5v14M5 12h14"/>
-    </svg>
-  </button>
-
   <!-- ===== Modal: Input Data Siswa ===== -->
   <div class="modal-overlay" id="studentModal">
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -972,13 +1131,18 @@
             </select>
           </div>
 
-          <div class="field">
-            <label for="f-jam">Jam</label>
-            <input id="f-jam" name="jam" type="text" placeholder="cth: 09:00"
-                   autocomplete="off" inputmode="text">
+          <div class="field span-2">
+            <label>Jam</label>
+            <div class="time-range">
+              <input id="f-jam-mulai" name="jamMulai" type="text" placeholder="09:00"
+                     autocomplete="off" inputmode="text" aria-label="Jam mulai">
+              <span class="time-sep">–</span>
+              <input id="f-jam-selesai" name="jamSelesai" type="text" placeholder="10:00"
+                     autocomplete="off" inputmode="text" aria-label="Jam selesai">
+            </div>
           </div>
 
-          <div class="field">
+          <div class="field span-2">
             <label for="f-term">Term (pilih tanggal)</label>
             <input id="f-term" name="termDate" type="date">
             <div class="term-preview" id="termPreview" hidden></div>
@@ -1011,7 +1175,6 @@ const tabs    = document.querySelectorAll('.tab');
 const pages   = document.querySelectorAll('.page');
 const elTitle = document.getElementById('pageTitle');
 const elSub   = document.getElementById('pageSub');
-const fabAdd  = document.getElementById('fabAdd');
 
 tabs.forEach(tab => {
   tab.addEventListener('click', () => {
@@ -1028,9 +1191,6 @@ tabs.forEach(tab => {
     elTitle.textContent = title;
     elSub.textContent   = sub;
 
-    /* tombol + hanya tampil di tab Student */
-    fabAdd.classList.toggle('off', key !== 'student');
-
     document.querySelector('.content').scrollTop = 0;
 
     if (navigator.vibrate) navigator.vibrate(8);
@@ -1043,12 +1203,13 @@ tabs.forEach(tab => {
 (function(){
   const LS_KEY = 'attendance.students.v1';
 
-  /* Singkatan bulan Indonesia */
   const MONTHS_ID = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const DAY_ORDER = { 'Senin':1,'Selasa':2,'Rabu':3,'Kamis':4,'Jumat':5,'Sabtu':6,'Minggu':7 };
 
   const form        = document.getElementById('studentForm');
   const modal       = document.getElementById('studentModal');
   const modalClose  = document.getElementById('modalClose');
+  const addBtn      = document.getElementById('addStudentBtn');
   const listEl      = document.getElementById('studentList');
   const boardEl     = document.getElementById('studentBoard');
   const emptyEl     = document.getElementById('emptyState');
@@ -1062,8 +1223,15 @@ tabs.forEach(tab => {
   const termPreview = document.getElementById('termPreview');
   const segBtns     = document.querySelectorAll('.seg-btn');
 
+  /* sort UI */
+  const sortBtn   = document.getElementById('sortBtn');
+  const sortMenu  = document.getElementById('sortMenu');
+  const sortLabel = document.getElementById('sortLabel');
+  const sortOpts  = document.querySelectorAll('.sort-opt');
+
   let students    = [];
   let viewMode    = 'list';
+  let sortMode    = 'newest';
   let query       = '';
   let animateNext = true;
 
@@ -1114,6 +1282,12 @@ tabs.forEach(tab => {
     return a;
   }
 
+  /* Ambil menit dari string jam (mendukung "09:00 - 10:00") */
+  function startMinutes(jam){
+    const m = String(jam || '').match(/(\d{1,2})[:.](\d{2})/);
+    return m ? (parseInt(m[1],10)*60 + parseInt(m[2],10)) : 99999;
+  }
+
   /* ---------- auto umur dari tanggal lahir ---------- */
   function syncAge(){
     const a = calcAge(lahirEl.value);
@@ -1151,7 +1325,7 @@ tabs.forEach(tab => {
     modal.classList.remove('open');
   }
 
-  fabAdd.addEventListener('click', openModal);
+  addBtn.addEventListener('click', openModal);
   modalClose.addEventListener('click', closeModal);
   modal.addEventListener('click', e => { if(e.target === modal) closeModal(); });
   document.addEventListener('keydown', e => {
@@ -1171,8 +1345,15 @@ tabs.forEach(tab => {
       return;
     }
 
-    const termDate = String(data.get('termDate') || '');
-    const term     = termLabelFromDate(termDate);
+    const termDate   = String(data.get('termDate') || '');
+    const term       = termLabelFromDate(termDate);
+    const jamMulai   = String(data.get('jamMulai')   || '').trim();
+    const jamSelesai = String(data.get('jamSelesai') || '').trim();
+
+    let jam = '';
+    if(jamMulai && jamSelesai)      jam = jamMulai + ' - ' + jamSelesai;
+    else if(jamMulai)               jam = jamMulai;
+    else if(jamSelesai)             jam = jamSelesai;
 
     students.unshift({
       id: 's' + Date.now().toString(36) + Math.random().toString(36).slice(2,6),
@@ -1181,7 +1362,7 @@ tabs.forEach(tab => {
       umur:     String(data.get('umur')  || ''),
       level:    String(data.get('level') || ''),
       hari:     String(data.get('hari')  || ''),
-      jam:      String(data.get('jam')   || ''),
+      jam:      jam,
       term:     term,
       termDate: termDate,
       createdAt: Date.now()
@@ -1204,6 +1385,33 @@ tabs.forEach(tab => {
     const hay = [s.nama, s.level, s.hari, s.jam, s.term, s.termDate, s.umur, s.lahir]
                   .join(' ').toLowerCase();
     return hay.includes(q);
+  }
+
+  /* ---------- sorting ---------- */
+  function sortList(arr){
+    const copy = arr.slice();
+    switch(sortMode){
+      case 'name-asc':
+        copy.sort((a,b) => String(a.nama).localeCompare(String(b.nama), 'id', {sensitivity:'base'}));
+        break;
+      case 'name-desc':
+        copy.sort((a,b) => String(b.nama).localeCompare(String(a.nama), 'id', {sensitivity:'base'}));
+        break;
+      case 'level':
+        copy.sort((a,b) => String(a.level).localeCompare(String(b.level), 'id', {numeric:true, sensitivity:'base'}));
+        break;
+      case 'day':
+        copy.sort((a,b) => (DAY_ORDER[a.hari] || 99) - (DAY_ORDER[b.hari] || 99));
+        break;
+      case 'time':
+        copy.sort((a,b) => startMinutes(a.jam) - startMinutes(b.jam));
+        break;
+      case 'newest':
+      default:
+        copy.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+        break;
+    }
+    return copy;
   }
 
   /* ---------- templates ---------- */
@@ -1258,7 +1466,7 @@ tabs.forEach(tab => {
   /* ---------- render ---------- */
   function render(){
     const q        = query.trim().toLowerCase();
-    const filtered = students.filter(s => matches(s, q));
+    const filtered = sortList(students.filter(s => matches(s, q)));
     const isEmpty  = filtered.length === 0;
 
     countEl.textContent = q
@@ -1279,7 +1487,7 @@ tabs.forEach(tab => {
     emptyTitle.textContent = q ? 'Tidak ditemukan' : 'Belum ada siswa';
     emptySub.textContent   = q
       ? 'Coba kata kunci lain untuk mencari siswa.'
-      : 'Tambahkan siswa pertama lewat tombol + di kanan bawah.';
+      : 'Tambahkan siswa pertama lewat tombol Tambah di atas.';
   }
 
   /* ---------- delete ---------- */
@@ -1322,6 +1530,39 @@ tabs.forEach(tab => {
 
       if(navigator.vibrate) navigator.vibrate(6);
     });
+  });
+
+  /* ---------- sorting UI ---------- */
+  function toggleSortMenu(force){
+    const open = typeof force === 'boolean' ? force : !sortMenu.classList.contains('open');
+    sortMenu.classList.toggle('open', open);
+    sortBtn.classList.toggle('open', open);
+    sortBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+
+  sortBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    toggleSortMenu();
+  });
+
+  sortOpts.forEach(opt => {
+    opt.addEventListener('click', () => {
+      sortMode = opt.dataset.sort;
+
+      sortOpts.forEach(o => o.classList.remove('active'));
+      opt.classList.add('active');
+
+      sortLabel.textContent = opt.textContent.trim().split('\n')[0].trim();
+      toggleSortMenu(false);
+      animateNext = false;
+      render();
+
+      if(navigator.vibrate) navigator.vibrate(6);
+    });
+  });
+
+  document.addEventListener('click', e => {
+    if(!e.target.closest('.sort-wrap')) toggleSortMenu(false);
   });
 
   /* ---------- init ---------- */
