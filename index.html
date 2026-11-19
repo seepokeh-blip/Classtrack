@@ -259,132 +259,6 @@
      ========================================================= */
   .student-page{ display:flex; flex-direction:column; gap:14px; }
 
-  .glass-card{
-    background:var(--glass);
-    backdrop-filter:blur(22px) saturate(180%);
-    -webkit-backdrop-filter:blur(22px) saturate(180%);
-    border:1px solid rgba(255,255,255,.92);
-    border-radius:24px;
-    box-shadow:
-      0 10px 30px rgba(37,99,235,.10),
-      inset 0 1px 0 rgba(255,255,255,.9);
-    padding:18px;
-  }
-
-  /* --- form card --- */
-  .card-head{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap:10px;
-    margin-bottom:16px;
-  }
-  .card-head-left{ display:flex; align-items:center; gap:9px; min-width:0; }
-  .dot-accent{
-    width:9px; height:9px; border-radius:50%;
-    background:linear-gradient(140deg, var(--orange-400), var(--orange-500));
-    box-shadow:0 2px 6px rgba(249,115,22,.5);
-    flex-shrink:0;
-  }
-  .card-head h2{
-    font-size:15px;
-    font-weight:700;
-    letter-spacing:-.2px;
-  }
-  .collapse-btn{
-    width:32px; height:32px;
-    border-radius:11px;
-    border:1px solid rgba(255,255,255,.95);
-    background:rgba(255,255,255,.7);
-    color:var(--muted);
-    display:grid; place-items:center;
-    cursor:pointer;
-    flex-shrink:0;
-    transition:transform .2s, background .2s;
-  }
-  .collapse-btn svg{ width:16px; height:16px; transition:transform .35s cubic-bezier(.4,0,.2,1); }
-  .collapse-btn:active{ transform:scale(.9); }
-
-  .form-card.collapsed .card-head{ margin-bottom:0; }
-  .form-card.collapsed .form-body{ display:none; }
-  .form-card.collapsed .collapse-btn svg{ transform:rotate(180deg); }
-
-  .field-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px;
-  }
-  .field{ display:flex; flex-direction:column; gap:6px; min-width:0; }
-  .field.span-2{ grid-column:span 2; }
-
-  .field label{
-    font-size:11.5px;
-    font-weight:600;
-    color:var(--muted);
-    letter-spacing:.2px;
-    padding-left:5px;
-  }
-
-  .field input,
-  .field select{
-    width:100%;
-    font-family:inherit;
-    font-size:14px;
-    font-weight:500;
-    color:var(--ink);
-    padding:12px 14px;
-    border-radius:15px;
-    border:1px solid rgba(147,197,253,.45);
-    background:rgba(255,255,255,.72);
-    outline:none;
-    transition:border-color .2s, box-shadow .2s, background .2s;
-  }
-  .field input::placeholder{ color:#9aa9bd; font-weight:500; }
-
-  .field input:focus,
-  .field select:focus{
-    border-color:rgba(59,130,246,.65);
-    background:#fff;
-    box-shadow:0 0 0 4px rgba(59,130,246,.15);
-  }
-
-  .field select{
-    appearance:none;
-    -webkit-appearance:none;
-    padding-right:36px;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
-    background-repeat:no-repeat;
-    background-position:right 13px center;
-  }
-
-  .btn-primary{
-    width:100%;
-    margin-top:16px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-    padding:14px;
-    border:none;
-    border-radius:16px;
-    font-family:inherit;
-    font-size:14px;
-    font-weight:700;
-    letter-spacing:.1px;
-    color:#fff;
-    background:linear-gradient(140deg, var(--blue-500) 0%, var(--blue-600) 55%, var(--blue-700) 100%);
-    box-shadow:
-      0 10px 24px rgba(37,99,235,.32),
-      inset 0 1px 0 rgba(255,255,255,.35);
-    cursor:pointer;
-    transition:transform .15s ease, box-shadow .2s ease;
-  }
-  .btn-primary svg{ width:17px; height:17px; }
-  .btn-primary:active{
-    transform:scale(.98);
-    box-shadow:0 4px 12px rgba(37,99,235,.28);
-  }
-
   /* --- toolbar --- */
   .toolbar{ display:flex; flex-direction:column; gap:12px; }
 
@@ -400,7 +274,7 @@
   .search-input{
     width:100%;
     font-family:inherit;
-    font-size:14px;
+    font-size:16px;
     font-weight:500;
     color:var(--ink);
     padding:14px 16px 14px 44px;
@@ -634,15 +508,219 @@
 
   .is-hidden{ display:none !important; }
 
+  /* =========================================================
+     FLOATING ADD BUTTON
+     ========================================================= */
+  .fab{
+    position:fixed;
+    z-index:60;
+    bottom:calc(96px + env(safe-area-inset-bottom));
+    right:max(18px, calc((100vw - 860px) / 2 + 22px));
+    width:58px; height:58px;
+    border-radius:20px;
+    border:none;
+    display:grid; place-items:center;
+    color:#fff;
+    background:linear-gradient(140deg, var(--blue-500), var(--blue-600) 55%, var(--blue-700));
+    box-shadow:
+      0 14px 32px rgba(37,99,235,.42),
+      inset 0 1px 0 rgba(255,255,255,.42);
+    cursor:pointer;
+    transition:transform .22s cubic-bezier(.34,1.56,.64,1),
+               opacity .22s ease,
+               box-shadow .2s;
+  }
+  .fab svg{ width:26px; height:26px; }
+  .fab:active{ transform:scale(.92); }
+  .fab.off{
+    opacity:0;
+    transform:scale(.7) translateY(12px);
+    pointer-events:none;
+  }
+
+  /* =========================================================
+     MODAL (POPUP FORM)
+     ========================================================= */
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    background:rgba(15,23,42,.30);
+    backdrop-filter:blur(10px) saturate(150%);
+    -webkit-backdrop-filter:blur(10px) saturate(150%);
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition:opacity .28s ease, visibility .28s ease;
+  }
+  .modal-overlay.open{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+  }
+
+  .modal-card{
+    width:min(520px, 100%);
+    max-height:min(88vh, 780px);
+    overflow-y:auto;
+    scrollbar-width:none;
+    padding:20px;
+    border-radius:28px;
+    background:rgba(255,255,255,.92);
+    backdrop-filter:blur(30px) saturate(190%);
+    -webkit-backdrop-filter:blur(30px) saturate(190%);
+    border:1px solid rgba(255,255,255,.96);
+    box-shadow:
+      0 30px 80px rgba(15,23,42,.30),
+      inset 0 1px 0 #fff;
+    transform:translateY(20px) scale(.95);
+    opacity:0;
+    transition:transform .36s cubic-bezier(.22,.9,.35,1), opacity .3s ease;
+  }
+  .modal-card::-webkit-scrollbar{ display:none; }
+  .modal-overlay.open .modal-card{ transform:translateY(0) scale(1); opacity:1; }
+
+  .modal-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .card-head-left{ display:flex; align-items:center; gap:9px; min-width:0; }
+  .dot-accent{
+    width:9px; height:9px; border-radius:50%;
+    background:linear-gradient(140deg, var(--orange-400), var(--orange-500));
+    box-shadow:0 2px 6px rgba(249,115,22,.5);
+    flex-shrink:0;
+  }
+  .modal-head h2{
+    font-size:16px;
+    font-weight:700;
+    letter-spacing:-.2px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .modal-close{
+    width:34px; height:34px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.95);
+    background:rgba(255,255,255,.75);
+    color:var(--muted);
+    display:grid; place-items:center;
+    cursor:pointer;
+    flex-shrink:0;
+    transition:background .2s, transform .15s;
+  }
+  .modal-close svg{ width:16px; height:16px; }
+  .modal-close:active{ transform:scale(.9); background:rgba(226,232,240,.9); }
+
+  /* --- form fields --- */
+  .field-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  .field{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .field.span-2{ grid-column:span 2; }
+
+  .field label{
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--muted);
+    letter-spacing:.2px;
+    padding-left:5px;
+  }
+
+  .field input,
+  .field select{
+    width:100%;
+    font-family:inherit;
+    font-size:16px;
+    font-weight:500;
+    color:var(--ink);
+    padding:12px 14px;
+    border-radius:15px;
+    border:1px solid rgba(147,197,253,.45);
+    background:rgba(255,255,255,.78);
+    outline:none;
+    transition:border-color .2s, box-shadow .2s, background .2s;
+    -webkit-appearance:none;
+    appearance:none;
+  }
+  .field input::placeholder{ color:#9aa9bd; font-weight:500; }
+
+  .field input:focus,
+  .field select:focus{
+    border-color:rgba(59,130,246,.65);
+    background:#fff;
+    box-shadow:0 0 0 4px rgba(59,130,246,.15);
+  }
+
+  .field select{
+    padding-right:36px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 13px center;
+  }
+
+  .term-preview{
+    display:flex;
+    padding-left:3px;
+    margin-top:2px;
+  }
+  .term-preview[hidden]{ display:none; }
+
+  .btn-primary{
+    width:100%;
+    margin-top:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:14px;
+    border:none;
+    border-radius:16px;
+    font-family:inherit;
+    font-size:14.5px;
+    font-weight:700;
+    letter-spacing:.1px;
+    color:#fff;
+    background:linear-gradient(140deg, var(--blue-500) 0%, var(--blue-600) 55%, var(--blue-700) 100%);
+    box-shadow:
+      0 10px 24px rgba(37,99,235,.32),
+      inset 0 1px 0 rgba(255,255,255,.35);
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .2s ease;
+  }
+  .btn-primary svg{ width:17px; height:17px; }
+  .btn-primary:active{
+    transform:scale(.98);
+    box-shadow:0 4px 12px rgba(37,99,235,.28);
+  }
+
+  /* ---------- responsive ---------- */
   @media (max-width:360px){
     .tab{ font-size:8.5px; }
     .tab svg{ width:20px; height:20px; }
     .brand-text h1{ font-size:17px; }
     .field-grid{ gap:10px; }
-    .field input, .field select{ padding:11px 12px; font-size:13px; }
+    .field input, .field select{ padding:11px 12px; font-size:16px; }
     .field select{ padding-right:32px; background-position:right 10px center; }
     .item-schedule{ display:none; }
     .seg-btn{ padding:7px 10px; font-size:11px; }
+    .modal-overlay{ padding:12px; }
+    .modal-card{ padding:16px; border-radius:24px; }
+  }
+
+  @media (max-width:420px){
+    .fab{ bottom:calc(92px + env(safe-area-inset-bottom)); width:54px; height:54px; border-radius:18px; }
   }
 
   @media (min-width:700px){
@@ -655,8 +733,8 @@
     .logo{ width:52px; height:52px; border-radius:18px; }
     .field-grid{ grid-template-columns:repeat(4, 1fr); }
     .field.span-2{ grid-column:span 2; }
-    .glass-card{ padding:22px; }
     .student-board{ grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); }
+    .modal-card{ padding:26px; }
   }
 </style>
 </head>
@@ -704,95 +782,6 @@
       <!-- ================= STUDENT ================= -->
       <section class="page" id="page-student">
         <div class="student-page">
-
-          <!-- ---------- Form ---------- -->
-          <div class="glass-card form-card" id="formCard">
-            <div class="card-head">
-              <div class="card-head-left">
-                <span class="dot-accent"></span>
-                <h2>Input Data Siswa</h2>
-              </div>
-              <button type="button" class="collapse-btn" id="collapseBtn" aria-label="Buka / tutup form">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="m18 15-6-6-6 6"/>
-                </svg>
-              </button>
-            </div>
-
-            <form class="form-body" id="studentForm" novalidate>
-              <div class="field-grid">
-                <div class="field span-2">
-                  <label for="f-nama">Nama</label>
-                  <input id="f-nama" name="nama" type="text" placeholder="Nama lengkap siswa"
-                         autocomplete="off" required>
-                </div>
-
-                <div class="field">
-                  <label for="f-lahir">Tanggal Lahir</label>
-                  <input id="f-lahir" name="lahir" type="date">
-                </div>
-
-                <div class="field">
-                  <label for="f-umur">Umur</label>
-                  <input id="f-umur" name="umur" type="number" min="0" max="120"
-                         inputmode="numeric" placeholder="0">
-                </div>
-
-                <div class="field">
-                  <label for="f-level">Level</label>
-                  <select id="f-level" name="level">
-                    <option value="">Pilih</option>
-                    <option>Level 1</option>
-                    <option>Level 2</option>
-                    <option>Level 3</option>
-                    <option>Level 4</option>
-                    <option>Level 5</option>
-                    <option>Level 6</option>
-                    <option>Beginner</option>
-                    <option>Intermediate</option>
-                    <option>Advanced</option>
-                  </select>
-                </div>
-
-                <div class="field">
-                  <label for="f-hari">Hari</label>
-                  <select id="f-hari" name="hari">
-                    <option value="">Pilih</option>
-                    <option>Senin</option>
-                    <option>Selasa</option>
-                    <option>Rabu</option>
-                    <option>Kamis</option>
-                    <option>Jumat</option>
-                    <option>Sabtu</option>
-                    <option>Minggu</option>
-                  </select>
-                </div>
-
-                <div class="field">
-                  <label for="f-jam">Jam</label>
-                  <input id="f-jam" name="jam" type="time">
-                </div>
-
-                <div class="field">
-                  <label for="f-term">Term</label>
-                  <select id="f-term" name="term">
-                    <option value="">Pilih</option>
-                    <option>Term 1</option>
-                    <option>Term 2</option>
-                    <option>Term 3</option>
-                    <option>Term 4</option>
-                  </select>
-                </div>
-              </div>
-
-              <button type="submit" class="btn-primary">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
-                  <path d="M12 5v14M5 12h14"/>
-                </svg>
-                Tambah Siswa
-              </button>
-            </form>
-          </div>
 
           <!-- ---------- Search + view toggle ---------- -->
           <div class="toolbar">
@@ -844,7 +833,7 @@
               </svg>
             </div>
             <p class="empty-title" id="emptyTitle">Belum ada siswa</p>
-            <p class="empty-sub" id="emptySub">Tambahkan siswa pertama lewat form di atas.</p>
+            <p class="empty-sub" id="emptySub">Tambahkan siswa pertama lewat tombol + di kanan bawah.</p>
           </div>
 
         </div>
@@ -912,6 +901,100 @@
 
   </div>
 
+  <!-- ===== Floating Add Button ===== -->
+  <button class="fab off" id="fabAdd" aria-label="Tambah siswa">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <path d="M12 5v14M5 12h14"/>
+    </svg>
+  </button>
+
+  <!-- ===== Modal: Input Data Siswa ===== -->
+  <div class="modal-overlay" id="studentModal">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <div class="card-head-left">
+          <span class="dot-accent"></span>
+          <h2 id="modalTitle">Input Data Siswa</h2>
+        </div>
+        <button type="button" class="modal-close" id="modalClose" aria-label="Tutup">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <form id="studentForm" novalidate>
+        <div class="field-grid">
+          <div class="field span-2">
+            <label for="f-nama">Nama</label>
+            <input id="f-nama" name="nama" type="text" placeholder="Nama lengkap siswa"
+                   autocomplete="off" required>
+          </div>
+
+          <div class="field">
+            <label for="f-lahir">Tanggal Lahir</label>
+            <input id="f-lahir" name="lahir" type="date">
+          </div>
+
+          <div class="field">
+            <label for="f-umur">Umur</label>
+            <input id="f-umur" name="umur" type="number" min="0" max="120"
+                   inputmode="numeric" placeholder="0">
+          </div>
+
+          <div class="field">
+            <label for="f-level">Level</label>
+            <select id="f-level" name="level">
+              <option value="">Pilih</option>
+              <option>Level 1</option>
+              <option>Level 2</option>
+              <option>Level 3</option>
+              <option>Level 4</option>
+              <option>Level 5</option>
+              <option>Level 6</option>
+              <option>Beginner</option>
+              <option>Intermediate</option>
+              <option>Advanced</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="f-hari">Hari</label>
+            <select id="f-hari" name="hari">
+              <option value="">Pilih</option>
+              <option>Senin</option>
+              <option>Selasa</option>
+              <option>Rabu</option>
+              <option>Kamis</option>
+              <option>Jumat</option>
+              <option>Sabtu</option>
+              <option>Minggu</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="f-jam">Jam</label>
+            <input id="f-jam" name="jam" type="text" placeholder="cth: 09:00"
+                   autocomplete="off" inputmode="text">
+          </div>
+
+          <div class="field">
+            <label for="f-term">Term (pilih tanggal)</label>
+            <input id="f-term" name="termDate" type="date">
+            <div class="term-preview" id="termPreview" hidden></div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Tambah Siswa
+        </button>
+      </form>
+    </div>
+  </div>
+
 <script>
 /* =========================================================
    TAB NAVIGATION
@@ -928,6 +1011,7 @@ const tabs    = document.querySelectorAll('.tab');
 const pages   = document.querySelectorAll('.page');
 const elTitle = document.getElementById('pageTitle');
 const elSub   = document.getElementById('pageSub');
+const fabAdd  = document.getElementById('fabAdd');
 
 tabs.forEach(tab => {
   tab.addEventListener('click', () => {
@@ -944,6 +1028,9 @@ tabs.forEach(tab => {
     elTitle.textContent = title;
     elSub.textContent   = sub;
 
+    /* tombol + hanya tampil di tab Student */
+    fabAdd.classList.toggle('off', key !== 'student');
+
     document.querySelector('.content').scrollTop = 0;
 
     if (navigator.vibrate) navigator.vibrate(8);
@@ -956,9 +1043,12 @@ tabs.forEach(tab => {
 (function(){
   const LS_KEY = 'attendance.students.v1';
 
+  /* Singkatan bulan Indonesia */
+  const MONTHS_ID = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+
   const form        = document.getElementById('studentForm');
-  const formCard    = document.getElementById('formCard');
-  const collapseBtn = document.getElementById('collapseBtn');
+  const modal       = document.getElementById('studentModal');
+  const modalClose  = document.getElementById('modalClose');
   const listEl      = document.getElementById('studentList');
   const boardEl     = document.getElementById('studentBoard');
   const emptyEl     = document.getElementById('emptyState');
@@ -968,6 +1058,8 @@ tabs.forEach(tab => {
   const countEl     = document.getElementById('resultCount');
   const lahirEl     = document.getElementById('f-lahir');
   const umurEl      = document.getElementById('f-umur');
+  const termEl      = document.getElementById('f-term');
+  const termPreview = document.getElementById('termPreview');
   const segBtns     = document.querySelectorAll('.seg-btn');
 
   let students    = [];
@@ -1000,6 +1092,16 @@ tabs.forEach(tab => {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   }
 
+  /* Term: dari tanggal -> 3 bulan (contoh 1 Januari => "Jan-Mar") */
+  function termLabelFromDate(v){
+    if(!v) return '';
+    const d = new Date(v + 'T00:00:00');
+    if(isNaN(d.getTime())) return '';
+    const start = d.getMonth();
+    const end   = (start + 2) % 12;
+    return MONTHS_ID[start] + '-' + MONTHS_ID[end];
+  }
+
   function calcAge(v){
     if(!v) return '';
     const b = new Date(v + 'T00:00:00');
@@ -1020,9 +1122,40 @@ tabs.forEach(tab => {
   lahirEl.addEventListener('change', syncAge);
   lahirEl.addEventListener('blur', syncAge);
 
-  /* ---------- collapse form ---------- */
-  collapseBtn.addEventListener('click', () => {
-    formCard.classList.toggle('collapsed');
+  /* ---------- preview term ---------- */
+  function updateTermPreview(){
+    const label = termLabelFromDate(termEl.value);
+    if(label){
+      termPreview.innerHTML = '<span class="chip chip-term">' + esc(label) + '</span>';
+      termPreview.hidden = false;
+    }else{
+      termPreview.hidden = true;
+      termPreview.textContent = '';
+    }
+  }
+  termEl.addEventListener('change', updateTermPreview);
+  termEl.addEventListener('input', updateTermPreview);
+
+  /* ---------- modal open / close ---------- */
+  function openModal(){
+    form.reset();
+    updateTermPreview();
+    modal.classList.add('open');
+    setTimeout(() => {
+      const nama = document.getElementById('f-nama');
+      if(nama) nama.focus();
+    }, 340);
+  }
+
+  function closeModal(){
+    modal.classList.remove('open');
+  }
+
+  fabAdd.addEventListener('click', openModal);
+  modalClose.addEventListener('click', closeModal);
+  modal.addEventListener('click', e => { if(e.target === modal) closeModal(); });
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && modal.classList.contains('open')) closeModal();
   });
 
   /* ---------- submit ---------- */
@@ -1033,24 +1166,32 @@ tabs.forEach(tab => {
     const nama = String(data.get('nama') || '').trim();
 
     if(!nama){
-      document.getElementById('f-nama').focus();
+      const el = document.getElementById('f-nama');
+      if(el) el.focus();
       return;
     }
+
+    const termDate = String(data.get('termDate') || '');
+    const term     = termLabelFromDate(termDate);
 
     students.unshift({
       id: 's' + Date.now().toString(36) + Math.random().toString(36).slice(2,6),
       nama,
-      lahir: String(data.get('lahir') || ''),
-      umur:  String(data.get('umur')  || ''),
-      level: String(data.get('level') || ''),
-      hari:  String(data.get('hari')  || ''),
-      jam:   String(data.get('jam')   || ''),
-      term:  String(data.get('term')  || ''),
+      lahir:    String(data.get('lahir') || ''),
+      umur:     String(data.get('umur')  || ''),
+      level:    String(data.get('level') || ''),
+      hari:     String(data.get('hari')  || ''),
+      jam:      String(data.get('jam')   || ''),
+      term:     term,
+      termDate: termDate,
       createdAt: Date.now()
     });
 
     persist();
     form.reset();
+    updateTermPreview();
+    closeModal();
+
     animateNext = true;
     render();
 
@@ -1060,7 +1201,7 @@ tabs.forEach(tab => {
   /* ---------- filter ---------- */
   function matches(s, q){
     if(!q) return true;
-    const hay = [s.nama, s.level, s.hari, s.jam, s.term, s.umur, s.lahir]
+    const hay = [s.nama, s.level, s.hari, s.jam, s.term, s.termDate, s.umur, s.lahir]
                   .join(' ').toLowerCase();
     return hay.includes(q);
   }
@@ -1138,7 +1279,7 @@ tabs.forEach(tab => {
     emptyTitle.textContent = q ? 'Tidak ditemukan' : 'Belum ada siswa';
     emptySub.textContent   = q
       ? 'Coba kata kunci lain untuk mencari siswa.'
-      : 'Tambahkan siswa pertama lewat form di atas.';
+      : 'Tambahkan siswa pertama lewat tombol + di kanan bawah.';
   }
 
   /* ---------- delete ---------- */
