@@ -20,7 +20,6 @@
     --ink:#0f172a;
     --muted:#64748b;
     --glass:rgba(255,255,255,.58);
-    --glass-strong:rgba(255,255,255,.78);
     --stroke:rgba(255,255,255,.85);
   }
 
@@ -255,10 +254,395 @@
 
   .tab.active svg{ transform:translateY(-1px) scale(1.06); }
 
+  /* =========================================================
+     STUDENT PAGE
+     ========================================================= */
+  .student-page{ display:flex; flex-direction:column; gap:14px; }
+
+  .glass-card{
+    background:var(--glass);
+    backdrop-filter:blur(22px) saturate(180%);
+    -webkit-backdrop-filter:blur(22px) saturate(180%);
+    border:1px solid rgba(255,255,255,.92);
+    border-radius:24px;
+    box-shadow:
+      0 10px 30px rgba(37,99,235,.10),
+      inset 0 1px 0 rgba(255,255,255,.9);
+    padding:18px;
+  }
+
+  /* --- form card --- */
+  .card-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .card-head-left{ display:flex; align-items:center; gap:9px; min-width:0; }
+  .dot-accent{
+    width:9px; height:9px; border-radius:50%;
+    background:linear-gradient(140deg, var(--orange-400), var(--orange-500));
+    box-shadow:0 2px 6px rgba(249,115,22,.5);
+    flex-shrink:0;
+  }
+  .card-head h2{
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:-.2px;
+  }
+  .collapse-btn{
+    width:32px; height:32px;
+    border-radius:11px;
+    border:1px solid rgba(255,255,255,.95);
+    background:rgba(255,255,255,.7);
+    color:var(--muted);
+    display:grid; place-items:center;
+    cursor:pointer;
+    flex-shrink:0;
+    transition:transform .2s, background .2s;
+  }
+  .collapse-btn svg{ width:16px; height:16px; transition:transform .35s cubic-bezier(.4,0,.2,1); }
+  .collapse-btn:active{ transform:scale(.9); }
+
+  .form-card.collapsed .card-head{ margin-bottom:0; }
+  .form-card.collapsed .form-body{ display:none; }
+  .form-card.collapsed .collapse-btn svg{ transform:rotate(180deg); }
+
+  .field-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  .field{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .field.span-2{ grid-column:span 2; }
+
+  .field label{
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--muted);
+    letter-spacing:.2px;
+    padding-left:5px;
+  }
+
+  .field input,
+  .field select{
+    width:100%;
+    font-family:inherit;
+    font-size:14px;
+    font-weight:500;
+    color:var(--ink);
+    padding:12px 14px;
+    border-radius:15px;
+    border:1px solid rgba(147,197,253,.45);
+    background:rgba(255,255,255,.72);
+    outline:none;
+    transition:border-color .2s, box-shadow .2s, background .2s;
+  }
+  .field input::placeholder{ color:#9aa9bd; font-weight:500; }
+
+  .field input:focus,
+  .field select:focus{
+    border-color:rgba(59,130,246,.65);
+    background:#fff;
+    box-shadow:0 0 0 4px rgba(59,130,246,.15);
+  }
+
+  .field select{
+    appearance:none;
+    -webkit-appearance:none;
+    padding-right:36px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 13px center;
+  }
+
+  .btn-primary{
+    width:100%;
+    margin-top:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:14px;
+    border:none;
+    border-radius:16px;
+    font-family:inherit;
+    font-size:14px;
+    font-weight:700;
+    letter-spacing:.1px;
+    color:#fff;
+    background:linear-gradient(140deg, var(--blue-500) 0%, var(--blue-600) 55%, var(--blue-700) 100%);
+    box-shadow:
+      0 10px 24px rgba(37,99,235,.32),
+      inset 0 1px 0 rgba(255,255,255,.35);
+    cursor:pointer;
+    transition:transform .15s ease, box-shadow .2s ease;
+  }
+  .btn-primary svg{ width:17px; height:17px; }
+  .btn-primary:active{
+    transform:scale(.98);
+    box-shadow:0 4px 12px rgba(37,99,235,.28);
+  }
+
+  /* --- toolbar --- */
+  .toolbar{ display:flex; flex-direction:column; gap:12px; }
+
+  .search-wrap{ position:relative; }
+  .search-wrap > svg{
+    position:absolute;
+    left:15px; top:50%;
+    transform:translateY(-50%);
+    width:18px; height:18px;
+    color:var(--muted);
+    pointer-events:none;
+  }
+  .search-input{
+    width:100%;
+    font-family:inherit;
+    font-size:14px;
+    font-weight:500;
+    color:var(--ink);
+    padding:14px 16px 14px 44px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,.95);
+    background:rgba(255,255,255,.7);
+    backdrop-filter:blur(18px) saturate(180%);
+    -webkit-backdrop-filter:blur(18px) saturate(180%);
+    box-shadow:0 8px 22px rgba(37,99,235,.10), inset 0 1px 0 #fff;
+    outline:none;
+    transition:box-shadow .2s, border-color .2s, background .2s;
+    -webkit-appearance:none;
+    appearance:none;
+  }
+  .search-input::-webkit-search-cancel-button{ -webkit-appearance:none; }
+  .search-input::placeholder{ color:#94a3b8; font-weight:500; }
+  .search-input:focus{
+    background:#fff;
+    border-color:rgba(59,130,246,.55);
+    box-shadow:0 0 0 4px rgba(59,130,246,.14), 0 8px 22px rgba(37,99,235,.12);
+  }
+
+  .toolbar-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:0 4px;
+  }
+
+  .result-count{
+    font-size:12px;
+    font-weight:600;
+    color:var(--muted);
+    white-space:nowrap;
+  }
+
+  .segmented{
+    display:flex;
+    gap:3px;
+    padding:4px;
+    border-radius:14px;
+    background:rgba(255,255,255,.65);
+    border:1px solid rgba(255,255,255,.95);
+    box-shadow:0 4px 14px rgba(37,99,235,.08), inset 0 1px 0 #fff;
+  }
+  .seg-btn{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    padding:7px 12px;
+    border:none;
+    border-radius:10px;
+    background:transparent;
+    font-family:inherit;
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--muted);
+    cursor:pointer;
+    transition:background .25s, color .25s, box-shadow .25s;
+  }
+  .seg-btn svg{ width:15px; height:15px; }
+  .seg-btn.active{
+    background:linear-gradient(140deg, var(--blue-500), var(--blue-600));
+    color:#fff;
+    box-shadow:0 6px 14px rgba(37,99,235,.3);
+  }
+
+  /* --- chips --- */
+  .chip{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    padding:4px 10px;
+    border-radius:999px;
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:.1px;
+    white-space:nowrap;
+  }
+  .chip-level{ background:rgba(249,115,22,.13); color:#c2410c; }
+  .chip-day{ background:rgba(59,130,246,.12); color:var(--blue-700); }
+  .chip-term{ background:rgba(37,99,235,.10); color:var(--blue-700); }
+
+  /* --- list view --- */
+  .student-list{ display:flex; flex-direction:column; gap:10px; }
+
+  .student-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:12px 14px;
+    border-radius:20px;
+    background:rgba(255,255,255,.62);
+    backdrop-filter:blur(18px) saturate(180%);
+    -webkit-backdrop-filter:blur(18px) saturate(180%);
+    border:1px solid rgba(255,255,255,.92);
+    box-shadow:0 6px 18px rgba(37,99,235,.08), inset 0 1px 0 rgba(255,255,255,.9);
+  }
+  .student-list.anim .student-item{ animation:itemIn .4s cubic-bezier(.22,.9,.35,1) both; }
+
+  @keyframes itemIn{
+    from{ opacity:0; transform:translateY(10px) scale(.98); }
+    to  { opacity:1; transform:translateY(0) scale(1); }
+  }
+
+  .avatar-sm{
+    width:44px; height:44px;
+    border-radius:14px;
+    display:grid; place-items:center;
+    color:#fff;
+    font-size:15px;
+    font-weight:800;
+    letter-spacing:.5px;
+    background:linear-gradient(140deg, var(--blue-500), var(--blue-700));
+    box-shadow:0 6px 14px rgba(37,99,235,.3), inset 0 1px 0 rgba(255,255,255,.4);
+    flex-shrink:0;
+  }
+
+  .item-info{ flex:1; min-width:0; }
+  .item-name{
+    font-size:14px;
+    font-weight:700;
+    letter-spacing:-.15px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .item-meta{
+    font-size:11.5px;
+    font-weight:500;
+    color:var(--muted);
+    margin-top:3px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .item-schedule{ flex-shrink:0; }
+
+  .item-del{
+    width:30px; height:30px;
+    border-radius:10px;
+    border:none;
+    background:rgba(239,68,68,.10);
+    color:#ef4444;
+    display:grid; place-items:center;
+    cursor:pointer;
+    flex-shrink:0;
+    transition:background .2s, transform .15s;
+  }
+  .item-del svg{ width:14px; height:14px; }
+  .item-del:active{ transform:scale(.88); background:rgba(239,68,68,.2); }
+
+  /* --- board view --- */
+  .student-board{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(150px, 1fr));
+    gap:12px;
+  }
+
+  .board-card{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    gap:9px;
+    padding:15px 14px 14px;
+    border-radius:22px;
+    background:rgba(255,255,255,.62);
+    backdrop-filter:blur(18px) saturate(180%);
+    -webkit-backdrop-filter:blur(18px) saturate(180%);
+    border:1px solid rgba(255,255,255,.92);
+    box-shadow:0 6px 18px rgba(37,99,235,.08), inset 0 1px 0 rgba(255,255,255,.9);
+  }
+  .student-board.anim .board-card{ animation:itemIn .4s cubic-bezier(.22,.9,.35,1) both; }
+
+  .board-card .avatar-sm{ width:46px; height:46px; border-radius:15px; font-size:15.5px; }
+  .board-card .item-del{ position:absolute; top:11px; right:11px; width:26px; height:26px; }
+
+  .board-name{
+    font-size:13.5px;
+    font-weight:700;
+    letter-spacing:-.15px;
+    line-height:1.3;
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+    overflow-wrap:anywhere;
+    padding-right:18px;
+  }
+
+  .board-chips{ display:flex; flex-wrap:wrap; gap:5px; }
+
+  .board-foot{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-size:11px;
+    font-weight:600;
+    color:var(--muted);
+    margin-top:auto;
+    padding-top:2px;
+  }
+  .board-foot svg{ width:13px; height:13px; flex-shrink:0; color:var(--blue-500); }
+  .board-foot span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+  /* --- empty state --- */
+  .empty-state{
+    display:none;
+    text-align:center;
+    padding:44px 22px;
+    border-radius:24px;
+    background:rgba(255,255,255,.5);
+    border:1px dashed rgba(147,197,253,.75);
+  }
+  .empty-state.show{ display:block; animation:pageIn .35s ease both; }
+
+  .empty-icon{
+    width:58px; height:58px;
+    margin:0 auto 14px;
+    border-radius:20px;
+    display:grid; place-items:center;
+    background:linear-gradient(140deg, rgba(59,130,246,.14), rgba(147,197,253,.28));
+    color:var(--blue-600);
+  }
+  .empty-icon svg{ width:27px; height:27px; }
+
+  .empty-title{ font-size:15px; font-weight:700; }
+  .empty-sub{ font-size:12.5px; color:var(--muted); margin-top:5px; line-height:1.5; }
+
+  .is-hidden{ display:none !important; }
+
   @media (max-width:360px){
     .tab{ font-size:8.5px; }
     .tab svg{ width:20px; height:20px; }
     .brand-text h1{ font-size:17px; }
+    .field-grid{ gap:10px; }
+    .field input, .field select{ padding:11px 12px; font-size:13px; }
+    .field select{ padding-right:32px; background-position:right 10px center; }
+    .item-schedule{ display:none; }
+    .seg-btn{ padding:7px 10px; font-size:11px; }
   }
 
   @media (min-width:700px){
@@ -269,6 +653,10 @@
     .tab svg{ width:24px; height:24px; }
     .tabbar{ padding:9px; border-radius:28px; }
     .logo{ width:52px; height:52px; border-radius:18px; }
+    .field-grid{ grid-template-columns:repeat(4, 1fr); }
+    .field.span-2{ grid-column:span 2; }
+    .glass-card{ padding:22px; }
+    .student-board{ grid-template-columns:repeat(auto-fill, minmax(170px, 1fr)); }
   }
 </style>
 </head>
@@ -313,8 +701,153 @@
         <!-- isi konten Home nanti di sini -->
       </section>
 
+      <!-- ================= STUDENT ================= -->
       <section class="page" id="page-student">
-        <!-- isi konten Student nanti di sini -->
+        <div class="student-page">
+
+          <!-- ---------- Form ---------- -->
+          <div class="glass-card form-card" id="formCard">
+            <div class="card-head">
+              <div class="card-head-left">
+                <span class="dot-accent"></span>
+                <h2>Input Data Siswa</h2>
+              </div>
+              <button type="button" class="collapse-btn" id="collapseBtn" aria-label="Buka / tutup form">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="m18 15-6-6-6 6"/>
+                </svg>
+              </button>
+            </div>
+
+            <form class="form-body" id="studentForm" novalidate>
+              <div class="field-grid">
+                <div class="field span-2">
+                  <label for="f-nama">Nama</label>
+                  <input id="f-nama" name="nama" type="text" placeholder="Nama lengkap siswa"
+                         autocomplete="off" required>
+                </div>
+
+                <div class="field">
+                  <label for="f-lahir">Tanggal Lahir</label>
+                  <input id="f-lahir" name="lahir" type="date">
+                </div>
+
+                <div class="field">
+                  <label for="f-umur">Umur</label>
+                  <input id="f-umur" name="umur" type="number" min="0" max="120"
+                         inputmode="numeric" placeholder="0">
+                </div>
+
+                <div class="field">
+                  <label for="f-level">Level</label>
+                  <select id="f-level" name="level">
+                    <option value="">Pilih</option>
+                    <option>Level 1</option>
+                    <option>Level 2</option>
+                    <option>Level 3</option>
+                    <option>Level 4</option>
+                    <option>Level 5</option>
+                    <option>Level 6</option>
+                    <option>Beginner</option>
+                    <option>Intermediate</option>
+                    <option>Advanced</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="f-hari">Hari</label>
+                  <select id="f-hari" name="hari">
+                    <option value="">Pilih</option>
+                    <option>Senin</option>
+                    <option>Selasa</option>
+                    <option>Rabu</option>
+                    <option>Kamis</option>
+                    <option>Jumat</option>
+                    <option>Sabtu</option>
+                    <option>Minggu</option>
+                  </select>
+                </div>
+
+                <div class="field">
+                  <label for="f-jam">Jam</label>
+                  <input id="f-jam" name="jam" type="time">
+                </div>
+
+                <div class="field">
+                  <label for="f-term">Term</label>
+                  <select id="f-term" name="term">
+                    <option value="">Pilih</option>
+                    <option>Term 1</option>
+                    <option>Term 2</option>
+                    <option>Term 3</option>
+                    <option>Term 4</option>
+                  </select>
+                </div>
+              </div>
+
+              <button type="submit" class="btn-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+                Tambah Siswa
+              </button>
+            </form>
+          </div>
+
+          <!-- ---------- Search + view toggle ---------- -->
+          <div class="toolbar">
+            <div class="search-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="7"/>
+                <path d="m20 20-3.5-3.5"/>
+              </svg>
+              <input id="searchInput" class="search-input" type="search"
+                     placeholder="Cari nama, level, hari, jam, term…"
+                     autocomplete="off" enterkeyhint="search">
+            </div>
+
+            <div class="toolbar-row">
+              <span class="result-count" id="resultCount">0 siswa</span>
+
+              <div class="segmented" role="group" aria-label="Tampilan">
+                <button type="button" class="seg-btn active" data-view="list">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 6h13M8 12h13M8 18h13"/>
+                    <path d="M3 6h.01M3 12h.01M3 18h.01"/>
+                  </svg>
+                  List
+                </button>
+                <button type="button" class="seg-btn" data-view="board">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1.6"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1.6"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1.6"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1.6"/>
+                  </svg>
+                  Board
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ---------- Display ---------- -->
+          <div class="student-list" id="studentList"></div>
+          <div class="student-board is-hidden" id="studentBoard"></div>
+
+          <div class="empty-state" id="emptyState">
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <p class="empty-title" id="emptyTitle">Belum ada siswa</p>
+            <p class="empty-sub" id="emptySub">Tambahkan siswa pertama lewat form di atas.</p>
+          </div>
+
+        </div>
       </section>
 
       <section class="page" id="page-attendance">
@@ -380,39 +913,279 @@
   </div>
 
 <script>
-  const TITLES = {
-    home:       ["Home",       "Selamat datang kembali"],
-    student:    ["Student",    "Kelola data siswa"],
-    attendance: ["Attendance", "Catat kehadiran"],
-    teacher:    ["Teacher",    "Kelola data guru"],
-    setting:    ["Setting",    "Pengaturan aplikasi"]
-  };
+/* =========================================================
+   TAB NAVIGATION
+   ========================================================= */
+const TITLES = {
+  home:       ["Home",       "Selamat datang kembali"],
+  student:    ["Student",    "Kelola data siswa"],
+  attendance: ["Attendance", "Catat kehadiran"],
+  teacher:    ["Teacher",    "Kelola data guru"],
+  setting:    ["Setting",    "Pengaturan aplikasi"]
+};
 
-  const tabs    = document.querySelectorAll('.tab');
-  const pages   = document.querySelectorAll('.page');
-  const elTitle = document.getElementById('pageTitle');
-  const elSub   = document.getElementById('pageSub');
+const tabs    = document.querySelectorAll('.tab');
+const pages   = document.querySelectorAll('.page');
+const elTitle = document.getElementById('pageTitle');
+const elSub   = document.getElementById('pageSub');
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const key = tab.dataset.tab;
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => {
+    const key = tab.dataset.tab;
 
-      tabs.forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
+    tabs.forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
 
-      pages.forEach(p => {
-        p.classList.toggle('active', p.id === 'page-' + key);
-      });
+    pages.forEach(p => {
+      p.classList.toggle('active', p.id === 'page-' + key);
+    });
 
-      const [title, sub] = TITLES[key] || ["", ""];
-      elTitle.textContent = title;
-      elSub.textContent   = sub;
+    const [title, sub] = TITLES[key] || ["", ""];
+    elTitle.textContent = title;
+    elSub.textContent   = sub;
 
-      document.querySelector('.content').scrollTop = 0;
+    document.querySelector('.content').scrollTop = 0;
 
-      if (navigator.vibrate) navigator.vibrate(8);
+    if (navigator.vibrate) navigator.vibrate(8);
+  });
+});
+
+/* =========================================================
+   STUDENT MODULE
+   ========================================================= */
+(function(){
+  const LS_KEY = 'attendance.students.v1';
+
+  const form        = document.getElementById('studentForm');
+  const formCard    = document.getElementById('formCard');
+  const collapseBtn = document.getElementById('collapseBtn');
+  const listEl      = document.getElementById('studentList');
+  const boardEl     = document.getElementById('studentBoard');
+  const emptyEl     = document.getElementById('emptyState');
+  const emptyTitle  = document.getElementById('emptyTitle');
+  const emptySub    = document.getElementById('emptySub');
+  const searchEl    = document.getElementById('searchInput');
+  const countEl     = document.getElementById('resultCount');
+  const lahirEl     = document.getElementById('f-lahir');
+  const umurEl      = document.getElementById('f-umur');
+  const segBtns     = document.querySelectorAll('.seg-btn');
+
+  let students    = [];
+  let viewMode    = 'list';
+  let query       = '';
+  let animateNext = true;
+
+  /* ---------- storage ---------- */
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(Array.isArray(parsed)) students = parsed;
+    }
+  }catch(e){ students = []; }
+
+  function persist(){
+    try{ localStorage.setItem(LS_KEY, JSON.stringify(students)); }catch(e){}
+  }
+
+  /* ---------- helpers ---------- */
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+  ));
+
+  function initials(name){
+    const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if(!parts.length) return '?';
+    if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  function calcAge(v){
+    if(!v) return '';
+    const b = new Date(v + 'T00:00:00');
+    if(isNaN(b.getTime())) return '';
+    const n = new Date();
+    let a = n.getFullYear() - b.getFullYear();
+    const m = n.getMonth() - b.getMonth();
+    if(m < 0 || (m === 0 && n.getDate() < b.getDate())) a--;
+    if(a < 0 || a > 150) return '';
+    return a;
+  }
+
+  /* ---------- auto umur dari tanggal lahir ---------- */
+  function syncAge(){
+    const a = calcAge(lahirEl.value);
+    if(a !== '') umurEl.value = a;
+  }
+  lahirEl.addEventListener('change', syncAge);
+  lahirEl.addEventListener('blur', syncAge);
+
+  /* ---------- collapse form ---------- */
+  collapseBtn.addEventListener('click', () => {
+    formCard.classList.toggle('collapsed');
+  });
+
+  /* ---------- submit ---------- */
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+
+    const data = new FormData(form);
+    const nama = String(data.get('nama') || '').trim();
+
+    if(!nama){
+      document.getElementById('f-nama').focus();
+      return;
+    }
+
+    students.unshift({
+      id: 's' + Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+      nama,
+      lahir: String(data.get('lahir') || ''),
+      umur:  String(data.get('umur')  || ''),
+      level: String(data.get('level') || ''),
+      hari:  String(data.get('hari')  || ''),
+      jam:   String(data.get('jam')   || ''),
+      term:  String(data.get('term')  || ''),
+      createdAt: Date.now()
+    });
+
+    persist();
+    form.reset();
+    animateNext = true;
+    render();
+
+    if(navigator.vibrate) navigator.vibrate(12);
+  });
+
+  /* ---------- filter ---------- */
+  function matches(s, q){
+    if(!q) return true;
+    const hay = [s.nama, s.level, s.hari, s.jam, s.term, s.umur, s.lahir]
+                  .join(' ').toLowerCase();
+    return hay.includes(q);
+  }
+
+  /* ---------- templates ---------- */
+  function listItemHTML(s){
+    const meta = [s.level, s.term].filter(Boolean).join(' • ')
+               + (s.umur ? (s.level || s.term ? ' • ' : '') + s.umur + ' th' : '');
+    const sched = [s.hari, s.jam].filter(Boolean).join(' • ');
+
+    return `
+      <div class="student-item">
+        <div class="avatar-sm">${esc(initials(s.nama))}</div>
+        <div class="item-info">
+          <div class="item-name">${esc(s.nama)}</div>
+          <div class="item-meta">${esc(meta || 'Belum ada data')}</div>
+        </div>
+        ${sched ? `<div class="item-schedule"><span class="chip chip-day">${esc(sched)}</span></div>` : ''}
+        <button type="button" class="item-del" data-del="${esc(s.id)}" aria-label="Hapus">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>`;
+  }
+
+  function boardCardHTML(s){
+    const sched = [s.hari, s.jam].filter(Boolean).join(' • ');
+
+    return `
+      <div class="board-card">
+        <button type="button" class="item-del" data-del="${esc(s.id)}" aria-label="Hapus">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
+        <div class="avatar-sm">${esc(initials(s.nama))}</div>
+        <div class="board-name">${esc(s.nama)}</div>
+        <div class="board-chips">
+          ${s.level ? `<span class="chip chip-level">${esc(s.level)}</span>` : ''}
+          ${s.term  ? `<span class="chip chip-term">${esc(s.term)}</span>`  : ''}
+          ${s.umur  ? `<span class="chip chip-term">${esc(s.umur)} th</span>` : ''}
+        </div>
+        <div class="board-foot">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M12 7v5l3 2"/>
+          </svg>
+          <span>${esc(sched || 'Belum ada jadwal')}</span>
+        </div>
+      </div>`;
+  }
+
+  /* ---------- render ---------- */
+  function render(){
+    const q        = query.trim().toLowerCase();
+    const filtered = students.filter(s => matches(s, q));
+    const isEmpty  = filtered.length === 0;
+
+    countEl.textContent = q
+      ? `${filtered.length} dari ${students.length} siswa`
+      : `${students.length} siswa`;
+
+    listEl.innerHTML  = filtered.map(listItemHTML).join('');
+    boardEl.innerHTML = filtered.map(boardCardHTML).join('');
+
+    listEl.classList.toggle('anim',  animateNext);
+    boardEl.classList.toggle('anim', animateNext);
+    animateNext = false;
+
+    listEl.classList.toggle('is-hidden',  isEmpty || viewMode !== 'list');
+    boardEl.classList.toggle('is-hidden', isEmpty || viewMode !== 'board');
+
+    emptyEl.classList.toggle('show', isEmpty);
+    emptyTitle.textContent = q ? 'Tidak ditemukan' : 'Belum ada siswa';
+    emptySub.textContent   = q
+      ? 'Coba kata kunci lain untuk mencari siswa.'
+      : 'Tambahkan siswa pertama lewat form di atas.';
+  }
+
+  /* ---------- delete ---------- */
+  function handleDelete(e){
+    const btn = e.target.closest('[data-del]');
+    if(!btn) return;
+
+    const id = btn.getAttribute('data-del');
+    const s  = students.find(x => x.id === id);
+    if(!s) return;
+
+    if(!window.confirm(`Hapus data "${s.nama}"?`)) return;
+
+    students = students.filter(x => x.id !== id);
+    persist();
+    animateNext = false;
+    render();
+  }
+  listEl.addEventListener('click', handleDelete);
+  boardEl.addEventListener('click', handleDelete);
+
+  /* ---------- search ---------- */
+  searchEl.addEventListener('input', () => {
+    query = searchEl.value;
+    animateNext = false;
+    render();
+  });
+
+  /* ---------- view toggle ---------- */
+  segBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if(btn.classList.contains('active')) return;
+
+      segBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      viewMode = btn.dataset.view;
+      animateNext = false;
+      render();
+
+      if(navigator.vibrate) navigator.vibrate(6);
     });
   });
+
+  /* ---------- init ---------- */
+  render();
+})();
 </script>
 </body>
 </html>
