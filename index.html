@@ -1235,6 +1235,13 @@
 .tc-confirm-btn:active{transform:scale(.97)}
 
 .field input.tc-invalid{border-color:#ef4444;box-shadow:0 0 0 4px rgba(239,68,68,.15)}
+
+.tc-link{display:inline-grid;place-items:center;width:22px;height:22px;margin:0 2px;border-radius:8px;vertical-align:middle;background:rgba(255,255,255,.75);color:#2563eb;text-decoration:none;box-shadow:0 1px 3px rgba(15,23,42,.15)}
+.tc-link svg{width:13px;height:13px}
+.tc-link:active{transform:scale(.92)}
+.tc-body{cursor:pointer}
+.student-item,.board-card,.attendance-item,.attendance-card{cursor:pointer}
+.student-item:active,.board-card:active,.attendance-item:active,.attendance-card:active{transform:scale(.985)}
 </style>
 </head>
 <body>
@@ -1462,31 +1469,14 @@
           <div class="lv-card">
             <div class="tc-head">
               <div class="card-head-left"><span class="dot-accent"></span><h2 class="tc-h">To-do List</h2></div>
-            </div>
-            <div class="tc-add-row">
-              <input id="todoInput" class="lv-input" type="text" placeholder="Tulis tugas baru..." autocomplete="off" maxlength="160">
-              <div class="tc-prio" id="todoPrio">
-                <button type="button" class="tc-prio-btn p-high" data-p="high"><i></i>Tinggi</button>
-                <button type="button" class="tc-prio-btn p-mid on" data-p="mid"><i></i>Sedang</button>
-                <button type="button" class="tc-prio-btn p-low" data-p="low"><i></i>Rendah</button>
-              </div>
-              <div class="field">
-                <label for="todoDue">Deadline (opsional)</label>
-                <input id="todoDue" type="date">
-              </div>
-              <div class="tc-prio" id="todoStat">
-                <button type="button" class="tc-stat-btn s-todo on" data-s="todo">Belum dimulai</button>
-                <button type="button" class="tc-stat-btn s-doing" data-s="doing">Dikerjakan</button>
-                <button type="button" class="tc-stat-btn s-done" data-s="done">Selesai</button>
-              </div>
-              <button type="button" class="btn-primary" id="todoAddBtn" style="margin-top:0">
+              <button type="button" class="btn-add-top tc-add" id="todoAddBtn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-                Tambah Tugas
+                Tugas
               </button>
             </div>
             <div class="tc-count" id="todoCount"></div>
             <div class="tc-list" id="todoList"></div>
-            <div class="tc-empty" id="todoEmpty">Belum ada tugas.<br>Tambahkan tugas dan atur prioritasnya.</div>
+            <div class="tc-empty" id="todoEmpty">Belum ada tugas.<br>Tap <b>+ Tugas</b> untuk menambahkan.</div>
           </div>
 
         </div>
@@ -2112,7 +2102,7 @@ tabs.forEach(tab => {
     const kosong = !s.level && !rest;
 
     return `
-      <div class="student-item">
+      <div class="student-item" data-id="${esc(s.id)}">
         <div class="avatar-sm">${esc(initials(s.nama))}</div>
         <div class="item-info">
           <div class="item-name">${esc(s.nama)}</div>
@@ -2127,7 +2117,7 @@ tabs.forEach(tab => {
     const sched = [s.hari, s.jam].filter(Boolean).join(' • ');
 
     return `
-      <div class="board-card">
+      <div class="board-card" data-id="${esc(s.id)}">
         ${actionButtonsHTML(s)}
         <div class="avatar-sm">${esc(initials(s.nama))}</div>
         <div class="board-name">${esc(s.nama)}</div>
@@ -2190,6 +2180,14 @@ tabs.forEach(tab => {
         animateNext = false;
         render();
       }, { title:'Hapus siswa?' });
+      return;
+    }
+
+    // tap di bagian mana pun pada kartu -> langsung buka data siswa
+    const card = e.target.closest('[data-id]');
+    if(card){
+      openEditModal(card.getAttribute('data-id'));
+      if(navigator.vibrate) navigator.vibrate(8);
     }
   }
   listEl.addEventListener('click', handleActions);
@@ -2534,7 +2532,12 @@ tabs.forEach(tab => {
     const h = e.target.closest('[data-history]');
     if(h){ openHistory(h.dataset.history); return; }
     const p = e.target.closest('[data-presensi]');
-    if(p) openModal(p.dataset.presensi, p.dataset.date, p.dataset.mkid);
+    if(p){ openModal(p.dataset.presensi, p.dataset.date, p.dataset.mkid); return; }
+
+    // tap di bagian mana pun pada kartu -> langsung buka presensi
+    const card = e.target.closest('.attendance-item, .attendance-card');
+    const btn = card && card.querySelector('[data-presensi]');
+    if(btn) openModal(btn.dataset.presensi, btn.dataset.date, btn.dataset.mkid);
   }
   listEl.addEventListener('click', handleListClick);
   boardEl.addEventListener('click', handleListClick);
@@ -3150,6 +3153,7 @@ tabs.forEach(tab => {
   const MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 
   const ICON_CAL   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>';
+  const ICON_LINK  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
   const ICON_PIN   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>';
   const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
   const ICON_EDIT  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
@@ -3159,6 +3163,18 @@ tabs.forEach(tab => {
     {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
   ));
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  // Link di dalam teks -> ikon link yang bisa di-tap
+  const URL_RE = /((?:https?:\/\/|www\.)[^\s<]+)/gi;
+  function linkify(text){
+    return String(text ?? '').split(URL_RE).map((part, i) => {
+      if(i % 2 === 0) return esc(part);
+      const m = part.match(/^(.*?)([.,;:!?)\]]*)$/);
+      const url = m[1], tail = m[2];
+      const href = /^https?:\/\//i.test(url) ? url : 'https://' + url;
+      return `<a class="tc-link" href="${esc(href)}" target="_blank" rel="noopener noreferrer" title="${esc(url)}" aria-label="Buka tautan">${ICON_LINK}</a>${esc(tail)}`;
+    }).join('');
+  }
 
   function load(key){
     try{
@@ -3226,7 +3242,7 @@ tabs.forEach(tab => {
     <div class="modal-overlay tc-modal" id="todoModal">
       <div class="modal-card" role="dialog" aria-modal="true">
         <div class="modal-head">
-          <div class="card-head-left"><span class="dot-accent"></span><h2>Edit Tugas</h2></div>
+          <div class="card-head-left"><span class="dot-accent"></span><h2 id="todoModalTitle">Tugas Baru</h2></div>
           <button type="button" class="modal-close" id="todoClose" aria-label="Tutup">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
           </button>
@@ -3234,7 +3250,7 @@ tabs.forEach(tab => {
         <div class="field-grid">
           <div class="field">
             <label for="todoEditText">Tugas</label>
-            <input id="todoEditText" type="text" maxlength="160" autocomplete="off">
+            <input id="todoEditText" type="text" maxlength="160" autocomplete="off" placeholder="Tulis tugas...">
           </div>
           <div class="field">
             <label for="todoEditDue">Deadline (opsional)</label>
@@ -3258,7 +3274,8 @@ tabs.forEach(tab => {
           </div>
         </div>
         <div class="tc-modal-actions" style="margin-top:16px">
-          <button type="button" class="btn-primary" id="todoEditSave">Simpan Perubahan</button>
+          <button type="button" class="att-del-btn" id="todoDelete" style="display:none">Hapus</button>
+          <button type="button" class="btn-primary" id="todoEditSave">Simpan</button>
         </div>
       </div>
     </div>
@@ -3329,7 +3346,7 @@ tabs.forEach(tab => {
              style="background:${c.bg};border-color:${c.bd}">
           <button type="button" class="tc-pin ${n.pinned ? 'on' : ''}" data-pin="${n.id}"
                   aria-label="${n.pinned ? 'Lepas pin' : 'Pin catatan'}">${ICON_PIN}</button>
-          <div class="tc-note-text">${esc(n.text)}</div>
+          <div class="tc-note-text">${linkify(n.text)}</div>
           <div class="tc-note-foot"><span>${fmtDate(n.updated)}</span>${n.pinned ? '<span>Dipin</span>' : ''}</div>
         </div>`;
     }).join('');
@@ -3394,6 +3411,7 @@ tabs.forEach(tab => {
   });
 
   noteGrid.addEventListener('click', e => {
+    if(e.target.closest('a.tc-link')){ e.stopPropagation(); return; }   // buka link, jangan buka editor
     const pin = e.target.closest('[data-pin]');
     if(pin){
       e.stopPropagation();
@@ -3409,20 +3427,18 @@ tabs.forEach(tab => {
   });
 
   /* =========================================================
-     TO-DO LIST
+     TO-DO LIST (tambah & edit lewat pop up)
      ========================================================= */
-  const todoInput = $('todoInput');
   const todoList  = $('todoList');
   const todoEmpty = $('todoEmpty');
   const todoCount = $('todoCount');
   const todoModal = $('todoModal');
   const todoEditText = $('todoEditText');
+  const todoDel   = $('todoDelete');
 
-  let newPrio = 'mid';
-  let newStat = 'todo';
+  let editTodoId = null;
   let editPrio = 'mid';
   let editStat = 'todo';
-  let editTodoId = null;
 
   function setPrioGroup(groupEl, val){
     groupEl.querySelectorAll('.tc-prio-btn').forEach(b => b.classList.toggle('on', b.dataset.p === val));
@@ -3444,18 +3460,15 @@ tabs.forEach(tab => {
   function renderTodos(){
     const list = sortedTodos();
     todoEmpty.classList.toggle('show', !list.length);
-    const nTodo  = todos.filter(t => t.status === 'todo').length;
-    const nDoing = todos.filter(t => t.status === 'doing').length;
-    const nDone  = todos.filter(t => t.status === 'done').length;
-    todoCount.textContent = list.length
-      ? `${nTodo} belum dimulai · ${nDoing} dikerjakan · ${nDone} selesai` : '';
+    const left = todos.filter(t => t.status !== 'done').length;
+    todoCount.textContent = list.length ? `${left} tugas tersisa · ${todos.length - left} selesai` : '';
     const today = todayStr();
     todoList.innerHTML = list.map(t => {
       const p = PRIO[t.prio] || PRIO.mid;
       const s = STAT[t.status];
       let due = '';
       if(t.due){
-        let cls = '', txt = 'Deadline ' + fmtDue(t.due);
+        let cls = '', txt = fmtDue(t.due);
         if(t.status !== 'done'){
           if(t.due < today){ cls = 'late'; txt = 'Terlambat · ' + fmtDue(t.due); }
           else if(t.due === today){ cls = 'today'; txt = 'Hari ini'; }
@@ -3465,7 +3478,7 @@ tabs.forEach(tab => {
       return `
         <div class="tc-item ${t.status}" data-id="${t.id}" style="--pc:${p.color}">
           <button type="button" class="tc-check" data-act="toggle" aria-label="Tandai selesai">${ICON_CHECK}</button>
-          <div class="tc-body">
+          <div class="tc-body" data-act="edit">
             <div class="tc-txt">${esc(t.text)}</div>
             <div class="tc-meta">
               <span class="tc-badge">${p.label}</span>
@@ -3473,78 +3486,28 @@ tabs.forEach(tab => {
               ${due}
             </div>
           </div>
-          <button type="button" class="tc-ic" data-act="edit" aria-label="Edit">${ICON_EDIT}</button>
           <button type="button" class="tc-ic del" data-act="del" aria-label="Hapus">${ICON_TRASH}</button>
         </div>`;
     }).join('');
   }
 
-  $('todoPrio').addEventListener('click', e => {
-    const b = e.target.closest('.tc-prio-btn');
-    if(!b) return;
-    newPrio = b.dataset.p;
-    setPrioGroup($('todoPrio'), newPrio);
-  });
-
-  $('todoStat').addEventListener('click', e => {
-    const b = e.target.closest('.tc-stat-btn');
-    if(!b) return;
-    newStat = b.dataset.s;
-    setStatGroup($('todoStat'), newStat);
-  });
-
-  function addTodo(){
-    const text = todoInput.value.trim();
-    if(!text){ todoInput.focus(); return; }
-    todos.push({ id:uid(), text, prio:newPrio, status:newStat, due:$('todoDue').value || '', created:Date.now() });
-    save(TODO_KEY, todos);
-    todoInput.value = '';
-    $('todoDue').value = '';
-    newStat = 'todo';
-    setStatGroup($('todoStat'), newStat);
-    renderTodos();
-    if(navigator.vibrate) navigator.vibrate(8);
+  function openTodo(id){
+    editTodoId = id || null;
+    const t = id ? todos.find(x => x.id === id) : null;
+    $('todoModalTitle').textContent = t ? 'Edit Tugas' : 'Tugas Baru';
+    todoEditText.value = t ? t.text : '';
+    $('todoEditDue').value = t ? (t.due || '') : '';
+    editPrio = t ? t.prio : 'mid';
+    editStat = t ? t.status : 'todo';
+    setPrioGroup($('todoEditPrio'), editPrio);
+    setStatGroup($('todoEditStat'), editStat);
+    todoDel.style.display = t ? '' : 'none';
+    todoModal.classList.add('open');
+    if(!t) setTimeout(() => todoEditText.focus(), 250);
   }
-  $('todoAddBtn').addEventListener('click', addTodo);
-  todoInput.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); addTodo(); } });
-
-  todoList.addEventListener('click', e => {
-    const btn = e.target.closest('[data-act]');
-    if(!btn) return;
-    const id = btn.closest('.tc-item').dataset.id;
-    const act = btn.dataset.act;
-    const t = todos.find(x => x.id === id);
-    if(!t) return;
-
-    if(act === 'toggle'){
-      const ns = t.status === 'done' ? 'todo' : 'done';
-      todos = todos.map(x => x.id === id ? Object.assign({}, x, { status: ns }) : x);
-      save(TODO_KEY, todos);
-      renderTodos();
-    }else if(act === 'status'){
-      todos = todos.map(x => x.id === id ? Object.assign({}, x, { status: STAT[x.status].next }) : x);
-      save(TODO_KEY, todos);
-      renderTodos();
-      if(navigator.vibrate) navigator.vibrate(8);
-    }else if(act === 'edit'){
-      editTodoId = id;
-      todoEditText.value = t.text;
-      editPrio = t.prio;
-      setPrioGroup($('todoEditPrio'), editPrio);
-      editStat = t.status;
-      setStatGroup($('todoEditStat'), editStat);
-      $('todoEditDue').value = t.due || '';
-      todoModal.classList.add('open');
-    }else if(act === 'del'){
-      askDelete(`Tugas "${t.text}" akan dihapus permanen.`, () => {
-        todos = todos.filter(x => x.id !== id);
-        save(TODO_KEY, todos);
-        renderTodos();
-      });
-    }
-  });
-
   function closeTodo(){ todoModal.classList.remove('open'); editTodoId = null; }
+
+  $('todoAddBtn').addEventListener('click', () => openTodo(null));
   $('todoClose').addEventListener('click', closeTodo);
   todoModal.addEventListener('click', e => { if(e.target === todoModal) closeTodo(); });
   $('todoEditPrio').addEventListener('click', e => {
@@ -3559,13 +3522,55 @@ tabs.forEach(tab => {
     editStat = b.dataset.s;
     setStatGroup($('todoEditStat'), editStat);
   });
+  todoEditText.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); $('todoEditSave').click(); } });
+
   $('todoEditSave').addEventListener('click', () => {
     const text = todoEditText.value.trim();
     if(!text){ todoEditText.focus(); return; }
-    todos = todos.map(x => x.id === editTodoId ? Object.assign({}, x, { text, prio:editPrio, status:editStat, due:$('todoEditDue').value || '' }) : x);
+    const due = $('todoEditDue').value || '';
+    if(editTodoId){
+      todos = todos.map(x => x.id === editTodoId
+        ? Object.assign({}, x, { text, prio:editPrio, status:editStat, due }) : x);
+    }else{
+      todos.push({ id:uid(), text, prio:editPrio, status:editStat, due, created:Date.now() });
+    }
     save(TODO_KEY, todos);
     closeTodo();
     renderTodos();
+    if(navigator.vibrate) navigator.vibrate(8);
+  });
+
+  function deleteTodo(id){
+    const t = todos.find(x => x.id === id);
+    if(!t) return;
+    askDelete(`Tugas "${t.text}" akan dihapus permanen.`, () => {
+      todos = todos.filter(x => x.id !== id);
+      save(TODO_KEY, todos);
+      closeTodo();
+      renderTodos();
+    });
+  }
+  todoDel.addEventListener('click', () => { if(editTodoId) deleteTodo(editTodoId); });
+
+  todoList.addEventListener('click', e => {
+    const btn = e.target.closest('[data-act]');
+    if(!btn) return;
+    const id = btn.closest('.tc-item').dataset.id;
+    const act = btn.dataset.act;
+    if(act === 'toggle'){
+      todos = todos.map(x => x.id === id ? Object.assign({}, x, { status: x.status === 'done' ? 'todo' : 'done' }) : x);
+      save(TODO_KEY, todos);
+      renderTodos();
+    }else if(act === 'status'){
+      todos = todos.map(x => x.id === id ? Object.assign({}, x, { status: STAT[x.status].next }) : x);
+      save(TODO_KEY, todos);
+      renderTodos();
+      if(navigator.vibrate) navigator.vibrate(8);
+    }else if(act === 'edit'){
+      openTodo(id);
+    }else if(act === 'del'){
+      deleteTodo(id);
+    }
   });
 
   /* ---------- init ---------- */
