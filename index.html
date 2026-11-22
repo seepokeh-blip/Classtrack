@@ -1248,6 +1248,7 @@
 .newterm-btn{height:42px;margin-top:8px;font-size:13px;border-radius:14px}
 .hist-terms{margin-bottom:10px}
 .hist-terms[hidden]{display:none}
+.icon-btn.item-hist{color:var(--blue-600)}
 </style>
 </head>
 <body>
@@ -1713,6 +1714,10 @@
     </div>
     <div class="day-strip hist-terms" id="histTerms" hidden></div>
     <p class="hist-summary" id="histSummary"></p>
+    <button type="button" class="btn-add-top wide hist-export" id="histExport" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+      Unduh Sheet Term Ini
+    </button>
     <div class="hist-list" id="histList"></div>
   </div>
 </div>
@@ -2166,6 +2171,13 @@ tabs.forEach(tab => {
   function actionButtonsHTML(s){
     return `
       <div class="item-actions">
+        <button type="button" class="icon-btn item-hist" data-shist="${esc(s.id)}" aria-label="Presensi & riwayat term">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="3"/>
+            <path d="M8 2v4M16 2v4M3 10h18"/>
+            <path d="m9 16 2 2 4-4"/>
+          </svg>
+        </button>
         <button type="button" class="icon-btn item-edit" data-edit="${esc(s.id)}" aria-label="Edit">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 20h9"/>
@@ -2250,6 +2262,13 @@ tabs.forEach(tab => {
   }
 
   function handleActions(e){
+    const histBtn = e.target.closest('[data-shist]');
+    if(histBtn){
+      if(window.openStudentHistory) window.openStudentHistory(histBtn.getAttribute('data-shist'));
+      if(navigator.vibrate) navigator.vibrate(8);
+      return;
+    }
+
     const editBtn = e.target.closest('[data-edit]');
     if(editBtn){
       openEditModal(editBtn.getAttribute('data-edit'));
@@ -2829,6 +2848,9 @@ tabs.forEach(tab => {
   /* ---------- modal riwayat ---------- */
   const histTerms = document.getElementById('histTerms');
   let histSid = null;
+  let histTi  = -1;
+
+  window.openStudentHistory = function(sid){ openHistory(sid, -1); };
 
   function openHistory(sid, ti){
     const s = getStudents().find(x => x.id === sid);
@@ -2836,6 +2858,7 @@ tabs.forEach(tab => {
     const prev = s.prevTerms || [];
     if(ti === undefined || ti === null || ti < 0 || ti >= prev.length) ti = -1;
     histSid = sid;
+    histTi  = ti;
 
     const meets = ti === -1
       ? getMeetings(s)
@@ -2866,6 +2889,7 @@ tabs.forEach(tab => {
 
     histName.textContent = s.nama;
     const termInfo = ti === -1 ? '' : 'Term ' + (ti + 1) + ' (selesai) • ' + [prev[ti].hari, prev[ti].jam].filter(Boolean).join(' ') + '\n';
+    document.getElementById('histExport').hidden = ti === -1;
     histSum.style.whiteSpace = 'pre-line';
     histSum.textContent  = termInfo + 'Hadir ' + c.Hadir + ' • Sakit ' + c.Sakit + ' • Izin ' + c.Izin
                          + ' • Alpa ' + c.Alpa + ' • Diganti ' + c.Diganti;
@@ -2908,6 +2932,60 @@ tabs.forEach(tab => {
     histModal.classList.add('open');
     if(navigator.vibrate) navigator.vibrate(8);
   }
+  /* ---------- ekspor sheet (CSV, bisa dibuka di Excel / Google Sheets) ---------- */
+  function csvCell(v){
+    const s = String(v ?? '');
+    return /[",\n\r;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  function buildTermCsv(sid, ti){
+    const s = getStudents().find(x => x.id === sid);
+    const prev = (s && s.prevTerms) || [];
+    if(!s || ti < 0 || ti >= prev.length) return null;
+    const t = prev[ti];
+    const head = ['Term','Nama','Level','Hari','Jam','Periode Mulai','Pertemuan','Tanggal','Status',
+                  'Project','Link','Catatan','Diganti Pada','Project Pengganti','Link Pengganti','Catatan Pengganti'];
+    const rows = [head];
+    (t.dates || []).forEach((date, i) => {
+      const rec = getRec(date, sid);
+      const mk  = rec && rec.status !== 'Hadir' ? findMakeup(sid, date) : null;
+      const mr  = mk && mk.status ? mk : null;
+      const status = !rec ? 'Belum dicatat' : (mk ? 'Diganti' : rec.status);
+      rows.push([
+        'Term ' + (ti + 1), s.nama, t.level || s.level || '', t.hari || '', t.jam || '', t.termDate || '',
+        i + 1, date, status,
+        rec ? (rec.project || '') : '', rec ? (rec.link || '') : '', rec ? (rec.catatan || '') : '',
+        mk ? mk.date : '', mr ? (mr.project || '') : '', mr ? (mr.link || '') : '', mr ? (mr.catatan || '') : ''
+      ]);
+    });
+    const csv = rows.map(r => r.map(csvCell).join(',')).join('\r\n');
+    const name = 'Presensi_' + s.nama.replace(/[\\/:*?"<>|,;]+/g, '').trim().replace(/\s+/g, '_') + '_Term' + (ti + 1) + '.csv';
+    return { name, csv };
+  }
+  window.__buildTermCsv = buildTermCsv;   // untuk pengecekan
+
+  document.getElementById('histExport').addEventListener('click', async () => {
+    const out = buildTermCsv(histSid, histTi);
+    if(!out) return;
+    const blob = new Blob(['\uFEFF' + out.csv], { type: 'text/csv;charset=utf-8' });
+    // di HP: buka menu bagikan (bisa langsung "Simpan ke Files" atau buka di Sheets)
+    try{
+      const file = new File([blob], out.name, { type: 'text/csv' });
+      if(navigator.canShare && navigator.canShare({ files: [file] })){
+        await navigator.share({ files: [file], title: out.name });
+        return;
+      }
+    }catch(e){
+      if(e && e.name === 'AbortError') return;
+    }
+    // fallback: unduh biasa
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = out.name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    if(navigator.vibrate) navigator.vibrate(10);
+  });
+
   histTerms.addEventListener('click', e => {
     const b = e.target.closest('[data-ti]');
     if(b && histSid) openHistory(histSid, parseInt(b.dataset.ti, 10));
