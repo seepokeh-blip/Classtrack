@@ -1141,6 +1141,9 @@
 .report-warn svg{width:15px;height:15px;flex-shrink:0}
 .att-del-btn{width:100%;margin-top:8px;padding:11px;border-radius:14px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.08);font-family:inherit;font-size:12.5px;font-weight:700;color:#dc2626;cursor:pointer}
 .att-del-btn:active{transform:scale(.98)}
+.topbar-right{margin-left:auto;text-align:right;min-width:0;flex-shrink:1;max-width:45%}
+.school-kelas{font-size:13px;font-weight:700;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.school-guru{font-size:11px;font-weight:500;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 </style>
 </head>
@@ -1156,12 +1159,24 @@
     <!-- ===== Top Bar ===== -->
    <header class="topbar">
   <div class="brand">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="4"/>
+        <path d="M8 2v4M16 2v4M3 10h18"/>
+        <path d="m9 15 2 2 4-4"/>
+      </svg>
+    </div>
     <div class="brand-text">
-      <h1 id="pageTitle">Nama Kelas</h1>
-      <p id="pageSub">Nama Guru</p>
+      <h1 id="pageTitle">Home</h1>
+      <p id="pageSub">Selamat datang kembali</p>
     </div>
   </div>
-  </header>
+  <div class="topbar-right">
+    <div class="school-kelas" id="schoolKelas">Nama Kelas</div>
+    <div class="school-guru" id="schoolGuru">Nama Guru</div>
+  </div>
+</header>
+
     <!-- ===== Content ===== -->
     <main class="content">
 
@@ -1660,6 +1675,9 @@ tabs.forEach(tab => {
     pages.forEach(p => {
       p.classList.toggle('active', p.id === 'page-' + key);
     });
+       const [title, sub] = TITLES[key] || ["", ""];
+    elTitle.textContent = title;
+    elSub.textContent   = sub;
 
     document.querySelector('.content').scrollTop = 0;
 
@@ -2712,10 +2730,10 @@ tabs.forEach(tab => {
     try{ return Object.assign({}, DEF_SCHOOL, JSON.parse(localStorage.getItem(SCHOOL_LS)) || {}); }
     catch(e){ return Object.assign({}, DEF_SCHOOL); }
   }
-  function applyHeader(){
+   function applyHeader(){
     const sc = loadSchool();
-    document.getElementById('pageTitle').textContent = sc.kelas;
-    document.getElementById('pageSub').textContent   = sc.guru;
+    document.getElementById('schoolKelas').textContent = sc.kelas;
+    document.getElementById('schoolGuru').textContent  = sc.guru;
   }
 
   /* ---------- halaman setting ---------- */
