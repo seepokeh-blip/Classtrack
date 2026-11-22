@@ -543,19 +543,32 @@
     display:block;
   }
 
-  .item-del{
+  /* action buttons */
+  .item-actions{ display:flex; align-items:center; gap:5px; flex-shrink:0; }
+
+  .icon-btn{
     width:30px; height:30px;
     border-radius:10px;
     border:none;
-    background:rgba(239,68,68,.10);
-    color:#ef4444;
     display:grid; place-items:center;
     cursor:pointer;
     flex-shrink:0;
     transition:background .2s, transform .15s;
   }
-  .item-del svg{ width:14px; height:14px; }
-  .item-del:active{ transform:scale(.88); background:rgba(239,68,68,.2); }
+  .icon-btn svg{ width:14px; height:14px; }
+  .icon-btn:active{ transform:scale(.88); }
+
+  .item-edit{
+    background:rgba(59,130,246,.10);
+    color:var(--blue-600);
+  }
+  .item-edit:active{ background:rgba(59,130,246,.22); }
+
+  .item-del{
+    background:rgba(239,68,68,.10);
+    color:#ef4444;
+  }
+  .item-del:active{ background:rgba(239,68,68,.22); }
 
   /* --- board view --- */
   .student-board{
@@ -580,7 +593,14 @@
   .student-board.anim .board-card{ animation:itemIn .4s cubic-bezier(.22,.9,.35,1) both; }
 
   .board-card .avatar-sm{ width:46px; height:46px; border-radius:15px; font-size:15.5px; }
-  .board-card .item-del{ position:absolute; top:11px; right:11px; width:26px; height:26px; }
+
+  .board-card .item-actions{
+    position:absolute;
+    top:11px; right:11px;
+    gap:4px;
+  }
+  .board-card .icon-btn{ width:26px; height:26px; border-radius:9px; }
+  .board-card .icon-btn svg{ width:13px; height:13px; }
 
   .board-name{
     font-size:13.5px;
@@ -592,7 +612,7 @@
     -webkit-box-orient:vertical;
     overflow:hidden;
     overflow-wrap:anywhere;
-    padding-right:18px;
+    padding-right:4px;
   }
 
   .board-chips{ display:flex; flex-wrap:wrap; gap:5px; }
@@ -823,6 +843,8 @@
     .sort-btn span{ display:none; }
     .sort-btn{ padding:8px; }
     .seg-btn{ padding:7px 9px; }
+    .item-actions{ gap:4px; }
+    .icon-btn{ width:28px; height:28px; }
   }
 
   @media (max-width:360px){
@@ -1067,7 +1089,7 @@
 
   </div>
 
-  <!-- ===== Modal: Input Data Siswa ===== -->
+  <!-- ===== Modal: Input / Edit Data Siswa ===== -->
   <div class="modal-overlay" id="studentModal">
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div class="modal-head">
@@ -1153,7 +1175,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
             <path d="M12 5v14M5 12h14"/>
           </svg>
-          Tambah Siswa
+          <span id="submitText">Tambah Siswa</span>
         </button>
       </form>
     </div>
@@ -1209,6 +1231,8 @@ tabs.forEach(tab => {
   const form        = document.getElementById('studentForm');
   const modal       = document.getElementById('studentModal');
   const modalClose  = document.getElementById('modalClose');
+  const modalTitle  = document.getElementById('modalTitle');
+  const submitText  = document.getElementById('submitText');
   const addBtn      = document.getElementById('addStudentBtn');
   const listEl      = document.getElementById('studentList');
   const boardEl     = document.getElementById('studentBoard');
@@ -1234,6 +1258,7 @@ tabs.forEach(tab => {
   let sortMode    = 'newest';
   let query       = '';
   let animateNext = true;
+  let editingId   = null;
 
   /* ---------- storage ---------- */
   try{
@@ -1288,6 +1313,15 @@ tabs.forEach(tab => {
     return m ? (parseInt(m[1],10)*60 + parseInt(m[2],10)) : 99999;
   }
 
+  /* Pisahkan "09:00 - 10:00" jadi ['09:00','10:00'] */
+  function splitTimeRange(jam){
+    const s = String(jam || '').trim();
+    if(!s) return ['', ''];
+    const parts = s.split(/\s*[-–—]\s*/);
+    if(parts.length >= 2) return [parts[0].trim(), parts[1].trim()];
+    return [s, ''];
+  }
+
   /* ---------- auto umur dari tanggal lahir ---------- */
   function syncAge(){
     const a = calcAge(lahirEl.value);
@@ -1311,9 +1345,41 @@ tabs.forEach(tab => {
   termEl.addEventListener('input', updateTermPreview);
 
   /* ---------- modal open / close ---------- */
-  function openModal(){
+  function openAddModal(){
+    editingId = null;
     form.reset();
     updateTermPreview();
+    modalTitle.textContent = 'Input Data Siswa';
+    submitText.textContent = 'Tambah Siswa';
+    modal.classList.add('open');
+    setTimeout(() => {
+      const nama = document.getElementById('f-nama');
+      if(nama) nama.focus();
+    }, 340);
+  }
+
+  function openEditModal(id){
+    const s = students.find(x => x.id === id);
+    if(!s) return;
+
+    editingId = s.id;
+
+    document.getElementById('f-nama').value  = s.nama  || '';
+    document.getElementById('f-lahir').value = s.lahir || '';
+    document.getElementById('f-umur').value  = s.umur  || '';
+    document.getElementById('f-level').value = s.level || '';
+    document.getElementById('f-hari').value  = s.hari  || '';
+
+    const [mulai, selesai] = splitTimeRange(s.jam);
+    document.getElementById('f-jam-mulai').value   = mulai;
+    document.getElementById('f-jam-selesai').value = selesai;
+
+    termEl.value = s.termDate || '';
+    updateTermPreview();
+
+    modalTitle.textContent = 'Edit Data Siswa';
+    submitText.textContent = 'Simpan Perubahan';
+
     modal.classList.add('open');
     setTimeout(() => {
       const nama = document.getElementById('f-nama');
@@ -1323,16 +1389,17 @@ tabs.forEach(tab => {
 
   function closeModal(){
     modal.classList.remove('open');
+    editingId = null;
   }
 
-  addBtn.addEventListener('click', openModal);
+  addBtn.addEventListener('click', openAddModal);
   modalClose.addEventListener('click', closeModal);
   modal.addEventListener('click', e => { if(e.target === modal) closeModal(); });
   document.addEventListener('keydown', e => {
     if(e.key === 'Escape' && modal.classList.contains('open')) closeModal();
   });
 
-  /* ---------- submit ---------- */
+  /* ---------- submit (tambah / edit) ---------- */
   form.addEventListener('submit', e => {
     e.preventDefault();
 
@@ -1355,8 +1422,7 @@ tabs.forEach(tab => {
     else if(jamMulai)               jam = jamMulai;
     else if(jamSelesai)             jam = jamSelesai;
 
-    students.unshift({
-      id: 's' + Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+    const record = {
       nama,
       lahir:    String(data.get('lahir') || ''),
       umur:     String(data.get('umur')  || ''),
@@ -1364,9 +1430,18 @@ tabs.forEach(tab => {
       hari:     String(data.get('hari')  || ''),
       jam:      jam,
       term:     term,
-      termDate: termDate,
-      createdAt: Date.now()
-    });
+      termDate: termDate
+    };
+
+    if(editingId){
+      const idx = students.findIndex(x => x.id === editingId);
+      if(idx > -1) students[idx] = Object.assign({}, students[idx], record);
+    }else{
+      students.unshift(Object.assign({
+        id: 's' + Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+        createdAt: Date.now()
+      }, record));
+    }
 
     persist();
     form.reset();
@@ -1415,6 +1490,23 @@ tabs.forEach(tab => {
   }
 
   /* ---------- templates ---------- */
+  function actionButtonsHTML(s){
+    return `
+      <div class="item-actions">
+        <button type="button" class="icon-btn item-edit" data-edit="${esc(s.id)}" aria-label="Edit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+          </svg>
+        </button>
+        <button type="button" class="icon-btn item-del" data-del="${esc(s.id)}" aria-label="Hapus">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>`;
+  }
+
   function listItemHTML(s){
     const meta = [s.level, s.term].filter(Boolean).join(' • ')
                + (s.umur ? (s.level || s.term ? ' • ' : '') + s.umur + ' th' : '');
@@ -1428,11 +1520,7 @@ tabs.forEach(tab => {
           <div class="item-meta">${esc(meta || 'Belum ada data')}</div>
         </div>
         ${sched ? `<div class="item-schedule"><span class="chip chip-day">${esc(sched)}</span></div>` : ''}
-        <button type="button" class="item-del" data-del="${esc(s.id)}" aria-label="Hapus">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
-            <path d="M18 6 6 18M6 6l12 12"/>
-          </svg>
-        </button>
+        ${actionButtonsHTML(s)}
       </div>`;
   }
 
@@ -1441,11 +1529,7 @@ tabs.forEach(tab => {
 
     return `
       <div class="board-card">
-        <button type="button" class="item-del" data-del="${esc(s.id)}" aria-label="Hapus">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
-            <path d="M18 6 6 18M6 6l12 12"/>
-          </svg>
-        </button>
+        ${actionButtonsHTML(s)}
         <div class="avatar-sm">${esc(initials(s.nama))}</div>
         <div class="board-name">${esc(s.nama)}</div>
         <div class="board-chips">
@@ -1490,24 +1574,30 @@ tabs.forEach(tab => {
       : 'Tambahkan siswa pertama lewat tombol Tambah di atas.';
   }
 
-  /* ---------- delete ---------- */
-  function handleDelete(e){
-    const btn = e.target.closest('[data-del]');
-    if(!btn) return;
+  /* ---------- edit & delete ---------- */
+  function handleActions(e){
+    const editBtn = e.target.closest('[data-edit]');
+    if(editBtn){
+      openEditModal(editBtn.getAttribute('data-edit'));
+      if(navigator.vibrate) navigator.vibrate(8);
+      return;
+    }
 
-    const id = btn.getAttribute('data-del');
-    const s  = students.find(x => x.id === id);
-    if(!s) return;
+    const delBtn = e.target.closest('[data-del]');
+    if(delBtn){
+      const id = delBtn.getAttribute('data-del');
+      const s  = students.find(x => x.id === id);
+      if(!s) return;
+      if(!window.confirm(`Hapus data "${s.nama}"?`)) return;
 
-    if(!window.confirm(`Hapus data "${s.nama}"?`)) return;
-
-    students = students.filter(x => x.id !== id);
-    persist();
-    animateNext = false;
-    render();
+      students = students.filter(x => x.id !== id);
+      persist();
+      animateNext = false;
+      render();
+    }
   }
-  listEl.addEventListener('click', handleDelete);
-  boardEl.addEventListener('click', handleDelete);
+  listEl.addEventListener('click', handleActions);
+  boardEl.addEventListener('click', handleActions);
 
   /* ---------- search ---------- */
   searchEl.addEventListener('input', () => {
