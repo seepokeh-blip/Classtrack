@@ -1145,6 +1145,96 @@
 .school-kelas{font-size:13px;font-weight:700;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .school-guru{font-size:11px;font-weight:500;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
+
+/* ===== Teacher: Sticky Notes & To-do ===== */
+.tc-wrap{display:flex;flex-direction:column;gap:16px}
+.tc-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.tc-h{font-size:15px;font-weight:700;letter-spacing:-.2px}
+.tc-add{height:38px;padding:0 13px;border-radius:14px;font-size:12.5px}
+.tc-add svg{width:16px;height:16px}
+.tc-notes{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:620px){.tc-notes{grid-template-columns:repeat(3,1fr)}}
+.tc-note{position:relative;display:flex;flex-direction:column;min-height:118px;padding:12px 12px 10px;border-radius:18px;border:1px solid transparent;cursor:pointer;text-align:left;font-family:inherit;color:#1e293b;box-shadow:0 6px 14px rgba(15,23,42,.08),inset 0 1px 0 rgba(255,255,255,.6);transition:transform .15s ease}
+.tc-note:active{transform:scale(.97)}
+.tc-note.pinned{box-shadow:0 8px 18px rgba(15,23,42,.14),inset 0 1px 0 rgba(255,255,255,.6)}
+.tc-note-text{flex:1;font-size:12.5px;font-weight:600;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden;padding-right:22px}
+.tc-note-foot{display:flex;align-items:center;justify-content:space-between;margin-top:8px;font-size:10px;font-weight:600;color:rgba(15,23,42,.5)}
+.tc-pin{position:absolute;top:8px;right:8px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(255,255,255,.55);display:grid;place-items:center;color:rgba(15,23,42,.45);cursor:pointer;padding:0}
+.tc-pin svg{width:15px;height:15px}
+.tc-pin.on{background:#fff;color:#dc2626;box-shadow:0 2px 6px rgba(15,23,42,.18)}
+.tc-pin.on svg{fill:currentColor;transform:rotate(35deg)}
+.tc-empty{display:none;text-align:center;padding:18px 10px 10px;font-size:12.5px;font-weight:500;color:var(--muted);line-height:1.5}
+.tc-empty.show{display:block}
+.tc-swatches{display:flex;gap:12px;padding-left:3px}
+.tc-sw{width:38px;height:38px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 6px rgba(15,23,42,.18);cursor:pointer;padding:0;display:grid;place-items:center;color:#334155}
+.tc-sw svg{width:16px;height:16px;opacity:0}
+.tc-sw.on{box-shadow:0 0 0 2.5px var(--blue-600)}
+.tc-sw.on svg{opacity:1}
+.tc-toggle{display:flex;align-items:center;gap:8px;padding:11px 14px;border-radius:15px;border:1px solid rgba(147,197,253,.45);background:rgba(255,255,255,.78);font-family:inherit;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;width:100%}
+.tc-toggle svg{width:17px;height:17px}
+.tc-toggle.on{color:#dc2626;border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.08)}
+.tc-toggle.on svg{fill:currentColor}
+.tc-add-row{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.tc-prio{display:flex;gap:6px}
+.tc-prio-btn{flex:1;padding:9px 6px;border-radius:12px;border:1px solid rgba(147,197,253,.45);background:rgba(255,255,255,.78);font-family:inherit;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.tc-prio-btn i{width:9px;height:9px;border-radius:50%;display:block}
+.tc-prio-btn.p-high i{background:#ef4444}
+.tc-prio-btn.p-mid i{background:#f97316}
+.tc-prio-btn.p-low i{background:#3b82f6}
+.tc-prio-btn.on{color:#fff;border-color:transparent}
+.tc-prio-btn.p-high.on{background:#ef4444}
+.tc-prio-btn.p-mid.on{background:#f97316}
+.tc-prio-btn.p-low.on{background:#3b82f6}
+.tc-prio-btn.on i{background:#fff}
+.tc-count{font-size:11.5px;font-weight:700;color:var(--muted);margin:2px 3px 8px}
+.tc-list{display:flex;flex-direction:column;gap:8px}
+.tc-item{display:flex;align-items:center;gap:10px;padding:10px 10px 10px 12px;border-radius:15px;background:rgba(255,255,255,.7);border:1px solid rgba(147,197,253,.35);border-left:4px solid var(--pc,#94a3b8)}
+.tc-check{width:24px;height:24px;border-radius:8px;border:2px solid #cbd5e1;background:#fff;flex-shrink:0;display:grid;place-items:center;cursor:pointer;padding:0;color:#fff}
+.tc-check svg{width:14px;height:14px;opacity:0}
+.tc-item.done .tc-check{background:#22c55e;border-color:#22c55e}
+.tc-item.done .tc-check svg{opacity:1}
+.tc-body{flex:1;min-width:0}
+.tc-txt{font-size:13px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
+.tc-item.done .tc-txt{text-decoration:line-through;color:var(--muted);font-weight:500}
+.tc-badge{display:inline-block;margin-top:4px;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;color:var(--pc);background:color-mix(in srgb,var(--pc) 13%,transparent);border:1px solid color-mix(in srgb,var(--pc) 40%,transparent)}
+.tc-item.done .tc-badge{opacity:.5}
+.tc-ic{width:32px;height:32px;border-radius:10px;border:none;background:rgba(59,130,246,.08);color:var(--blue-600);display:grid;place-items:center;cursor:pointer;padding:0;flex-shrink:0}
+.tc-ic svg{width:15px;height:15px}
+.tc-ic.del{background:rgba(239,68,68,.08);color:#dc2626}
+.tc-ic:active{transform:scale(.92)}
+.tc-modal-actions{display:flex;gap:8px;margin-top:6px}
+.tc-modal-actions .att-del-btn{margin-top:0;width:auto;flex:0 0 auto;padding:0 16px}
+.tc-modal-actions .btn-primary{margin-top:0}
+.tc-modal .field-grid{grid-template-columns:1fr}
+.tc-modal textarea,.tc-modal input,.tc-wrap input{user-select:text;-webkit-user-select:text}
+
+.tc-stat-btn{flex:1;padding:9px 4px;border-radius:12px;border:1px solid rgba(147,197,253,.45);background:rgba(255,255,255,.78);font-family:inherit;font-size:11.5px;font-weight:700;color:var(--muted);cursor:pointer}
+.tc-stat-btn.on{color:#fff;border-color:transparent}
+.tc-stat-btn.s-todo.on{background:#64748b}
+.tc-stat-btn.s-doing.on{background:#7c3aed}
+.tc-stat-btn.s-done.on{background:#22c55e}
+.tc-meta{display:flex;flex-wrap:wrap;align-items:center;gap:5px;margin-top:5px}
+.tc-meta .tc-badge{margin-top:0}
+.tc-status{display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--sc);background:color-mix(in srgb,var(--sc) 13%,transparent);border:1px solid color-mix(in srgb,var(--sc) 40%,transparent)}
+.tc-status:active{transform:scale(.95)}
+.tc-due{display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:var(--muted)}
+.tc-due svg{width:11px;height:11px}
+.tc-due.today{color:#ea580c}
+.tc-due.late{color:#dc2626}
+.tc-item.doing{background:rgba(124,58,237,.06);border-color:rgba(124,58,237,.25);border-left-color:var(--pc)}
+.tc-item.done .tc-status,.tc-item.done .tc-due{opacity:.55}
+
+.tc-confirm{position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;padding:24px;background:rgba(15,23,42,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.tc-confirm.open{display:flex}
+.tc-confirm-card{width:100%;max-width:320px;padding:20px;border-radius:24px;background:#fff;box-shadow:0 20px 50px rgba(15,23,42,.3);animation:pageIn .25s ease both}
+.tc-confirm-title{font-size:16px;font-weight:700;margin-bottom:6px}
+.tc-confirm-msg{font-size:13px;font-weight:500;color:var(--muted);line-height:1.45;overflow-wrap:anywhere}
+.tc-confirm-actions{display:flex;gap:8px;margin-top:16px}
+.tc-confirm-btn{flex:1;padding:12px;border-radius:14px;border:1px solid rgba(147,197,253,.45);background:rgba(255,255,255,.78);font-family:inherit;font-size:13.5px;font-weight:700;color:var(--muted);cursor:pointer}
+.tc-confirm-btn.danger{background:#ef4444;border-color:transparent;color:#fff}
+.tc-confirm-btn:active{transform:scale(.97)}
+
+.field input.tc-invalid{border-color:#ef4444;box-shadow:0 0 0 4px rgba(239,68,68,.15)}
 </style>
 </head>
 <body>
@@ -1352,7 +1442,55 @@
         </div>
       </section>
 
-      <section class="page" id="page-teacher"></section>
+      <section class="page" id="page-teacher">
+        <div class="tc-wrap">
+
+          <!-- Sticky Notes -->
+          <div class="lv-card">
+            <div class="tc-head">
+              <div class="card-head-left"><span class="dot-accent"></span><h2 class="tc-h">Sticky Notes</h2></div>
+              <button type="button" class="btn-add-top tc-add" id="noteAddBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Catatan
+              </button>
+            </div>
+            <div class="tc-notes" id="noteGrid"></div>
+            <div class="tc-empty" id="noteEmpty">Belum ada catatan.<br>Tap <b>+ Catatan</b> untuk menulis catatan pertama.</div>
+          </div>
+
+          <!-- To-do List -->
+          <div class="lv-card">
+            <div class="tc-head">
+              <div class="card-head-left"><span class="dot-accent"></span><h2 class="tc-h">To-do List</h2></div>
+            </div>
+            <div class="tc-add-row">
+              <input id="todoInput" class="lv-input" type="text" placeholder="Tulis tugas baru..." autocomplete="off" maxlength="160">
+              <div class="tc-prio" id="todoPrio">
+                <button type="button" class="tc-prio-btn p-high" data-p="high"><i></i>Tinggi</button>
+                <button type="button" class="tc-prio-btn p-mid on" data-p="mid"><i></i>Sedang</button>
+                <button type="button" class="tc-prio-btn p-low" data-p="low"><i></i>Rendah</button>
+              </div>
+              <div class="field">
+                <label for="todoDue">Deadline (opsional)</label>
+                <input id="todoDue" type="date">
+              </div>
+              <div class="tc-prio" id="todoStat">
+                <button type="button" class="tc-stat-btn s-todo on" data-s="todo">Belum dimulai</button>
+                <button type="button" class="tc-stat-btn s-doing" data-s="doing">Dikerjakan</button>
+                <button type="button" class="tc-stat-btn s-done" data-s="done">Selesai</button>
+              </div>
+              <button type="button" class="btn-primary" id="todoAddBtn" style="margin-top:0">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+                Tambah Tugas
+              </button>
+            </div>
+            <div class="tc-count" id="todoCount"></div>
+            <div class="tc-list" id="todoList"></div>
+            <div class="tc-empty" id="todoEmpty">Belum ada tugas.<br>Tambahkan tugas dan atur prioritasnya.</div>
+          </div>
+
+        </div>
+      </section>
       <section class="page" id="page-setting"></section>
 
     </main>
@@ -1473,10 +1611,10 @@
             <label>Jam</label>
             <div class="time-range">
               <input id="f-jam-mulai" name="jamMulai" type="text" placeholder="09:00"
-                     autocomplete="off" inputmode="text" aria-label="Jam mulai">
+                     autocomplete="off" inputmode="numeric" maxlength="5" aria-label="Jam mulai">
               <span class="time-sep">–</span>
               <input id="f-jam-selesai" name="jamSelesai" type="text" placeholder="10:00"
-                     autocomplete="off" inputmode="text" aria-label="Jam selesai">
+                     autocomplete="off" inputmode="numeric" maxlength="5" aria-label="Jam selesai">
             </div>
           </div>
 
@@ -1656,7 +1794,7 @@ const TITLES = {
   home:       ["Home",       "Selamat datang kembali"],
   student:    ["Student",    "Kelola data siswa"],
   attendance: ["Attendance", "Catat kehadiran"],
-  teacher:    ["Teacher",    "Kelola data guru"],
+  teacher:    ["Teacher",    "Catatan & to-do guru"],
   setting:    ["Setting",    "Pengaturan aplikasi"]
 };
 
@@ -1874,8 +2012,8 @@ tabs.forEach(tab => {
 
     const termDate   = String(data.get('termDate') || '');
     const term       = termLabelFromDate(termDate);
-    const jamMulai   = String(data.get('jamMulai')   || '').trim();
-    const jamSelesai = String(data.get('jamSelesai') || '').trim();
+    const jamMulai   = window.normTime(data.get('jamMulai'));
+    const jamSelesai = window.normTime(data.get('jamSelesai'));
 
     let jam = '';
     if(jamMulai && jamSelesai)      jam = jamMulai + ' - ' + jamSelesai;
@@ -2046,12 +2184,12 @@ tabs.forEach(tab => {
       const id = delBtn.getAttribute('data-del');
       const s  = students.find(x => x.id === id);
       if(!s) return;
-      if(!window.confirm(`Hapus data "${s.nama}"?`)) return;
-
-      students = students.filter(x => x.id !== id);
-      persist();
-      animateNext = false;
-      render();
+      window.askDelete(`Data "${s.nama}" akan dihapus permanen.`, () => {
+        students = students.filter(x => x.id !== id);
+        persist();
+        animateNext = false;
+        render();
+      }, { title:'Hapus siswa?' });
     }
   }
   listEl.addEventListener('click', handleActions);
@@ -2538,33 +2676,39 @@ tabs.forEach(tab => {
 
   attDeleteBtn.addEventListener('click', () => {
     if(!editing) return;
-    const s = getStudents().find(x => x.id === editing.sid);
+    const ed = editing;
+    const s = getStudents().find(x => x.id === ed.sid);
     const name = s ? s.nama : '';
 
-    if(editing.mkId){
-      if(!window.confirm('Batalkan kelas pengganti ' + name + '? Presensi pengganti ikut terhapus.')) return;
-      makeups = makeups.filter(m => m.id !== editing.mkId);
-      save(MK_LS, makeups);
-    }else{
-      const linked = makeups.filter(m => m.sid === editing.sid && m.absentDate === editing.date);
-      const msg = 'Hapus presensi ' + name + ' pada ' + fmtLong(editing.date) + '?'
-        + (linked.length ? ' Kelas pengganti yang terkait juga akan dibatalkan.' : '');
-      if(!window.confirm(msg)) return;
-
-      if(records[editing.date]){
-        delete records[editing.date][editing.sid];
-        if(!Object.keys(records[editing.date]).length) delete records[editing.date];
-        save(ATT_LS, records);
-      }
-      if(linked.length){
-        makeups = makeups.filter(m => !(m.sid === editing.sid && m.absentDate === editing.date));
-        save(MK_LS, makeups);
-      }
+    function finish(){
+      closeModal();
+      render();
+      if(navigator.vibrate) navigator.vibrate(12);
     }
 
-    closeModal();
-    render();
-    if(navigator.vibrate) navigator.vibrate(12);
+    if(ed.mkId){
+      window.askDelete('Kelas pengganti ' + name + ' akan dibatalkan. Presensi pengganti ikut terhapus.', () => {
+        makeups = makeups.filter(m => m.id !== ed.mkId);
+        save(MK_LS, makeups);
+        finish();
+      }, { title:'Batalkan kelas pengganti?', yes:'Batalkan' });
+    }else{
+      const linked = makeups.filter(m => m.sid === ed.sid && m.absentDate === ed.date);
+      const msg = 'Presensi ' + name + ' pada ' + fmtLong(ed.date) + ' akan dihapus.'
+        + (linked.length ? ' Kelas pengganti yang terkait juga akan dibatalkan.' : '');
+      window.askDelete(msg, () => {
+        if(records[ed.date]){
+          delete records[ed.date][ed.sid];
+          if(!Object.keys(records[ed.date]).length) delete records[ed.date];
+          save(ATT_LS, records);
+        }
+        if(linked.length){
+          makeups = makeups.filter(m => !(m.sid === ed.sid && m.absentDate === ed.date));
+          save(MK_LS, makeups);
+        }
+        finish();
+      }, { title:'Hapus presensi?' });
+    }
   });
 
   /* ---------- modal riwayat ---------- */
@@ -2902,12 +3046,12 @@ tabs.forEach(tab => {
     const msg = n
       ? `Hapus level "${editName}"? ${n} siswa dengan level ini akan dikosongkan levelnya.`
       : `Hapus level "${editName}"?`;
-    if(!window.confirm(msg)) return;
-
-    LevelStore.set(LevelStore.get().filter(x => x.name !== editName));
-    if(n) writeStudents(students().map(s => s.level === editName ? Object.assign({}, s, { level: '' }) : s));
-    closeLevel();
-    refresh();
+    window.askDelete(msg, () => {
+      LevelStore.set(LevelStore.get().filter(x => x.name !== editName));
+      if(n) writeStudents(students().map(s => s.level === editName ? Object.assign({}, s, { level: '' }) : s));
+      closeLevel();
+      refresh();
+    }, { title:'Hapus level?' });
   });
 
   /* ---------- init ---------- */
@@ -2917,6 +3061,516 @@ tabs.forEach(tab => {
   applyHeader();
   renderList();
   refreshLevelSelect();
+})();
+
+/* =========================================================
+   TIME INPUT: ketik 10 -> 10:00, 1130 -> 11:30
+   ========================================================= */
+(function(){
+  const pad = n => String(n).padStart(2, '0');
+
+  // Kembalikan "HH:MM", '' (kosong), atau null (tidak valid)
+  function parse(v){
+    v = String(v || '').trim();
+    if(!v) return '';
+    let h, m;
+    const sep = v.match(/^(\d{1,2})\s*[:.,\s]\s*(\d{0,2})$/);
+    if(sep){
+      h = sep[1]; m = sep[2];
+      if(m === '') m = '00';
+      else if(m.length === 1) m += '0';
+    }else if(/^\d+$/.test(v)){
+      if(v.length <= 2){ h = v; m = '00'; }
+      else if(v.length === 3){ h = v[0]; m = v.slice(1); }
+      else { h = v.slice(0, 2); m = v.slice(2, 4); }
+    }else{
+      return null;
+    }
+    h = +h; m = +m;
+    if(h > 23 || m > 59) return null;
+    return pad(h) + ':' + pad(m);
+  }
+
+  window.normTime = function(v){
+    const r = parse(v);
+    return r === null ? String(v || '').trim() : r;
+  };
+
+  function setup(el){
+    if(!el) return;
+    el.setAttribute('inputmode', 'numeric');
+    el.setAttribute('maxlength', '5');
+
+    el.addEventListener('input', () => {
+      el.value = el.value.replace(/[^\d:.,\s]/g, '');
+      el.classList.remove('tc-invalid');
+      // 4 angka langsung diformat (1130 -> 11:30)
+      if(/^\d{4}$/.test(el.value)){
+        const r = parse(el.value);
+        if(r === null) el.classList.add('tc-invalid');
+        else el.value = r;
+      }
+    });
+
+    // Selesai mengetik: 10 -> 10:00, 930 -> 09:30
+    el.addEventListener('blur', () => {
+      const r = parse(el.value);
+      if(r === null) el.classList.add('tc-invalid');
+      else{ el.value = r; el.classList.remove('tc-invalid'); }
+    });
+  }
+
+  setup(document.getElementById('f-jam-mulai'));
+  setup(document.getElementById('f-jam-selesai'));
+})();
+
+/* =========================================================
+   TEACHER MODULE: STICKY NOTES + TO-DO
+   ========================================================= */
+(function(){
+  const NOTE_KEY = 'attendance.teacher.notes.v1';
+  const TODO_KEY = 'attendance.teacher.todos.v1';
+
+  const COLORS = {
+    red:    { label:'Merah',  bg:'#ffd9d9', bd:'#f4aeae' },
+    yellow: { label:'Kuning', bg:'#fff2b3', bd:'#ecd46b' },
+    green:  { label:'Hijau',  bg:'#cdf3d8', bd:'#92d8a8' },
+    blue:   { label:'Biru',   bg:'#d3e5ff', bd:'#98bff4' }
+  };
+  const PRIO = {
+    high: { label:'Tinggi', color:'#ef4444', rank:0 },
+    mid:  { label:'Sedang', color:'#f97316', rank:1 },
+    low:  { label:'Rendah', color:'#3b82f6', rank:2 }
+  };
+  const STAT = {
+    todo:  { label:'Belum dimulai', color:'#64748b', rank:0, next:'doing' },
+    doing: { label:'Sedang dikerjakan', color:'#7c3aed', rank:1, next:'done' },
+    done:  { label:'Selesai', color:'#22c55e', rank:2, next:'todo' }
+  };
+  const MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+
+  const ICON_CAL   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>';
+  const ICON_PIN   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>';
+  const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+  const ICON_EDIT  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+  const ICON_TRASH = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>';
+
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+  ));
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+
+  function load(key){
+    try{
+      const p = JSON.parse(localStorage.getItem(key));
+      return Array.isArray(p) ? p : [];
+    }catch(e){ return []; }
+  }
+  function save(key, val){
+    try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
+  }
+  function fmtDate(ts){
+    const d = new Date(ts);
+    return d.getDate() + ' ' + MONTHS[d.getMonth()];
+  }
+
+  let notes = load(NOTE_KEY);
+  let todos = load(TODO_KEY).map(t => {
+    if(!STAT[t.status]) t.status = t.done ? 'done' : 'todo';   // migrasi data lama
+    t.due = t.due || '';
+    delete t.done;
+    return t;
+  });
+
+  function todayStr(){
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  function fmtDue(v){
+    const [y, m, d] = v.split('-').map(Number);
+    return d + ' ' + MONTHS[m-1] + (y !== new Date().getFullYear() ? ' ' + y : '');
+  }
+
+  /* ---------- Modals (appended to body so position:fixed works) ---------- */
+  document.body.insertAdjacentHTML('beforeend', `
+    <div class="modal-overlay tc-modal" id="noteModal">
+      <div class="modal-card" role="dialog" aria-modal="true">
+        <div class="modal-head">
+          <div class="card-head-left"><span class="dot-accent"></span><h2 id="noteModalTitle">Catatan Baru</h2></div>
+          <button type="button" class="modal-close" id="noteClose" aria-label="Tutup">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label for="noteText">Isi catatan</label>
+            <textarea id="noteText" rows="6" placeholder="Tulis catatan..." maxlength="600"></textarea>
+          </div>
+          <div class="field">
+            <label>Warna</label>
+            <div class="tc-swatches" id="noteSwatches">
+              ${Object.entries(COLORS).map(([k,c]) =>
+                `<button type="button" class="tc-sw" data-c="${k}" aria-label="${c.label}" style="background:${c.bg}">${ICON_CHECK}</button>`
+              ).join('')}
+            </div>
+          </div>
+          <button type="button" class="tc-toggle" id="notePinToggle">${ICON_PIN}<span>Pin catatan penting</span></button>
+        </div>
+        <div class="tc-modal-actions" style="margin-top:16px">
+          <button type="button" class="att-del-btn" id="noteDelete" style="display:none">Hapus</button>
+          <button type="button" class="btn-primary" id="noteSave">Simpan</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay tc-modal" id="todoModal">
+      <div class="modal-card" role="dialog" aria-modal="true">
+        <div class="modal-head">
+          <div class="card-head-left"><span class="dot-accent"></span><h2>Edit Tugas</h2></div>
+          <button type="button" class="modal-close" id="todoClose" aria-label="Tutup">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="field-grid">
+          <div class="field">
+            <label for="todoEditText">Tugas</label>
+            <input id="todoEditText" type="text" maxlength="160" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="todoEditDue">Deadline (opsional)</label>
+            <input id="todoEditDue" type="date">
+          </div>
+          <div class="field">
+            <label>Status</label>
+            <div class="tc-prio" id="todoEditStat">
+              <button type="button" class="tc-stat-btn s-todo" data-s="todo">Belum dimulai</button>
+              <button type="button" class="tc-stat-btn s-doing" data-s="doing">Dikerjakan</button>
+              <button type="button" class="tc-stat-btn s-done" data-s="done">Selesai</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Prioritas</label>
+            <div class="tc-prio" id="todoEditPrio">
+              <button type="button" class="tc-prio-btn p-high" data-p="high"><i></i>Tinggi</button>
+              <button type="button" class="tc-prio-btn p-mid" data-p="mid"><i></i>Sedang</button>
+              <button type="button" class="tc-prio-btn p-low" data-p="low"><i></i>Rendah</button>
+            </div>
+          </div>
+        </div>
+        <div class="tc-modal-actions" style="margin-top:16px">
+          <button type="button" class="btn-primary" id="todoEditSave">Simpan Perubahan</button>
+        </div>
+      </div>
+    </div>
+  `);
+
+  document.body.insertAdjacentHTML('beforeend', `
+    <div class="tc-confirm" id="tcConfirm">
+      <div class="tc-confirm-card" role="alertdialog" aria-modal="true">
+        <div class="tc-confirm-title" id="tcConfirmTitle">Hapus?</div>
+        <div class="tc-confirm-msg" id="tcConfirmMsg"></div>
+        <div class="tc-confirm-actions">
+          <button type="button" class="tc-confirm-btn" id="tcConfirmNo">Batal</button>
+          <button type="button" class="tc-confirm-btn danger" id="tcConfirmYes">Hapus</button>
+        </div>
+      </div>
+    </div>
+  `);
+
+  const $ = id => document.getElementById(id);
+
+  let confirmCb = null;
+  function askDelete(msg, cb, opt){
+    opt = opt || {};
+    $('tcConfirmTitle').textContent = opt.title || 'Hapus?';
+    $('tcConfirmYes').textContent   = opt.yes   || 'Hapus';
+    $('tcConfirmMsg').textContent = msg;
+    confirmCb = cb;
+    $('tcConfirm').classList.add('open');
+  }
+  window.askDelete = askDelete;   // dipakai juga oleh modul Student & Attendance
+  function closeConfirm(){ $('tcConfirm').classList.remove('open'); confirmCb = null; }
+  $('tcConfirmNo').addEventListener('click', closeConfirm);
+  $('tcConfirm').addEventListener('click', e => { if(e.target === $('tcConfirm')) closeConfirm(); });
+  $('tcConfirmYes').addEventListener('click', () => {
+    const cb = confirmCb;
+    closeConfirm();
+    if(cb) cb();
+  });
+
+  /* =========================================================
+     STICKY NOTES
+     ========================================================= */
+  const noteGrid  = $('noteGrid');
+  const noteEmpty = $('noteEmpty');
+  const noteModal = $('noteModal');
+  const noteText  = $('noteText');
+  const noteSw    = $('noteSwatches');
+  const notePinT  = $('notePinToggle');
+  const noteDel   = $('noteDelete');
+
+  let editNoteId = null;
+  let draftColor = 'yellow';
+  let draftPin   = false;
+
+  function sortedNotes(){
+    return notes.slice().sort((a, b) =>
+      (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.updated - a.updated
+    );
+  }
+
+  function renderNotes(){
+    const list = sortedNotes();
+    noteEmpty.classList.toggle('show', !list.length);
+    noteGrid.innerHTML = list.map(n => {
+      const c = COLORS[n.color] || COLORS.yellow;
+      return `
+        <div class="tc-note ${n.pinned ? 'pinned' : ''}" data-id="${n.id}" role="button" tabindex="0"
+             style="background:${c.bg};border-color:${c.bd}">
+          <button type="button" class="tc-pin ${n.pinned ? 'on' : ''}" data-pin="${n.id}"
+                  aria-label="${n.pinned ? 'Lepas pin' : 'Pin catatan'}">${ICON_PIN}</button>
+          <div class="tc-note-text">${esc(n.text)}</div>
+          <div class="tc-note-foot"><span>${fmtDate(n.updated)}</span>${n.pinned ? '<span>Dipin</span>' : ''}</div>
+        </div>`;
+    }).join('');
+  }
+
+  function setDraftColor(k){
+    draftColor = k;
+    noteSw.querySelectorAll('.tc-sw').forEach(b => b.classList.toggle('on', b.dataset.c === k));
+  }
+  function setDraftPin(v){
+    draftPin = v;
+    notePinT.classList.toggle('on', v);
+    notePinT.querySelector('span').textContent = v ? 'Dipin (tampil paling atas)' : 'Pin catatan penting';
+  }
+
+  function openNote(id){
+    editNoteId = id || null;
+    const n = id ? notes.find(x => x.id === id) : null;
+    $('noteModalTitle').textContent = n ? 'Edit Catatan' : 'Catatan Baru';
+    noteText.value = n ? n.text : '';
+    setDraftColor(n ? n.color : 'yellow');
+    setDraftPin(n ? !!n.pinned : false);
+    noteDel.style.display = n ? '' : 'none';
+    noteModal.classList.add('open');
+    if(!n) setTimeout(() => noteText.focus(), 250);
+  }
+  function closeNote(){ noteModal.classList.remove('open'); }
+
+  $('noteAddBtn').addEventListener('click', () => openNote(null));
+  $('noteClose').addEventListener('click', closeNote);
+  noteModal.addEventListener('click', e => { if(e.target === noteModal) closeNote(); });
+  noteSw.addEventListener('click', e => {
+    const b = e.target.closest('.tc-sw');
+    if(b) setDraftColor(b.dataset.c);
+  });
+  notePinT.addEventListener('click', () => setDraftPin(!draftPin));
+
+  $('noteSave').addEventListener('click', () => {
+    const text = noteText.value.trim();
+    if(!text){ noteText.focus(); return; }
+    const now = Date.now();
+    if(editNoteId){
+      notes = notes.map(n => n.id === editNoteId
+        ? Object.assign({}, n, { text, color:draftColor, pinned:draftPin, updated:now }) : n);
+    }else{
+      notes.push({ id:uid(), text, color:draftColor, pinned:draftPin, created:now, updated:now });
+    }
+    save(NOTE_KEY, notes);
+    closeNote();
+    renderNotes();
+  });
+
+  noteDel.addEventListener('click', () => {
+    if(!editNoteId) return;
+    const id = editNoteId;
+    askDelete('Catatan ini akan dihapus permanen.', () => {
+      notes = notes.filter(n => n.id !== id);
+      save(NOTE_KEY, notes);
+      closeNote();
+      renderNotes();
+    });
+  });
+
+  noteGrid.addEventListener('click', e => {
+    const pin = e.target.closest('[data-pin]');
+    if(pin){
+      e.stopPropagation();
+      const id = pin.dataset.pin;
+      notes = notes.map(n => n.id === id ? Object.assign({}, n, { pinned: !n.pinned }) : n);
+      save(NOTE_KEY, notes);
+      renderNotes();
+      if(navigator.vibrate) navigator.vibrate(8);
+      return;
+    }
+    const card = e.target.closest('.tc-note');
+    if(card) openNote(card.dataset.id);
+  });
+
+  /* =========================================================
+     TO-DO LIST
+     ========================================================= */
+  const todoInput = $('todoInput');
+  const todoList  = $('todoList');
+  const todoEmpty = $('todoEmpty');
+  const todoCount = $('todoCount');
+  const todoModal = $('todoModal');
+  const todoEditText = $('todoEditText');
+
+  let newPrio = 'mid';
+  let newStat = 'todo';
+  let editPrio = 'mid';
+  let editStat = 'todo';
+  let editTodoId = null;
+
+  function setPrioGroup(groupEl, val){
+    groupEl.querySelectorAll('.tc-prio-btn').forEach(b => b.classList.toggle('on', b.dataset.p === val));
+  }
+  function setStatGroup(groupEl, val){
+    groupEl.querySelectorAll('.tc-stat-btn').forEach(b => b.classList.toggle('on', b.dataset.s === val));
+  }
+  function dueRank(t){ return t.due ? t.due : '9999-99-99'; }
+
+  function sortedTodos(){
+    return todos.slice().sort((a, b) =>
+      (a.status === 'done' ? 1 : 0) - (b.status === 'done' ? 1 : 0) ||
+      PRIO[a.prio].rank - PRIO[b.prio].rank ||
+      dueRank(a).localeCompare(dueRank(b)) ||
+      a.created - b.created
+    );
+  }
+
+  function renderTodos(){
+    const list = sortedTodos();
+    todoEmpty.classList.toggle('show', !list.length);
+    const nTodo  = todos.filter(t => t.status === 'todo').length;
+    const nDoing = todos.filter(t => t.status === 'doing').length;
+    const nDone  = todos.filter(t => t.status === 'done').length;
+    todoCount.textContent = list.length
+      ? `${nTodo} belum dimulai · ${nDoing} dikerjakan · ${nDone} selesai` : '';
+    const today = todayStr();
+    todoList.innerHTML = list.map(t => {
+      const p = PRIO[t.prio] || PRIO.mid;
+      const s = STAT[t.status];
+      let due = '';
+      if(t.due){
+        let cls = '', txt = 'Deadline ' + fmtDue(t.due);
+        if(t.status !== 'done'){
+          if(t.due < today){ cls = 'late'; txt = 'Terlambat · ' + fmtDue(t.due); }
+          else if(t.due === today){ cls = 'today'; txt = 'Hari ini'; }
+        }
+        due = `<span class="tc-due ${cls}">${ICON_CAL}${txt}</span>`;
+      }
+      return `
+        <div class="tc-item ${t.status}" data-id="${t.id}" style="--pc:${p.color}">
+          <button type="button" class="tc-check" data-act="toggle" aria-label="Tandai selesai">${ICON_CHECK}</button>
+          <div class="tc-body">
+            <div class="tc-txt">${esc(t.text)}</div>
+            <div class="tc-meta">
+              <span class="tc-badge">${p.label}</span>
+              <button type="button" class="tc-status" data-act="status" style="--sc:${s.color}" aria-label="Ubah status">${s.label}</button>
+              ${due}
+            </div>
+          </div>
+          <button type="button" class="tc-ic" data-act="edit" aria-label="Edit">${ICON_EDIT}</button>
+          <button type="button" class="tc-ic del" data-act="del" aria-label="Hapus">${ICON_TRASH}</button>
+        </div>`;
+    }).join('');
+  }
+
+  $('todoPrio').addEventListener('click', e => {
+    const b = e.target.closest('.tc-prio-btn');
+    if(!b) return;
+    newPrio = b.dataset.p;
+    setPrioGroup($('todoPrio'), newPrio);
+  });
+
+  $('todoStat').addEventListener('click', e => {
+    const b = e.target.closest('.tc-stat-btn');
+    if(!b) return;
+    newStat = b.dataset.s;
+    setStatGroup($('todoStat'), newStat);
+  });
+
+  function addTodo(){
+    const text = todoInput.value.trim();
+    if(!text){ todoInput.focus(); return; }
+    todos.push({ id:uid(), text, prio:newPrio, status:newStat, due:$('todoDue').value || '', created:Date.now() });
+    save(TODO_KEY, todos);
+    todoInput.value = '';
+    $('todoDue').value = '';
+    newStat = 'todo';
+    setStatGroup($('todoStat'), newStat);
+    renderTodos();
+    if(navigator.vibrate) navigator.vibrate(8);
+  }
+  $('todoAddBtn').addEventListener('click', addTodo);
+  todoInput.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); addTodo(); } });
+
+  todoList.addEventListener('click', e => {
+    const btn = e.target.closest('[data-act]');
+    if(!btn) return;
+    const id = btn.closest('.tc-item').dataset.id;
+    const act = btn.dataset.act;
+    const t = todos.find(x => x.id === id);
+    if(!t) return;
+
+    if(act === 'toggle'){
+      const ns = t.status === 'done' ? 'todo' : 'done';
+      todos = todos.map(x => x.id === id ? Object.assign({}, x, { status: ns }) : x);
+      save(TODO_KEY, todos);
+      renderTodos();
+    }else if(act === 'status'){
+      todos = todos.map(x => x.id === id ? Object.assign({}, x, { status: STAT[x.status].next }) : x);
+      save(TODO_KEY, todos);
+      renderTodos();
+      if(navigator.vibrate) navigator.vibrate(8);
+    }else if(act === 'edit'){
+      editTodoId = id;
+      todoEditText.value = t.text;
+      editPrio = t.prio;
+      setPrioGroup($('todoEditPrio'), editPrio);
+      editStat = t.status;
+      setStatGroup($('todoEditStat'), editStat);
+      $('todoEditDue').value = t.due || '';
+      todoModal.classList.add('open');
+    }else if(act === 'del'){
+      askDelete(`Tugas "${t.text}" akan dihapus permanen.`, () => {
+        todos = todos.filter(x => x.id !== id);
+        save(TODO_KEY, todos);
+        renderTodos();
+      });
+    }
+  });
+
+  function closeTodo(){ todoModal.classList.remove('open'); editTodoId = null; }
+  $('todoClose').addEventListener('click', closeTodo);
+  todoModal.addEventListener('click', e => { if(e.target === todoModal) closeTodo(); });
+  $('todoEditPrio').addEventListener('click', e => {
+    const b = e.target.closest('.tc-prio-btn');
+    if(!b) return;
+    editPrio = b.dataset.p;
+    setPrioGroup($('todoEditPrio'), editPrio);
+  });
+  $('todoEditStat').addEventListener('click', e => {
+    const b = e.target.closest('.tc-stat-btn');
+    if(!b) return;
+    editStat = b.dataset.s;
+    setStatGroup($('todoEditStat'), editStat);
+  });
+  $('todoEditSave').addEventListener('click', () => {
+    const text = todoEditText.value.trim();
+    if(!text){ todoEditText.focus(); return; }
+    todos = todos.map(x => x.id === editTodoId ? Object.assign({}, x, { text, prio:editPrio, status:editStat, due:$('todoEditDue').value || '' }) : x);
+    save(TODO_KEY, todos);
+    closeTodo();
+    renderTodos();
+  });
+
+  /* ---------- init ---------- */
+  renderNotes();
+  renderTodos();
 })();
 
 </script>
