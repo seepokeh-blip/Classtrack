@@ -255,6 +255,114 @@
   .tab.active svg{ transform:translateY(-1px) scale(1.06); }
 
   /* =========================================================
+     HOME PAGE (dashboard)
+     ========================================================= */
+  .home-page{ display:flex; flex-direction:column; gap:14px; }
+
+  .welcome-card{
+    position:relative; overflow:hidden;
+    padding:20px; border-radius:26px; color:#fff;
+    background:linear-gradient(140deg, var(--blue-500) 0%, var(--blue-600) 55%, var(--blue-700) 100%);
+    box-shadow:0 18px 40px rgba(37,99,235,.32), inset 0 1px 0 rgba(255,255,255,.35);
+  }
+  .welcome-card::after{
+    content:""; position:absolute; right:-46px; top:-56px;
+    width:170px; height:170px; border-radius:50%;
+    background:rgba(255,255,255,.14); pointer-events:none;
+  }
+  .welcome-hi{ font-size:13px; font-weight:600; opacity:.88; position:relative; }
+  .welcome-class{ font-size:22px; font-weight:700; letter-spacing:-.4px; margin-top:2px; position:relative;
+                  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .welcome-sub{ font-size:12.5px; font-weight:500; opacity:.88; margin-top:3px; position:relative; }
+  .welcome-stats{ position:relative; display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:16px; }
+  .stat-tile{
+    display:flex; flex-direction:column; gap:6px; min-width:0;
+    padding:12px 10px; border-radius:18px;
+    background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.28);
+  }
+  button.stat-tile{ font-family:inherit; text-align:left; cursor:pointer; color:#fff; transition:transform .15s ease; }
+  button.stat-tile:active{ transform:scale(.97); }
+  .stat-tile.warn{ background:rgba(249,115,22,.34); border-color:rgba(255,237,213,.45); }
+  .stat-num{ font-size:24px; font-weight:800; letter-spacing:-.5px; line-height:1; }
+  .stat-label{ font-size:11px; font-weight:600; opacity:.92; line-height:1.25; }
+
+  .home-card{
+    padding:16px; border-radius:24px; min-width:0;
+    background:var(--glass);
+    backdrop-filter:blur(22px) saturate(180%);
+    -webkit-backdrop-filter:blur(22px) saturate(180%);
+    border:1px solid var(--stroke);
+    box-shadow:0 10px 28px rgba(37,99,235,.10), inset 0 1px 0 rgba(255,255,255,.9);
+  }
+  .home-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; min-width:0; }
+  .home-head .card-head-left{ min-width:0; }
+  .home-title{ font-size:15px; font-weight:700; letter-spacing:-.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .home-count{ font-size:12px; font-weight:700; color:var(--muted); white-space:nowrap; flex-shrink:0; }
+  .home-link{
+    border:none; background:transparent; cursor:pointer; padding:4px 2px;
+    font-family:inherit; font-size:12px; font-weight:700; color:var(--blue-600); white-space:nowrap; flex-shrink:0;
+  }
+  .home-grid{ display:grid; grid-template-columns:1fr; gap:14px; }
+  @media (min-width:640px){ .home-grid{ grid-template-columns:1fr 1fr; } }
+
+  .home-list{ display:flex; flex-direction:column; gap:8px; }
+  .home-row{
+    width:100%; min-width:0;
+    display:flex; align-items:center; gap:12px;
+    padding:11px 12px; border-radius:16px; text-align:left;
+    border:1px solid rgba(255,255,255,.95);
+    background:rgba(255,255,255,.72);
+    box-shadow:0 4px 12px rgba(37,99,235,.06);
+    font-family:inherit; color:var(--ink); cursor:pointer;
+    transition:transform .15s ease, background .2s ease;
+  }
+  .home-row:active{ transform:scale(.98); background:#fff; }
+  .home-time{ flex-shrink:0; min-width:54px; font-size:12px; font-weight:700; color:var(--blue-700); }
+  .home-main{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
+  .home-main b{ font-size:14px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .home-main small{ font-size:11.5px; font-weight:600; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .home-pill{
+    flex-shrink:0; font-size:11px; font-weight:700; padding:5px 9px; border-radius:999px;
+    background:#eef4ff; color:var(--blue-700); white-space:nowrap;
+  }
+  .home-pill.hadir{ background:#dcfce7; color:#15803d; }
+  .home-pill.sakit{ background:#fef9c3; color:#a16207; }
+  .home-pill.izin{ background:#e0e7ff; color:#4338ca; }
+  .home-pill.alpa{ background:#fee2e2; color:#b91c1c; }
+  .home-pill.warn{ background:#ffedd5; color:#c2410c; }
+
+  .home-empty{ font-size:12.5px; font-weight:600; color:var(--muted); padding:4px 2px; }
+  .home-empty[hidden]{ display:none; }
+
+  .home-note{
+    padding:11px 12px; border-radius:16px; border:1px solid; width:100%;
+    font-family:inherit; font-size:13px; font-weight:600; line-height:1.4; color:var(--ink);
+    text-align:left; cursor:pointer; white-space:pre-wrap; word-break:break-word;
+    display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;
+  }
+  .home-note-foot{ display:block; margin-top:6px; font-size:10.5px; font-weight:700; color:var(--muted); }
+
+  .home-todo{
+    display:flex; align-items:center; gap:11px; width:100%; min-width:0;
+    padding:10px 11px; border-radius:16px; text-align:left; cursor:pointer;
+    font-family:inherit; color:var(--ink);
+    background:rgba(255,255,255,.72); border:1px solid rgba(255,255,255,.95);
+  }
+  .home-check{ width:18px; height:18px; flex-shrink:0; border-radius:6px; border:2px solid #cbd5e1; background:#fff; }
+  .home-todo-body{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+  .home-todo-txt{ font-size:13.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .home-todo-meta{ display:flex; align-items:center; gap:6px; font-size:11px; font-weight:700; color:var(--muted); min-width:0; }
+  .home-prio{ width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+  .home-due.late{ color:#dc2626; }
+  .home-due.today{ color:#ea580c; }
+
+  .home-av{
+    width:34px; height:34px; border-radius:12px; flex-shrink:0; display:grid; place-items:center;
+    font-size:12px; font-weight:800; color:var(--blue-700);
+    background:linear-gradient(140deg,#dbeafe,#bfdbfe);
+  }
+
+  /* =========================================================
      STUDENT PAGE
      ========================================================= */
   .student-page{ display:flex; flex-direction:column; gap:14px; }
@@ -1284,7 +1392,84 @@
     <!-- ===== Content ===== -->
     <main class="content">
 
-      <section class="page active" id="page-home"></section>
+      <section class="page active" id="page-home">
+        <div class="home-page">
+
+          <!-- Welcome: ringkasan kelas -->
+          <div class="welcome-card">
+            <p class="welcome-hi" id="homeGreet">Selamat datang kembali</p>
+            <h2 class="welcome-class" id="homeClass">Nama Kelas</h2>
+            <p class="welcome-sub" id="homeDate">—</p>
+            <div class="welcome-stats">
+              <button type="button" class="stat-tile" data-goto="student">
+                <span class="stat-num" id="statStudents">0</span>
+                <span class="stat-label">Jumlah siswa</span>
+              </button>
+              <button type="button" class="stat-tile" data-goto="attendance">
+                <span class="stat-num" id="statToday">0</span>
+                <span class="stat-label">Jadwal hari ini</span>
+              </button>
+              <button type="button" class="stat-tile warn" id="statPendingBtn">
+                <span class="stat-num" id="statPending">0</span>
+                <span class="stat-label">Belum diganti</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Jadwal hari ini (tap -> presensi) -->
+          <div class="home-card">
+            <div class="home-head">
+              <div class="card-head-left"><span class="dot-accent"></span><h2 class="home-title" id="todayTitle">Jadwal hari ini</h2></div>
+              <button type="button" class="home-link" data-goto="attendance">Presensi ›</button>
+            </div>
+            <div class="home-list" id="homeToday"></div>
+            <p class="home-empty" id="homeTodayEmpty" hidden>Tidak ada jadwal hari ini.</p>
+          </div>
+
+          <div class="home-grid">
+            <!-- Sticky note yang dipin -->
+            <div class="home-card">
+              <div class="home-head">
+                <div class="card-head-left"><span class="dot-accent"></span><h2 class="home-title">Catatan dipin</h2></div>
+                <button type="button" class="home-link" data-goto="teacher">Buka ›</button>
+              </div>
+              <div class="home-list" id="homeNotes"></div>
+              <p class="home-empty" id="homeNotesEmpty" hidden>Belum ada catatan yang dipin.</p>
+            </div>
+
+            <!-- To-do list -->
+            <div class="home-card">
+              <div class="home-head">
+                <div class="card-head-left"><span class="dot-accent"></span><h2 class="home-title">To-do</h2></div>
+                <span class="home-count" id="homeTodoCount"></span>
+              </div>
+              <div class="home-list" id="homeTodos"></div>
+              <p class="home-empty" id="homeTodosEmpty" hidden>Tidak ada tugas yang tersisa.</p>
+            </div>
+          </div>
+
+          <!-- Tiket kelas pengganti yang belum diganti -->
+          <div class="home-card">
+            <div class="home-head">
+              <div class="card-head-left"><span class="dot-accent"></span><h2 class="home-title">Belum diganti</h2></div>
+              <span class="home-count" id="homePendingCount"></span>
+            </div>
+            <div class="home-list" id="homePending"></div>
+            <p class="home-empty" id="homePendingEmpty" hidden>Semua ketidakhadiran sudah diganti.</p>
+          </div>
+
+          <!-- Term yang akan selesai -->
+          <div class="home-card">
+            <div class="home-head">
+              <div class="card-head-left"><span class="dot-accent"></span><h2 class="home-title">Term akan selesai</h2></div>
+              <button type="button" class="home-link" data-goto="student">Siswa ›</button>
+            </div>
+            <div class="home-list" id="homeEnding"></div>
+            <p class="home-empty" id="homeEndingEmpty" hidden>Tidak ada term yang akan selesai dalam waktu dekat.</p>
+          </div>
+
+        </div>
+      </section>
 
       <!-- ================= STUDENT ================= -->
       <section class="page" id="page-student">
@@ -1821,6 +2006,10 @@ tabs.forEach(tab => {
     elSub.textContent   = sub;
 
     document.querySelector('.content').scrollTop = 0;
+
+    if(key === 'home' && typeof window.__homeRefresh === 'function'){
+      window.__homeRefresh();
+    }
 
     if(key === 'attendance' && typeof window.__attendanceRefresh === 'function'){
       window.__attendanceRefresh();
@@ -3077,6 +3266,46 @@ tabs.forEach(tab => {
 
   /* ---------- init ---------- */
   window.__attendanceRefresh = render;
+
+  /* ---------- data & aksi untuk tab Home ---------- */
+  function itemsFor(date){
+    const students = getStudents();
+    const regular = students
+      .filter(s => regularDates(s).includes(date))
+      .map(s => ({ s, mk: null }));
+    const extra = makeups
+      .filter(m => m.date === date)
+      .map(m => {
+        const s = students.find(x => x.id === m.sid);
+        return s ? { s, mk: m } : null;
+      })
+      .filter(Boolean);
+    return regular.concat(extra)
+      .sort((a, b) => startMinutes(a.s.jam) - startMinutes(b.s.jam));
+  }
+  window.AttendanceData = {
+    TOTAL_MEET,
+    todayKey,
+    fmtLong,
+    dayNameOf,
+    addDays,
+    addMonths,
+    getStudents,
+    itemsFor,
+    recFor,
+    doneCount: s => getMeetings(s).filter(m => m.rec).length,
+    termLast:  s => s.termDate ? addDays(addMonths(s.termDate, 3), -1) : '',
+    pendingAll: () => getStudents().flatMap(s =>
+      pendingAbsences(s).map(p => ({ s, date: p.date, status: p.status }))
+    ),
+    // pindah ke tanggal tertentu; kalau sid diisi, langsung buka presensi siswa itu
+    goto(date, sid, mkId){
+      selectedDate = date;
+      render();
+      if(sid) openModal(sid, date, mkId || '');
+    }
+  };
+
   render();
 })();
  /* =========================================================
@@ -3796,6 +4025,228 @@ tabs.forEach(tab => {
   /* ---------- init ---------- */
   renderNotes();
   renderTodos();
+})();
+
+/* =========================================================
+   HOME MODULE: ringkasan kelas (membaca data dari tab lain)
+   ========================================================= */
+(function(){
+  const A = window.AttendanceData;
+  const SCHOOL_LS = 'attendance.school.v1';
+  const NOTE_KEY  = 'attendance.teacher.notes.v1';
+  const TODO_KEY  = 'attendance.teacher.todos.v1';
+  const NOTE_COLORS = {
+    red:    ['#ffd9d9', '#f4aeae'],
+    yellow: ['#fff2b3', '#ecd46b'],
+    green:  ['#cdf3d8', '#92d8a8'],
+    blue:   ['#d3e5ff', '#98bff4']
+  };
+  const PRIO = {
+    high: { label:'Tinggi', color:'#ef4444', rank:0 },
+    mid:  { label:'Sedang', color:'#f97316', rank:1 },
+    low:  { label:'Rendah', color:'#3b82f6', rank:2 }
+  };
+  const $ = id => document.getElementById(id);
+  const root = $('page-home');
+
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+  ));
+  const initials = name => {
+    const p = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if(!p.length) return '?';
+    return p.length === 1 ? p[0].slice(0,2).toUpperCase() : (p[0][0] + p[1][0]).toUpperCase();
+  };
+  function readArr(key){
+    try{
+      const p = JSON.parse(localStorage.getItem(key));
+      return Array.isArray(p) ? p : [];
+    }catch(e){ return []; }
+  }
+  function readSchool(){
+    try{ return JSON.parse(localStorage.getItem(SCHOOL_LS)) || {}; }catch(e){ return {}; }
+  }
+  // selisih hari dari hari ini (0 = hari ini, negatif = sudah lewat)
+  function dayDiff(k){
+    const [y, m, d] = k.split('-').map(Number);
+    const t = new Date();
+    const today = new Date(t.getFullYear(), t.getMonth(), t.getDate());
+    return Math.round((new Date(y, m-1, d) - today) / 86400000);
+  }
+  function gotoTab(key){
+    const b = document.querySelector('.tab[data-tab="' + key + '"]');
+    if(b) b.click();
+  }
+
+  /* ---------- welcome ---------- */
+  function renderWelcome(){
+    const sc = readSchool();
+    const kelas = sc.kelas || 'Nama Kelas';
+    const guru  = sc.guru  || '';
+    const today = A.todayKey();
+    $('homeClass').textContent = kelas;
+    $('homeGreet').textContent = guru && guru !== 'Nama Guru' ? 'Halo, ' + guru : 'Selamat datang kembali';
+    $('homeDate').textContent  = A.dayNameOf(today) + ', ' + A.fmtLong(today);
+    $('statStudents').textContent = A.getStudents().length;
+  }
+
+  /* ---------- jadwal hari ini ---------- */
+  function renderToday(){
+    const today = A.todayKey();
+    const items = A.itemsFor(today);
+    $('todayTitle').textContent = 'Jadwal hari ini';
+    $('statToday').textContent  = items.length;
+    $('homeToday').innerHTML = items.map(x => {
+      const rec = A.recFor(x.s, today, x.mk);
+      const st  = rec && rec.status ? rec.status : '';
+      const pill = st
+        ? `<span class="home-pill ${esc(st.toLowerCase())}">${esc(st)}</span>`
+        : `<span class="home-pill">Presensi</span>`;
+      const meta = [x.s.level, x.s.term].filter(Boolean).join(' • ') || '—';
+      return `
+        <button type="button" class="home-row" data-open-sid="${esc(x.s.id)}"
+                data-date="${today}" data-mkid="${esc(x.mk ? x.mk.id : '')}">
+          <span class="home-time">${esc(x.s.jam || '—')}</span>
+          <span class="home-main">
+            <b>${esc(x.s.nama)}${x.mk ? ' · Pengganti' : ''}</b>
+            <small>${esc(meta)}</small>
+          </span>
+          ${pill}
+        </button>`;
+    }).join('');
+    $('homeTodayEmpty').hidden = items.length > 0;
+  }
+
+  /* ---------- catatan dipin ---------- */
+  function renderNotes(){
+    const pinned = readArr(NOTE_KEY)
+      .filter(n => n.pinned)
+      .sort((a, b) => (b.updated || 0) - (a.updated || 0))
+      .slice(0, 3);
+    $('homeNotes').innerHTML = pinned.map(n => {
+      const [bg, bd] = NOTE_COLORS[n.color] || NOTE_COLORS.yellow;
+      return `<button type="button" class="home-note" data-goto="teacher"
+                style="background:${bg};border-color:${bd}">${esc(n.text)}</button>`;
+    }).join('');
+    $('homeNotesEmpty').hidden = pinned.length > 0;
+  }
+
+  /* ---------- to-do ---------- */
+  function renderTodos(){
+    const today = A.todayKey();
+    const todos = readArr(TODO_KEY)
+      .filter(t => t.status !== 'done')
+      .sort((a, b) =>
+        (PRIO[a.prio] ? PRIO[a.prio].rank : 1) - (PRIO[b.prio] ? PRIO[b.prio].rank : 1) ||
+        (a.due || '9999-99-99').localeCompare(b.due || '9999-99-99') ||
+        (a.created || 0) - (b.created || 0)
+      );
+    $('homeTodoCount').textContent = todos.length ? todos.length + ' tersisa' : '';
+    $('homeTodos').innerHTML = todos.slice(0, 5).map(t => {
+      const p = PRIO[t.prio] || PRIO.mid;
+      let due = '';
+      if(t.due){
+        const diff = dayDiff(t.due);
+        const cls = diff < 0 ? 'late' : (t.due === today ? 'today' : '');
+        const txt = diff < 0 ? 'Terlambat' : (t.due === today ? 'Hari ini' : A.fmtLong(t.due));
+        due = `<span class="home-due ${cls}">· ${esc(txt)}</span>`;
+      }
+      return `
+        <button type="button" class="home-todo" data-goto="teacher">
+          <span class="home-check"></span>
+          <span class="home-todo-body">
+            <span class="home-todo-txt">${esc(t.text)}</span>
+            <span class="home-todo-meta">
+              <span class="home-prio" style="background:${p.color}"></span>${esc(p.label)} ${due}
+            </span>
+          </span>
+        </button>`;
+    }).join('');
+    $('homeTodosEmpty').hidden = todos.length > 0;
+  }
+
+  /* ---------- tiket kelas pengganti yang belum diganti ---------- */
+  function renderPending(){
+    const list = A.pendingAll().sort((a, b) => b.date.localeCompare(a.date));
+    $('statPending').textContent = list.length;
+    $('homePendingCount').textContent = list.length ? list.length + ' tiket' : '';
+    $('homePending').innerHTML = list.slice(0, 8).map(p => `
+      <button type="button" class="home-row" data-ticket-date="${esc(p.date)}">
+        <span class="home-av">${esc(initials(p.s.nama))}</span>
+        <span class="home-main">
+          <b>${esc(p.s.nama)}</b>
+          <small>${esc(p.s.level || '—')} • ${esc(A.fmtLong(p.date))}</small>
+        </span>
+        <span class="home-pill ${esc(p.status.toLowerCase())}">${esc(p.status)}</span>
+      </button>`).join('');
+    $('homePendingEmpty').hidden = list.length > 0;
+  }
+
+  /* ---------- term yang akan selesai ---------- */
+  function renderEnding(){
+    const total = A.TOTAL_MEET;
+    const rows = A.getStudents().map(s => {
+      const done = A.doneCount(s);
+      const last = A.termLast(s);
+      const left = last ? dayDiff(last) : null;
+      const nearEnd = done >= total - 1 || (left !== null && left >= 0 && left <= 14);
+      return nearEnd ? { s, done, last, left } : null;
+    }).filter(Boolean).sort((a, b) => b.done - a.done);
+
+    $('homeEnding').innerHTML = rows.map(r => {
+      const sisa = total - r.done;
+      const info = [
+        `${r.done}/${total} pertemuan`,
+        r.left !== null && r.left >= 0 && r.last ? `berakhir ${A.fmtLong(r.last)}` : ''
+      ].filter(Boolean).join(' • ');
+      const pill = sisa <= 0
+        ? `<span class="home-pill warn">Siap rapor</span>`
+        : `<span class="home-pill warn">Sisa ${sisa}</span>`;
+      return `
+        <button type="button" class="home-row" data-goto="student">
+          <span class="home-av">${esc(initials(r.s.nama))}</span>
+          <span class="home-main">
+            <b>${esc(r.s.nama)}</b>
+            <small>${esc(info)}</small>
+          </span>
+          ${pill}
+        </button>`;
+    }).join('');
+    $('homeEndingEmpty').hidden = rows.length > 0;
+  }
+
+  function renderHome(){
+    renderWelcome();
+    renderToday();
+    renderNotes();
+    renderTodos();
+    renderPending();
+    renderEnding();
+  }
+
+  /* ---------- klik ---------- */
+  root.addEventListener('click', e => {
+    const row = e.target.closest('[data-open-sid]');
+    if(row){
+      gotoTab('attendance');
+      A.goto(row.dataset.date, row.dataset.openSid, row.dataset.mkid);
+      return;
+    }
+    const tk = e.target.closest('[data-ticket-date]');
+    if(tk){
+      gotoTab('attendance');
+      A.goto(tk.dataset.ticketDate);
+      return;
+    }
+    const g = e.target.closest('[data-goto]');
+    if(g) gotoTab(g.dataset.goto);
+  });
+
+  // statPending juga bisa membuka tab presensi
+  $('statPendingBtn').addEventListener('click', () => gotoTab('attendance'));
+
+  window.__homeRefresh = renderHome;
+  renderHome();
 })();
 
 </script>
