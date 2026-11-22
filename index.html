@@ -1142,6 +1142,13 @@
 .att-del-btn{width:100%;margin-top:8px;padding:11px;border-radius:14px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.08);font-family:inherit;font-size:12.5px;font-weight:700;color:#dc2626;cursor:pointer}
 .att-del-btn:active{transform:scale(.98)}
 .newterm{margin-top:16px;padding-top:14px;border-top:1px solid rgba(147,197,253,.35)}
+.prev-term{margin-top:14px}
+.prev-term-btn{width:100%;padding:11px;border-radius:14px;border:1px solid rgba(147,197,253,.45);background:rgba(255,255,255,.78);font-family:inherit;font-size:12.5px;font-weight:700;color:var(--blue-700);cursor:pointer}
+.prev-term-btn:active{transform:scale(.98)}
+.prev-term-list{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.prev-term-item{padding:11px 12px;border-radius:14px;background:rgba(59,130,246,.05);border:1px solid rgba(147,197,253,.35)}
+.prev-term-name{font-size:13px;font-weight:700}
+.prev-term-sub{font-size:11px;font-weight:500;color:var(--muted);margin-top:2px}
 
 </style>
 </head>
@@ -1580,6 +1587,11 @@
     <p class="hist-summary" id="histSummary"></p>
     <div class="hist-list" id="histList"></div>
    <div class="newterm" id="newTermBox" hidden>
+    <div class="prev-term" id="prevTermBox" hidden>
+  <button type="button" class="prev-term-btn" id="prevTermBtn">Term sebelumnya</button>
+  <div class="prev-term-list" id="prevTermList" hidden></div>
+</div>
+
   <span class="status-label">Term sudah lengkap (11 pertemuan)</span>
   <div class="field">
     <label for="ntDate">Tanggal mulai term baru</label>
@@ -2785,6 +2797,48 @@ tabs.forEach(tab => {
     selectedDate = newDate;
     render();
     if(navigator.vibrate) navigator.vibrate(12);
+  });
+   /* ---------- term sebelumnya ---------- */
+  const prevTermBox  = document.getElementById('prevTermBox');
+  const prevTermBtn  = document.getElementById('prevTermBtn');
+  const prevTermList = document.getElementById('prevTermList');
+  let prevSid = null;
+
+  function showPrevTerms(sid){
+    const s = getStudents().find(x => x.id === sid);
+    prevSid = sid;
+    prevTermList.hidden = true;
+    prevTermList.innerHTML = '';
+    prevTermBox.hidden = !(s && Array.isArray(s.termHistory) && s.termHistory.length);
+  }
+
+  prevTermBtn.addEventListener('click', () => {
+    const s = getStudents().find(x => x.id === prevSid);
+    if(!s || !Array.isArray(s.termHistory)) return;
+
+    const isOpen = !prevTermList.hidden;
+    if(isOpen){
+      prevTermList.hidden = true;
+      prevTermBtn.textContent = 'Term sebelumnya';
+      return;
+    }
+
+    prevTermList.innerHTML = s.termHistory.slice().reverse().map((t, i) => `
+      <div class="prev-term-item">
+        <div class="prev-term-name">${esc(t.term || 'Term ' + (s.termHistory.length - i))}</div>
+        <div class="prev-term-sub">${esc(fmtDate(t.termDate))} – ${esc(fmtDate(t.endDate))} • ${t.selesai} pertemuan tercatat</div>
+      </div>`).join('');
+    prevTermList.hidden = false;
+    prevTermBtn.textContent = 'Tutup term sebelumnya';
+  });
+
+  listEl.addEventListener('click', e => {
+    const h = e.target.closest('[data-history]');
+    if(h) showPrevTerms(h.dataset.history);
+  });
+  boardEl.addEventListener('click', e => {
+    const h = e.target.closest('[data-history]');
+    if(h) showPrevTerms(h.dataset.history);
   });
 
   /* ---------- init ---------- */
