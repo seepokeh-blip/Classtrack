@@ -1103,6 +1103,13 @@
 .hist-chip.st-none{background:rgba(148,163,184,.25);color:var(--muted)}
 .hist-detail{font-size:11.5px;line-height:1.5;margin-top:7px;overflow-wrap:anywhere}
 .hist-detail a{color:var(--blue-700);font-weight:700}
+.day-strip{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 4px;margin:0 -2px}
+.day-strip::-webkit-scrollbar{display:none}
+.day-chip{flex:1 0 auto;min-width:48px;padding:9px 6px;border:1px solid rgba(255,255,255,.95);border-radius:14px;background:rgba(255,255,255,.62);font-family:inherit;font-size:11.5px;font-weight:700;color:var(--muted);cursor:pointer;transition:background .2s,color .2s,transform .15s}
+.day-chip:active{transform:scale(.95)}
+.day-chip.active{background:linear-gradient(140deg,var(--blue-500),var(--blue-600));color:#fff;border-color:transparent;box-shadow:0 6px 14px rgba(37,99,235,.28)}
+.day-chip.today::after{content:"";display:block;width:4px;height:4px;border-radius:50%;background:var(--orange-500);margin:3px auto 0}
+.day-chip.active.today::after{background:#fff}
 
 </style>
 </head>
@@ -1265,7 +1272,7 @@
               <span class="today-stat-label">siswa</span>
             </div>
           </div>
-
+         <div class="day-strip" id="dayStrip"></div>
           <div class="toolbar-row">
             <span class="result-count" id="attResultCount">0 siswa</span>
 
@@ -2017,6 +2024,11 @@ tabs.forEach(tab => {
   let attView = 'list';
   let currentStatus = 'Hadir';
   let editingStudentId = null;
+  let selectedDay = null;
+ 
+  const DAY_SHORT = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+  const DAY_FULL  = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
+  const dayStripEl = document.getElementById('dayStrip');
 
   const listEl     = document.getElementById('attendanceList');
   const boardEl    = document.getElementById('attendanceBoard');
@@ -2215,19 +2227,38 @@ histModal.addEventListener('click', e => { if(e.target === histModal) closeHisto
       </div>`;
   }
 
-  function renderAttendance(){
+    function renderAttendance(){
     const students = getStudents();
     const today    = todayDayName();
-    const todays   = students.filter(s => s.hari === today);
+    if(!selectedDay) selectedDay = today;
+
+    const todays = students.filter(s => s.hari === selectedDay);
     todays.sort((a,b) => startMinutes(a.jam) - startMinutes(b.jam));
 
-    document.getElementById('todayDay').textContent     = today;
-    document.getElementById('todayDate').textContent    = formatTodayDate();
-    document.getElementById('todayCount').textContent   = todays.length;
+    const isToday = selectedDay === today;
+    const d = new Date();
+    const offset = DAY_FULL.indexOf(selectedDay) - DAY_FULL.indexOf(today);
+    const shown = new Date(d.getFullYear(), d.getMonth(), d.getDate() + offset);
+
+    document.getElementById('todayDay').textContent      = selectedDay;
+    document.getElementById('todayDate').textContent     = isToday
+      ? formatTodayDate()
+      : shown.getDate() + ' ' + MONTHS_LONG[shown.getMonth()] + ' ' + shown.getFullYear();
+    document.querySelector('.today-label').textContent   = isToday ? 'Jadwal hari ini' : 'Jadwal';
+    document.getElementById('todayCount').textContent    = todays.length;
     document.getElementById('attResultCount').textContent = todays.length + ' siswa';
 
-    const isEmpty = todays.length === 0;
+    // strip hari
+    const order = [1,2,3,4,5,6,0]; // Senin..Minggu
+    dayStripEl.innerHTML = order.map((idx, i) => {
+      const name = DAY_FULL[i];
+      const cls = ['day-chip',
+                   name === selectedDay ? 'active' : '',
+                   name === today ? 'today' : ''].join(' ').trim();
+      return `<button type="button" class="${cls}" data-day="${name}">${DAY_SHORT[i]}</button>`;
+    }).join('');
 
+    const isEmpty = todays.length === 0;
     listEl.innerHTML  = todays.map(listItemHTML).join('');
     boardEl.innerHTML = todays.map(boardCardHTML).join('');
 
@@ -2235,9 +2266,10 @@ histModal.addEventListener('click', e => { if(e.target === histModal) closeHisto
     boardEl.classList.toggle('is-hidden', isEmpty || attView !== 'board');
 
     emptyEl.classList.toggle('show', isEmpty);
-    emptyTitle.textContent = 'Tidak ada jadwal hari ini';
-    emptySub.textContent   = 'Belum ada siswa yang dijadwalkan pada hari ' + today + '.';
+    emptyTitle.textContent = isToday ? 'Tidak ada jadwal hari ini' : 'Tidak ada jadwal ' + selectedDay;
+    emptySub.textContent   = 'Belum ada siswa yang dijadwalkan pada hari ' + selectedDay + '.';
   }
+
 
   /* ---------- modal ---------- */
   function openModal(sid){
@@ -2345,6 +2377,13 @@ histModal.addEventListener('click', e => { if(e.target === histModal) closeHisto
       renderAttendance();
       if(navigator.vibrate) navigator.vibrate(6);
     });
+  });
+   dayStripEl.addEventListener('click', e => {
+    const btn = e.target.closest('[data-day]');
+    if(!btn) return;
+    selectedDay = btn.getAttribute('data-day');
+    renderAttendance();
+    if(navigator.vibrate) navigator.vibrate(6);
   });
 
   /* expose refresh untuk tab switch */
