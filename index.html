@@ -1150,6 +1150,7 @@
 .prev-term-name{font-size:13px;font-weight:700}
 .prev-term-sub{font-size:11px;font-weight:500;color:var(--muted);margin-top:2px}
 .prev-term-list[hidden]{display:none}
+.newterm[hidden]{display:none !important}
 
 </style>
 </head>
@@ -2083,15 +2084,6 @@ tabs.forEach(tab => {
       render();
     }
   }
-  listEl.addEventListener('click', handleActions);
-  boardEl.addEventListener('click', handleActions);
-
-  searchEl.addEventListener('input', () => {
-    query = searchEl.value;
-    animateNext = false;
-    render();
-  });
-
   segBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       if(btn.classList.contains('active')) return;
@@ -2600,6 +2592,9 @@ tabs.forEach(tab => {
   function openHistory(sid){
     const s = getStudents().find(x => x.id === sid);
     if(!s) return;
+       showNewTermBox(sid);
+    showPrevTerms(sid);
+
     const meets = getMeetings(s);
 
     const c = { Hadir:0, Sakit:0, Izin:0, Alpa:0, Diganti:0 };
@@ -2837,16 +2832,6 @@ tabs.forEach(tab => {
     prevTermList.hidden = false;
     prevTermBtn.textContent = 'Tutup term sebelumnya';
   });
-
-  listEl.addEventListener('click', e => {
-    const h = e.target.closest('[data-history]');
-    if(h) showPrevTerms(h.dataset.history);
-  });
-  boardEl.addEventListener('click', e => {
-    const h = e.target.closest('[data-history]');
-    if(h) showPrevTerms(h.dataset.history);
-  });
-
   /* ---------- init ---------- */
   window.__attendanceRefresh = render;
   render();
