@@ -1242,6 +1242,12 @@
 .tc-body{cursor:pointer}
 .student-item,.board-card,.attendance-item,.attendance-card{cursor:pointer}
 .student-item:active,.board-card:active,.attendance-item:active,.attendance-card:active{transform:scale(.985)}
+.term-hint{margin-top:8px;padding:9px 11px;border-radius:12px;background:rgba(59,130,246,.08);border:1px solid rgba(147,197,253,.5);color:var(--blue-700);font-size:11.5px;font-weight:600;line-height:1.45}
+.term-hint[hidden]{display:none}
+.term-hint.err{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.4);color:#dc2626}
+.newterm-btn{height:42px;margin-top:8px;font-size:13px;border-radius:14px}
+.hist-terms{margin-bottom:10px}
+.hist-terms[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -1612,6 +1618,7 @@
             <label for="f-term">Term (pilih tanggal)</label>
             <input id="f-term" name="termDate" type="date">
             <div class="term-preview" id="termPreview" hidden></div>
+            <div class="term-hint" id="termHint" hidden></div>
           </div>
         </div>
 
@@ -1704,6 +1711,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
     </div>
+    <div class="day-strip hist-terms" id="histTerms" hidden></div>
     <p class="hist-summary" id="histSummary"></p>
     <div class="hist-list" id="histList"></div>
   </div>
@@ -1856,6 +1864,7 @@ tabs.forEach(tab => {
   let query       = '';
   let animateNext = true;
   let editingId   = null;
+  let newTermCtx  = null;   // { id, minDate, dates } saat mode Term Baru
 
   try{
     const raw = localStorage.getItem(LS_KEY);
@@ -1976,9 +1985,64 @@ tabs.forEach(tab => {
     }, 340);
   }
 
+  const termHint = document.getElementById('termHint');
+  function fmtKey(k){
+    const [y,m,d] = String(k).split('-').map(Number);
+    return d + ' ' + MONTHS_ID[m-1] + ' ' + y;
+  }
+  function resetTermMode(){
+    newTermCtx = null;
+    termEl.removeAttribute('min');
+    termEl.classList.remove('tc-invalid');
+    termHint.hidden = true;
+    termHint.classList.remove('err');
+    termHint.textContent = '';
+  }
+  termEl.addEventListener('input', () => {
+    termEl.classList.remove('tc-invalid');
+    termHint.classList.remove('err');
+  });
+
+  // Mulai term baru: isian sama seperti edit siswa, tanggal term dikosongkan
+  function openNewTerm(id){
+    const s = students.find(x => x.id === id);
+    if(!s) return;
+    const info = (window.AttendanceTerm && window.AttendanceTerm.prepare(id)) || { minDate:'', dates:[], pending:0 };
+
+    editingId  = null;
+    newTermCtx = { id: s.id, minDate: info.minDate || '', dates: info.dates || [] };
+
+    document.getElementById('f-nama').value  = s.nama  || '';
+    document.getElementById('f-lahir').value = s.lahir || '';
+    document.getElementById('f-umur').value  = s.umur  || '';
+    document.getElementById('f-level').value = s.level || '';
+    document.getElementById('f-hari').value  = s.hari  || '';
+    const [mulai, selesai] = splitTimeRange(s.jam);
+    document.getElementById('f-jam-mulai').value   = mulai;
+    document.getElementById('f-jam-selesai').value = selesai;
+
+    termEl.value = '';
+    if(newTermCtx.minDate) termEl.min = newTermCtx.minDate;
+    updateTermPreview();
+
+    const notes = [];
+    if(newTermCtx.minDate) notes.push('Tanggal mulai term baru: ' + fmtKey(newTermCtx.minDate) + ' atau sesudahnya.');
+    if(info.pending) notes.push(info.pending + ' tiket kelas pengganti yang belum dipakai tidak berlaku lagi di term baru.');
+    notes.push('Riwayat presensi term sebelumnya tetap tersimpan dan bisa dilihat di tombol riwayat.');
+    termHint.textContent = notes.join(' ');
+    termHint.classList.remove('err');
+    termHint.hidden = false;
+
+    modalTitle.textContent = 'Term Baru';
+    submitText.textContent = 'Mulai Term Baru';
+    modal.classList.add('open');
+  }
+  window.openNewTerm = openNewTerm;
+
   function closeModal(){
     modal.classList.remove('open');
     editingId = null;
+    resetTermMode();
   }
 
   addBtn.addEventListener('click', openAddModal);
@@ -2001,6 +2065,14 @@ tabs.forEach(tab => {
     }
 
     const termDate   = String(data.get('termDate') || '');
+
+    if(newTermCtx && (!termDate || (newTermCtx.minDate && termDate < newTermCtx.minDate))){
+      termEl.classList.add('tc-invalid');
+      termHint.classList.add('err');
+      termHint.hidden = false;
+      termEl.focus();
+      return;
+    }
     const term       = termLabelFromDate(termDate);
     const jamMulai   = window.normTime(data.get('jamMulai'));
     const jamSelesai = window.normTime(data.get('jamSelesai'));
@@ -2021,7 +2093,22 @@ tabs.forEach(tab => {
       termDate: termDate
     };
 
-    if(editingId){
+    if(newTermCtx){
+      const idx = students.findIndex(x => x.id === newTermCtx.id);
+      if(idx > -1){
+        const old = students[idx];
+        const prev = (old.prevTerms || []).concat([{
+          termDate: old.termDate || '',
+          term:     old.term || '',
+          hari:     old.hari || '',
+          jam:      old.jam || '',
+          level:    old.level || '',
+          dates:    newTermCtx.dates.slice(),
+          endedAt:  Date.now()
+        }]);
+        students[idx] = Object.assign({}, old, record, { prevTerms: prev });
+      }
+    }else if(editingId){
       const idx = students.findIndex(x => x.id === editingId);
       if(idx > -1) students[idx] = Object.assign({}, students[idx], record);
     }else{
@@ -2038,6 +2125,7 @@ tabs.forEach(tab => {
 
     animateNext = true;
     render();
+    if(window.__attendanceRefresh) window.__attendanceRefresh();
 
     if(navigator.vibrate) navigator.vibrate(12);
   });
@@ -2376,6 +2464,17 @@ tabs.forEach(tab => {
     if(m.rec.status !== 'Hadir' && findMakeup(s.id, m.date)) return 'st-diganti';
     return 'st-' + m.rec.status.toLowerCase();
   }
+  // dipakai modul Student saat membuka "Term Baru"
+  window.AttendanceTerm = {
+    prepare(sid){
+      const s = getStudents().find(x => x.id === sid);
+      if(!s) return { minDate:'', dates:[], pending:0 };
+      const dates = regularDates(s);
+      const all = dates.concat(makeups.filter(m => m.sid === sid).map(m => m.date)).sort();
+      const last = all.length ? all[all.length - 1] : '';
+      return { minDate: last ? addDays(last, 1) : '', dates, pending: pendingAbsences(s).length };
+    }
+  };
   function pendingAbsences(s){
     return getMeetings(s)
       .filter(m => m.rec && ABSENT.includes(m.rec.status) && !findMakeup(s.id, m.date))
@@ -2392,6 +2491,15 @@ tabs.forEach(tab => {
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 11h2"/></svg>
       <span>${msg}</span>
     </div>`;
+  }
+
+  function newTermBtnHTML(s){
+    const done = getMeetings(s).filter(m => m.rec).length;
+    if(done < TOTAL_MEET) return '';
+    return `<button type="button" class="btn-add-top wide newterm-btn" data-newterm="${esc(s.id)}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      Term Baru
+    </button>`;
   }
 
   function progressHTML(s){
@@ -2508,6 +2616,7 @@ tabs.forEach(tab => {
           <div class="item-meta">${lvBadge(s)}${esc(metaOf(s) + proj)}</div>
           ${progressHTML(s)}
           ${reportWarnHTML(s)}
+          ${newTermBtnHTML(s)}
         </div>
         ${statusBtnHtml(s.id, rec, date, mk ? mk.id : '')}
       </div>`;
@@ -2524,11 +2633,14 @@ tabs.forEach(tab => {
         ${rec && rec.status === 'Hadir' && rec.project ? `<div class="att-card-meta">📁 ${esc(rec.project)}</div>` : ''}
         ${progressHTML(s)}
         ${reportWarnHTML(s)}
+        ${newTermBtnHTML(s)}
         ${statusBtnHtml(s.id, rec, date, mk ? mk.id : '')}
       </div>`;
   }
 
   function handleListClick(e){
+    const nt = e.target.closest('[data-newterm]');
+    if(nt){ window.openNewTerm(nt.dataset.newterm); return; }
     const h = e.target.closest('[data-history]');
     if(h){ openHistory(h.dataset.history); return; }
     const p = e.target.closest('[data-presensi]');
@@ -2715,10 +2827,34 @@ tabs.forEach(tab => {
   });
 
   /* ---------- modal riwayat ---------- */
-  function openHistory(sid){
+  const histTerms = document.getElementById('histTerms');
+  let histSid = null;
+
+  function openHistory(sid, ti){
     const s = getStudents().find(x => x.id === sid);
     if(!s) return;
-    const meets = getMeetings(s);
+    const prev = s.prevTerms || [];
+    if(ti === undefined || ti === null || ti < 0 || ti >= prev.length) ti = -1;
+    histSid = sid;
+
+    const meets = ti === -1
+      ? getMeetings(s)
+      : (prev[ti].dates || []).map((date, i) => ({ no: i+1, date, rec: getRec(date, s.id) }));
+
+    // pilihan term (hanya muncul jika sudah pernah ganti term)
+    if(prev.length){
+      const chip = (idx, n, label) =>
+        `<button type="button" class="day-chip${idx === ti ? ' active' : ''}" data-ti="${idx}">Term ${n}<small>${esc(label)}</small></button>`;
+      let chips = chip(-1, prev.length + 1, s.term || 'Saat ini');
+      for(let i = prev.length - 1; i >= 0; i--){
+        chips += chip(i, i + 1, prev[i].term || (prev[i].termDate ? fmtDate(prev[i].termDate) : 'Selesai'));
+      }
+      histTerms.innerHTML = chips;
+      histTerms.hidden = false;
+    }else{
+      histTerms.hidden = true;
+      histTerms.innerHTML = '';
+    }
 
     const c = { Hadir:0, Sakit:0, Izin:0, Alpa:0, Diganti:0 };
     meets.forEach(m => {
@@ -2729,7 +2865,9 @@ tabs.forEach(tab => {
     });
 
     histName.textContent = s.nama;
-    histSum.textContent  = 'Hadir ' + c.Hadir + ' • Sakit ' + c.Sakit + ' • Izin ' + c.Izin
+    const termInfo = ti === -1 ? '' : 'Term ' + (ti + 1) + ' (selesai) • ' + [prev[ti].hari, prev[ti].jam].filter(Boolean).join(' ') + '\n';
+    histSum.style.whiteSpace = 'pre-line';
+    histSum.textContent  = termInfo + 'Hadir ' + c.Hadir + ' • Sakit ' + c.Sakit + ' • Izin ' + c.Izin
                          + ' • Alpa ' + c.Alpa + ' • Diganti ' + c.Diganti;
 
     let html = '';
@@ -2770,6 +2908,10 @@ tabs.forEach(tab => {
     histModal.classList.add('open');
     if(navigator.vibrate) navigator.vibrate(8);
   }
+  histTerms.addEventListener('click', e => {
+    const b = e.target.closest('[data-ti]');
+    if(b && histSid) openHistory(histSid, parseInt(b.dataset.ti, 10));
+  });
   histClose.addEventListener('click', () => histModal.classList.remove('open'));
   histModal.addEventListener('click', e => { if(e.target === histModal) histModal.classList.remove('open'); });
 
