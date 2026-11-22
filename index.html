@@ -1141,6 +1141,7 @@
 .report-warn svg{width:15px;height:15px;flex-shrink:0}
 .att-del-btn{width:100%;margin-top:8px;padding:11px;border-radius:14px;border:1px solid rgba(239,68,68,.35);background:rgba(239,68,68,.08);font-family:inherit;font-size:12.5px;font-weight:700;color:#dc2626;cursor:pointer}
 .att-del-btn:active{transform:scale(.98)}
+.newterm{margin-top:16px;padding-top:14px;border-top:1px solid rgba(147,197,253,.35)}
 
 </style>
 </head>
@@ -1578,6 +1579,15 @@
     </div>
     <p class="hist-summary" id="histSummary"></p>
     <div class="hist-list" id="histList"></div>
+   <div class="newterm" id="newTermBox" hidden>
+  <span class="status-label">Term sudah lengkap (11 pertemuan)</span>
+  <div class="field">
+    <label for="ntDate">Tanggal mulai term baru</label>
+    <input id="ntDate" type="date">
+  </div>
+  <button type="button" class="btn-primary" id="ntStart">Mulai term baru</button>
+</div>
+
   </div>
 </div>
 <div class="modal-overlay" id="mkModal">
@@ -2708,6 +2718,74 @@ tabs.forEach(tab => {
   document.getElementById('mkBack').addEventListener('click', () => showStep(1));
   document.getElementById('mkSave').addEventListener('click', saveMakeup);
   mkModal.addEventListener('click', e => { if(e.target === mkModal) closeMakeup(); });
+  /* ---------- term baru ---------- */
+  const newTermBox = document.getElementById('newTermBox');
+  const ntDate     = document.getElementById('ntDate');
+  const ntStart    = document.getElementById('ntStart');
+  let ntSid = null;
+
+  function termLabel(k){
+    const d = parseKey(k);
+    return MONTHS_ID[d.getMonth()] + '-' + MONTHS_ID[parseKey(addMonths(k, 2)).getMonth()];
+  }
+
+  function showNewTermBox(sid){
+    const s = getStudents().find(x => x.id === sid);
+    ntSid = sid;
+    ntDate.value = '';
+    const done = s ? getMeetings(s).filter(m => m.rec).length : 0;
+    newTermBox.hidden = !(s && s.termDate && done >= TOTAL_MEET);
+  }
+
+  listEl.addEventListener('click', e => {
+    const h = e.target.closest('[data-history]');
+    if(h) showNewTermBox(h.dataset.history);
+  });
+  boardEl.addEventListener('click', e => {
+    const h = e.target.closest('[data-history]');
+    if(h) showNewTermBox(h.dataset.history);
+  });
+
+  ntStart.addEventListener('click', () => {
+    const students = getStudents();
+    const idx = students.findIndex(x => x.id === ntSid);
+    if(idx < 0) return;
+    const s = students[idx];
+    const newDate = ntDate.value;
+    if(!newDate){ ntDate.focus(); return; }
+
+    const meets = getMeetings(s);
+    const last = meets.length ? meets[meets.length - 1].date : s.termDate;
+    if(newDate <= last){
+      window.alert('Tanggal term baru harus setelah pertemuan terakhir (' + fmtDate(last) + ').');
+      return;
+    }
+    if(!window.confirm('Mulai term baru untuk ' + s.nama + ' mulai ' + fmtLong(newDate) + '? Data term sebelumnya tetap tersimpan.')) return;
+
+    const archive = Array.isArray(s.termHistory) ? s.termHistory.slice() : [];
+    archive.push({
+      termDate: s.termDate,
+      term: s.term || termLabel(s.termDate),
+      endDate: last,
+      selesai: meets.filter(m => m.rec).length
+    });
+
+    students[idx] = Object.assign({}, s, {
+      termDate: newDate,
+      term: termLabel(newDate),
+      termHistory: archive
+    });
+    save(STUDENT_LS, students);
+
+    // sinyal ke modul Student agar memuat ulang data siswa
+    window.dispatchEvent(new Event('levels-changed'));
+
+    newTermBox.hidden = true;
+    histModal.classList.remove('open');
+    selectedDate = newDate;
+    render();
+    if(navigator.vibrate) navigator.vibrate(12);
+  });
 
   /* ---------- init ---------- */
   window.__attendanceRefresh = render;
