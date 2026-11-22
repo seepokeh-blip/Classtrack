@@ -1118,6 +1118,8 @@
 .mk-name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mk-sub{font-size:11px;font-weight:500;color:var(--muted);margin-top:2px}
 .mk-back{margin-top:12px;width:100%;padding:11px;border-radius:14px;border:1px solid rgba(147,197,253,.45);background:rgba(255,255,255,.78);font-family:inherit;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer}
+.day-chip.nav{flex:0 0 40px;min-width:40px;font-size:18px;padding:9px 0}
+.day-chip small{display:block;font-size:10px;font-weight:600;opacity:.85;margin-top:2px}
 
 </style>
 </head>
@@ -2057,33 +2059,142 @@ tabs.forEach(tab => {
 (function(){
   const ATT_LS     = 'attendance.records.v1';
   const STUDENT_LS = 'attendance.students.v1';
-
-  const DAYS_ID     = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const MK_LS      = 'attendance.makeups.v1';
+  const TOTAL_MEET = 11;
+  const ABSENT     = ['Sakit','Izin','Alpa'];
+  const DAYS_ID    = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const DAY_SHORT  = ['Sen','Sel','Rab','Kam','Jum','Sab','Min']; // mulai Senin
   const MONTHS_LONG = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const MONTHS_ID   = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 
-  let records = {};
-  try {
-    const raw = localStorage.getItem(ATT_LS);
-    if(raw) records = JSON.parse(raw) || {};
-  } catch(e){ records = {}; }
+  /* ---------- storage ---------- */
+  function load(key, fallback){
+    try{ const raw = localStorage.getItem(key); return raw ? (JSON.parse(raw) ?? fallback) : fallback; }
+    catch(e){ return fallback; }
+  }
+  function save(key, val){
+    try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){}
+  }
+  let records = load(ATT_LS, {});
+  let makeups = load(MK_LS, []);
 
+  /* ---------- state ---------- */
   let attView = 'list';
   let currentStatus = 'Hadir';
   let editingStudentId = null;
-  let selectedDay = null;
- 
-  const DAY_SHORT = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
-  const DAY_FULL  = ['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'];
-  const dayStripEl = document.getElementById('dayStrip');
+  let editingDate = null;
+  let mkCurrent = null;
 
+  /* ---------- date helpers ---------- */
+  const pad      = n => String(n).padStart(2,'0');
+  const keyOf    = d => d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+  const parseKey = k => { const [y,m,d] = k.split('-').map(Number); return new Date(y, m-1, d); };
+  const todayKey = () => keyOf(new Date());
+  const addDays  = (k,n) => { const d = parseKey(k); d.setDate(d.getDate()+n); return keyOf(d); };
+  const addMonths= (k,n) => { const d = parseKey(k); d.setMonth(d.getMonth()+n); return keyOf(d); };
+  const dayNameOf= k => DAYS_ID[parseKey(k).getDay()];
+  const fmtDate  = k => { const d = parseKey(k); return d.getDate()+' '+MONTHS_ID[d.getMonth()]+' '+d.getFullYear(); };
+  const fmtLong  = k => { const d = parseKey(k); return d.getDate()+' '+MONTHS_LONG[d.getMonth()]+' '+d.getFullYear(); };
+
+  let selectedDate = todayKey();
+
+  /* ---------- misc helpers ---------- */
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+  ));
+  function initials(name){
+    const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+    if(!parts.length) return '?';
+    if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  function startMinutes(jam){
+    const m = String(jam || '').match(/(\d{1,2})[:.](\d{2})/);
+    return m ? (parseInt(m[1],10)*60 + parseInt(m[2],10)) : 99999;
+  }
+  function normalizeUrl(v){
+    if(!v) return '';
+    v = String(v).trim();
+    if(!/^https?:\/\//i.test(v)) v = 'https://' + v;
+    return v;
+  }
+  function getStudents(){ return load(STUDENT_LS, []); }
+
+  /* ---------- term & records ---------- */
+  function inTerm(s, date){
+    if(!s.termDate) return true;
+    return date >= s.termDate && date < addMonths(s.termDate, 3);
+  }
+  // jadwal reguler: hari sama dengan hari siswa, dan masih dalam term
+  function isRegular(s, date){
+    return !!s.hari && dayNameOf(date) === s.hari && inTerm(s, date);
+  }
+  function findMakeup(sid, absentDate){
+    return makeups.find(m => m.sid === sid && m.absentDate === absentDate) || null;
+  }
+  function getRec(date, sid){
+    return (records[date] && records[date][sid]) || null;
+  }
+  function setRec(date, sid, data){
+    if(!records[date]) records[date] = {};
+    records[date][sid] = data;
+    save(ATT_LS, records);
+  }
+  // riwayat 11 pertemuan reguler saja (pengganti tidak dihitung)
+  function getMeetings(s){
+    const rows = [];
+    Object.keys(records).sort().forEach(date => {
+      if(!isRegular(s, date)) return;
+      const r = getRec(date, s.id);
+      if(r) rows.push(Object.assign({ date }, r));
+    });
+    return rows.slice(0, TOTAL_MEET);
+  }
+  function pendingAbsences(s){
+    const out = [];
+    Object.keys(records).sort().forEach(date => {
+      if(!isRegular(s, date)) return;
+      const r = getRec(date, s.id);
+      if(r && ABSENT.includes(r.status) && !findMakeup(s.id, date)){
+        out.push({ date, status: r.status });
+      }
+    });
+    return out;
+  }
+  function segClass(s, r){
+    if(r.status === 'Hadir') return 'st-hadir';
+    if(findMakeup(s.id, r.date)) return 'st-diganti';
+    return 'st-' + r.status.toLowerCase();
+  }
+  function progressHTML(s){
+    const m = getMeetings(s);
+    let segs = '';
+    for(let i = 0; i < TOTAL_MEET; i++){
+      segs += '<i class="' + (m[i] ? segClass(s, m[i]) : '') + '"></i>';
+    }
+    return `
+      <div class="hist-row">
+        <div class="hist-bar">${segs}</div>
+        <span class="hist-count">${m.length}/${TOTAL_MEET}</span>
+        <button type="button" class="hist-btn" data-history="${esc(s.id)}" aria-label="Lihat riwayat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>
+          </svg>
+        </button>
+      </div>`;
+  }
+
+  /* ---------- DOM refs ---------- */
   const listEl     = document.getElementById('attendanceList');
   const boardEl    = document.getElementById('attendanceBoard');
   const emptyEl    = document.getElementById('attEmpty');
   const emptyTitle = document.getElementById('attEmptyTitle');
   const emptySub   = document.getElementById('attEmptySub');
+  const dayStripEl = document.getElementById('dayStrip');
+  const attSegBtns = document.querySelectorAll('#page-attendance .seg-btn');
 
-  const modal      = document.getElementById('attModal');
-  const modalClose = document.getElementById('attModalClose');
+  const attModal   = document.getElementById('attModal');
+  const attModalClose = document.getElementById('attModalClose');
   const attAvatar  = document.getElementById('attAvatar');
   const attName    = document.getElementById('attStudentName');
   const attMeta    = document.getElementById('attStudentMeta');
@@ -2094,273 +2205,153 @@ tabs.forEach(tab => {
   const linkChip   = document.getElementById('attLinkChip');
   const hadirFields= document.getElementById('hadirFields');
   const saveBtn    = document.getElementById('attSaveBtn');
-  const attSegBtns = document.querySelectorAll('#page-attendance .seg-btn');
-  const statusBtns = document.querySelectorAll('.status-btn');
+  const statusBtns = document.querySelectorAll('#attModal .status-btn');
 
-  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
-    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
-  ));
+  const histModal  = document.getElementById('histModal');
+  const histList   = document.getElementById('histList');
+  const histName   = document.getElementById('histName');
+  const histSum    = document.getElementById('histSummary');
+  const histClose  = document.getElementById('histClose');
 
-  function initials(name){
-    const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
-    if(!parts.length) return '?';
-    if(parts.length === 1) return parts[0].slice(0,2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
-  }
+  const mkModal    = document.getElementById('mkModal');
+  const mkList     = document.getElementById('mkList');
+  const mkStep1    = document.getElementById('mkStep1');
+  const mkStep2    = document.getElementById('mkStep2');
+  const mkSelInfo  = document.getElementById('mkSelInfo');
+  const mkDate     = document.getElementById('mkDate');
 
-  function startMinutes(jam){
-    const m = String(jam || '').match(/(\d{1,2})[:.](\d{2})/);
-    return m ? (parseInt(m[1],10)*60 + parseInt(m[2],10)) : 99999;
-  }
-
-  function normalizeUrl(v){
-    if(!v) return '';
-    v = String(v).trim();
-    if(!/^https?:\/\//i.test(v)) v = 'https://' + v;
-    return v;
-  }
-
-  function getStudents(){
-    try {
-      const raw = localStorage.getItem(STUDENT_LS);
-      return raw ? JSON.parse(raw) : [];
-    } catch(e){ return []; }
-  }
-
-  function todayKey(){
-    const d = new Date();
-    return d.getFullYear() + '-' +
-           String(d.getMonth()+1).padStart(2,'0') + '-' +
-           String(d.getDate()).padStart(2,'0');
-  }
-
-  function todayDayName(){ return DAYS_ID[new Date().getDay()]; }
-
-  function formatTodayDate(){
-    const d = new Date();
-    return d.getDate() + ' ' + MONTHS_LONG[d.getMonth()] + ' ' + d.getFullYear();
-  }
-
-  function getTodayRecord(sid){
-    const t = todayKey();
-    return (records[t] && records[t][sid]) || null;
-  }
-
-  function saveTodayRecord(sid, data){
-    const t = todayKey();
-    if(!records[t]) records[t] = {};
-    records[t][sid] = data;
-    try { localStorage.setItem(ATT_LS, JSON.stringify(records)); } catch(e){}
-  }
- const TOTAL_MEET = 11;
-const histModal = document.getElementById('histModal');
-const histList  = document.getElementById('histList');
-const histName  = document.getElementById('histName');
-const histSum   = document.getElementById('histSummary');
-
-function fmtDate(k){
-  const p = k.split('-');
-  return (+p[2]) + ' ' + MONTHS_LONG[+p[1]-1].slice(0,3) + ' ' + p[0];
-}
-
-function getMeetings(s){
-  const rows = [];
-  Object.keys(records).sort().forEach(date => {
-    if(s.termDate && date < s.termDate) return;
-    const r = records[date] && records[date][s.id];
-    if(r) rows.push(Object.assign({ date }, r));
-  });
-  return rows.slice(0, TOTAL_MEET);
-}
-
-function progressHTML(s){
-  const m = getMeetings(s);
-  let segs = '';
-  for(let i = 0; i < TOTAL_MEET; i++){
-    segs += '<i class="' + (m[i] ? segClass(s, m[i]) : '') + '"></i>';
-  }
-  return `
-    <div class="hist-row">
-      <div class="hist-bar">${segs}</div>
-      <span class="hist-count">${m.length}/${TOTAL_MEET}</span>
-      <button type="button" class="hist-btn" data-history="${esc(s.id)}" aria-label="Lihat riwayat">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>
-        </svg>
-      </button>
-    </div>`;
-}
-function openHistory(sid){
-  const s = getStudents().find(x => x.id === sid);
-  if(!s) return;
-  const m = getMeetings(s);
-  const c = { Hadir:0, Sakit:0, Izin:0, Alpa:0, Diganti:0 };
-  m.forEach(r => {
-    const mk = r.status !== 'Hadir' ? findMakeup(s.id, r.date) : null;
-    if(mk) c.Diganti++;
-    else if(c[r.status] !== undefined) c[r.status]++;
-  });
-
-  histName.textContent = s.nama;
-  histSum.textContent  = 'Hadir ' + c.Hadir + ' • Sakit ' + c.Sakit + ' • Izin ' + c.Izin
-                       + ' • Alpa ' + c.Alpa + ' • Diganti ' + c.Diganti;
-
-  let html = '';
-  for(let i = 0; i < TOTAL_MEET; i++){
-    const r = m[i];
-    if(!r){
-      html += `<div class="hist-item none"><div class="hist-top">
-        <div><div class="hist-no">Pertemuan ${i+1}</div></div>
-        <span class="hist-chip st-none">Belum</span></div></div>`;
-      continue;
+  /* ---------- strip hari & minggu ---------- */
+  function renderStrip(){
+    const today = todayKey();
+    const mon = addDays(selectedDate, -((parseKey(selectedDate).getDay() + 6) % 7));
+    let html = '<button type="button" class="day-chip nav" data-nav="-7" aria-label="Minggu sebelumnya">‹</button>';
+    for(let i = 0; i < 7; i++){
+      const k = addDays(mon, i);
+      const cls = ['day-chip',
+                   k === selectedDate ? 'active' : '',
+                   k === today ? 'today' : ''].join(' ').trim();
+      html += `<button type="button" class="${cls}" data-date="${k}">${DAY_SHORT[i]}<small>${parseKey(k).getDate()}</small></button>`;
     }
-    const mk = r.status !== 'Hadir' ? findMakeup(s.id, r.date) : null;
-    const chipCls = mk ? 'st-diganti' : 'st-' + r.status.toLowerCase();
-    const chipTxt = mk ? 'Diganti' : r.status;
-
-    const det = [];
-    if(mk) det.push('🔁 Diganti pada ' + esc(fmtDate(mk.date)));
-    if(r.project) det.push('📁 ' + esc(r.project));
-    if(r.link)    det.push('<a href="' + esc(r.link) + '" target="_blank" rel="noopener">Buka link</a>');
-    if(r.catatan) det.push('📝 ' + esc(r.catatan));
-
-    html += `<div class="hist-item"><div class="hist-top">
-      <div><div class="hist-no">Pertemuan ${i+1}</div><div class="hist-date">${esc(fmtDate(r.date))}</div></div>
-      <span class="hist-chip ${chipCls}">${esc(chipTxt)}</span></div>
-      ${det.length ? '<div class="hist-detail">' + det.join('<br>') + '</div>' : ''}</div>`;
-  }
-  histList.innerHTML = html;
-  histModal.classList.add('open');
-  if(navigator.vibrate) navigator.vibrate(8);
-}
-
-function closeHistory(){ histModal.classList.remove('open'); }
-document.getElementById('histClose').addEventListener('click', closeHistory);
-histModal.addEventListener('click', e => { if(e.target === histModal) closeHistory(); });
-
-  /* ---------- rendering ---------- */
-  function statusBtnHtml(sid, rec){
-    if(!rec) return `<button type="button" class="presensi-btn" data-presensi="${esc(sid)}">Presensi</button>`;
-    const cls = 'st-' + rec.status.toLowerCase();
-    return `<button type="button" class="presensi-btn ${cls}" data-presensi="${esc(sid)}">${esc(rec.status)}</button>`;
+    html += '<button type="button" class="day-chip nav" data-nav="7" aria-label="Minggu berikutnya">›</button>';
+    dayStripEl.innerHTML = html;
   }
 
-  function listMeta(s, rec){
-    const parts = [];
-    if(s.level) parts.push(s.level);
-    if(s.term)  parts.push(s.term);
-    if(s.jam)   parts.push(s.jam);
-    if(rec && rec.status === 'Hadir' && rec.project) parts.push('📁 ' + rec.project);
-    return parts.join(' • ');
+  dayStripEl.addEventListener('click', e => {
+    const nav = e.target.closest('[data-nav]');
+    if(nav){
+      selectedDate = addDays(selectedDate, Number(nav.dataset.nav));
+      render();
+      return;
+    }
+    const b = e.target.closest('[data-date]');
+    if(b){
+      selectedDate = b.dataset.date;
+      render();
+      if(navigator.vibrate) navigator.vibrate(6);
+    }
+  });
+
+  /* ---------- list & board ---------- */
+  function metaOf(s){ return [s.level, s.term, s.jam].filter(Boolean).join(' • ') || '—'; }
+
+  function statusBtnHtml(sid, rec, date){
+    const cls   = rec ? ' st-' + rec.status.toLowerCase() : '';
+    const label = rec ? rec.status : 'Presensi';
+    return `<button type="button" class="presensi-btn${cls}" data-presensi="${esc(sid)}" data-date="${esc(date)}">${esc(label)}</button>`;
   }
 
-  function listItemHTML(s){
-    const rec = getTodayRecord(s.id);
+  function listItemHTML(s, mk, date){
+    const rec  = getRec(date, s.id);
+    const proj = rec && rec.status === 'Hadir' && rec.project ? ' • 📁 ' + rec.project : '';
     return `
       <div class="attendance-item">
         <div class="avatar-sm">${esc(initials(s.nama))}</div>
         <div class="item-info">
-          <div class="item-name">${esc(s.nama)}</div>
-          <div class="item-meta">${esc(listMeta(s, rec) || '—')}</div>
+          <div class="item-name">${esc(s.nama)} ${mk ? '<span class="chip chip-term">Pengganti</span>' : ''}</div>
+          <div class="item-meta">${esc(metaOf(s) + proj)}</div>
+          ${progressHTML(s)}
         </div>
-        ${progressHTML(s)}
-        ${statusBtnHtml(s.id, rec)}
+        ${statusBtnHtml(s.id, rec, date)}
       </div>`;
   }
 
-   function boardCardHTML(s){
-    const rec = getTodayRecord(s.id);
+  function boardCardHTML(s, mk, date){
+    const rec = getRec(date, s.id);
     return `
       <div class="attendance-card">
         <div class="avatar-sm">${esc(initials(s.nama))}</div>
         <div class="att-card-name">${esc(s.nama)}</div>
-        <div class="att-card-meta">${esc([s.level, s.term, s.jam].filter(Boolean).join(' • ') || '—')}</div>
-        ${rec && rec.status === 'Hadir' && rec.project
-            ? `<div class="att-card-meta">📁 ${esc(rec.project)}</div>` : ''}
+        ${mk ? '<span class="chip chip-term" style="align-self:flex-start">Pengganti</span>' : ''}
+        <div class="att-card-meta">${esc(metaOf(s))}</div>
+        ${rec && rec.status === 'Hadir' && rec.project ? `<div class="att-card-meta">📁 ${esc(rec.project)}</div>` : ''}
         ${progressHTML(s)}
-        ${statusBtnHtml(s.id, rec)}
+        ${statusBtnHtml(s.id, rec, date)}
       </div>`;
   }
 
-    function renderAttendance(){
+  function handleListClick(e){
+    const h = e.target.closest('[data-history]');
+    if(h){ openHistory(h.dataset.history); return; }
+    const p = e.target.closest('[data-presensi]');
+    if(p) openModal(p.dataset.presensi, p.dataset.date);
+  }
+  listEl.addEventListener('click', handleListClick);
+  boardEl.addEventListener('click', handleListClick);
+
+  /* ---------- render utama ---------- */
+  function render(){
     const students = getStudents();
-    const today    = todayDayName();
-    if(!selectedDay) selectedDay = today;
+    const date = selectedDate;
+    const isToday = date === todayKey();
 
-    const todays = students.filter(s => s.hari === selectedDay);
-    todays.sort((a,b) => startMinutes(a.jam) - startMinutes(b.jam));
+    const regular = students.filter(s => isRegular(s, date)).map(s => ({ s, mk: null }));
+    const extra = makeups
+      .filter(m => m.date === date)
+      .map(m => {
+        const s = students.find(x => x.id === m.sid);
+        return s ? { s, mk: m } : null;
+      })
+      .filter(Boolean);
 
-    const isToday = selectedDay === today;
-    const d = new Date();
-    const offset = DAY_FULL.indexOf(selectedDay) - DAY_FULL.indexOf(today);
-    const shown = new Date(d.getFullYear(), d.getMonth(), d.getDate() + offset);
+    const items = regular.concat(extra)
+      .sort((a, b) => startMinutes(a.s.jam) - startMinutes(b.s.jam));
 
-    document.getElementById('todayDay').textContent      = selectedDay;
-    document.getElementById('todayDate').textContent     = isToday
-      ? formatTodayDate()
-      : shown.getDate() + ' ' + MONTHS_LONG[shown.getMonth()] + ' ' + shown.getFullYear();
+    document.getElementById('todayDay').textContent      = dayNameOf(date);
+    document.getElementById('todayDate').textContent     = fmtLong(date);
     document.querySelector('.today-label').textContent   = isToday ? 'Jadwal hari ini' : 'Jadwal';
-    document.getElementById('todayCount').textContent    = todays.length;
-    document.getElementById('attResultCount').textContent = todays.length + ' siswa';
+    document.getElementById('todayCount').textContent    = items.length;
+    document.getElementById('attResultCount').textContent = items.length + ' siswa';
 
-    // strip hari
-    const order = [1,2,3,4,5,6,0]; // Senin..Minggu
-    dayStripEl.innerHTML = order.map((idx, i) => {
-      const name = DAY_FULL[i];
-      const cls = ['day-chip',
-                   name === selectedDay ? 'active' : '',
-                   name === today ? 'today' : ''].join(' ').trim();
-      return `<button type="button" class="${cls}" data-day="${name}">${DAY_SHORT[i]}</button>`;
-    }).join('');
+    renderStrip();
 
-    const isEmpty = todays.length === 0;
-    listEl.innerHTML  = todays.map(listItemHTML).join('');
-    boardEl.innerHTML = todays.map(boardCardHTML).join('');
+    const isEmpty = items.length === 0;
+    listEl.innerHTML  = items.map(x => listItemHTML(x.s, x.mk, date)).join('');
+    boardEl.innerHTML = items.map(x => boardCardHTML(x.s, x.mk, date)).join('');
 
     listEl.classList.toggle('is-hidden',  isEmpty || attView !== 'list');
     boardEl.classList.toggle('is-hidden', isEmpty || attView !== 'board');
 
     emptyEl.classList.toggle('show', isEmpty);
-    emptyTitle.textContent = isToday ? 'Tidak ada jadwal hari ini' : 'Tidak ada jadwal ' + selectedDay;
-    emptySub.textContent   = 'Belum ada siswa yang dijadwalkan pada hari ' + selectedDay + '.';
+    emptyTitle.textContent = isToday ? 'Tidak ada jadwal hari ini' : 'Tidak ada jadwal ' + dayNameOf(date);
+    emptySub.textContent   = 'Belum ada siswa yang dijadwalkan pada ' + dayNameOf(date) + ', ' + fmtLong(date) + '.';
   }
 
+  attSegBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      if(btn.classList.contains('active')) return;
+      attSegBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      attView = btn.dataset.attView;
+      render();
+      if(navigator.vibrate) navigator.vibrate(6);
+    });
+  });
 
-  /* ---------- modal ---------- */
-  function openModal(sid){
-    const students = getStudents();
-    const s = students.find(x => x.id === sid);
-    if(!s) return;
-
-    editingStudentId = sid;
-    const rec = getTodayRecord(sid) || {};
-    currentStatus = rec.status || 'Hadir';
-
-    attAvatar.textContent = initials(s.nama);
-    attName.textContent   = s.nama;
-    attMeta.textContent   = [s.level, s.hari, s.jam].filter(Boolean).join(' • ') || '—';
-
-    projectEl.value = rec.project || '';
-    linkEl.value    = rec.link    || '';
-    noteEl.value    = rec.catatan || '';
-
-    applyStatusUI();
-    updateLinkPreview();
-
-    modal.classList.add('open');
-    if(navigator.vibrate) navigator.vibrate(8);
-  }
-
-  function closeModal(){
-    modal.classList.remove('open');
-    editingStudentId = null;
-  }
-
+  /* ---------- modal presensi ---------- */
   function applyStatusUI(){
     statusBtns.forEach(b => b.classList.toggle('active', b.dataset.status === currentStatus));
-    hadirFields.style.display = (currentStatus === 'Hadir') ? '' : 'none';
+    hadirFields.style.display = currentStatus === 'Hadir' ? '' : 'none';
   }
-
   function updateLinkPreview(){
     const val = linkEl.value.trim();
     if(val){
@@ -2370,138 +2361,118 @@ histModal.addEventListener('click', e => { if(e.target === histModal) closeHisto
       linkPrev.hidden = true;
     }
   }
+  function openModal(sid, date){
+    const s = getStudents().find(x => x.id === sid);
+    if(!s) return;
+    editingStudentId = sid;
+    editingDate = date;
+    const rec = getRec(date, sid) || {};
+    currentStatus = rec.status || 'Hadir';
 
-  /* ---------- events ---------- */
-  modalClose.addEventListener('click', closeModal);
-  modal.addEventListener('click', e => { if(e.target === modal) closeModal(); });
-  document.addEventListener('keydown', e => {
-    if(e.key === 'Escape' && modal.classList.contains('open')) closeModal();
-  });
+    attAvatar.textContent = initials(s.nama);
+    attName.textContent   = s.nama;
+    attMeta.textContent   = [s.level, dayNameOf(date), fmtLong(date)].filter(Boolean).join(' • ');
 
+    projectEl.value = rec.project || '';
+    linkEl.value    = rec.link || '';
+    noteEl.value    = rec.catatan || '';
+
+    applyStatusUI();
+    updateLinkPreview();
+    attModal.classList.add('open');
+    if(navigator.vibrate) navigator.vibrate(8);
+  }
+  function closeModal(){
+    attModal.classList.remove('open');
+    editingStudentId = null;
+    editingDate = null;
+  }
+  attModalClose.addEventListener('click', closeModal);
+  attModal.addEventListener('click', e => { if(e.target === attModal) closeModal(); });
   statusBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       currentStatus = btn.dataset.status;
       applyStatusUI();
-      if(navigator.vibrate) navigator.vibrate(6);
     });
   });
-
   linkEl.addEventListener('input',  updateLinkPreview);
   linkEl.addEventListener('change', updateLinkPreview);
 
   saveBtn.addEventListener('click', () => {
     if(!editingStudentId) return;
-
     const data = {
-      status:  currentStatus,
+      status: currentStatus,
       project: '',
-      link:    '',
+      link: '',
       catatan: noteEl.value.trim(),
       updatedAt: Date.now()
     };
-
     if(currentStatus === 'Hadir'){
       data.project = projectEl.value.trim();
-      const rawLink = linkEl.value.trim();
-      data.link = rawLink ? normalizeUrl(rawLink) : '';
+      const raw = linkEl.value.trim();
+      data.link = raw ? normalizeUrl(raw) : '';
     }
-
-    saveTodayRecord(editingStudentId, data);
+    setRec(editingDate, editingStudentId, data);
     closeModal();
-    renderAttendance();
-
+    render();
     if(navigator.vibrate) navigator.vibrate(12);
   });
- function handlePresensiClick(e){
-  const h = e.target.closest('[data-history]');
-  if(h){ openHistory(h.getAttribute('data-history')); return; }
-  const btn = e.target.closest('[data-presensi]');
-  if(!btn) return;
-  openModal(btn.getAttribute('data-presensi'));
-}
 
-  listEl.addEventListener('click', handlePresensiClick);
-  boardEl.addEventListener('click', handlePresensiClick);
-
-  attSegBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      if(btn.classList.contains('active')) return;
-      attSegBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      attView = btn.dataset.attView;
-      renderAttendance();
-      if(navigator.vibrate) navigator.vibrate(6);
+  /* ---------- modal riwayat ---------- */
+  function openHistory(sid){
+    const s = getStudents().find(x => x.id === sid);
+    if(!s) return;
+    const m = getMeetings(s);
+    const c = { Hadir:0, Sakit:0, Izin:0, Alpa:0, Diganti:0 };
+    m.forEach(r => {
+      if(r.status !== 'Hadir' && findMakeup(s.id, r.date)) c.Diganti++;
+      else if(c[r.status] !== undefined) c[r.status]++;
     });
-  });
-   dayStripEl.addEventListener('click', e => {
-    const btn = e.target.closest('[data-day]');
-    if(!btn) return;
-    selectedDay = btn.getAttribute('data-day');
-    renderAttendance();
-    if(navigator.vibrate) navigator.vibrate(6);
-  });
 
-   /* ---------- kelas pengganti ---------- */
-  const MK_LS = 'attendance.makeups.v1';
-  const ABSENT = ['Sakit','Izin','Alpa'];
-  let makeups = [];
-  try{
-    const raw = localStorage.getItem(MK_LS);
-    if(raw) makeups = JSON.parse(raw) || [];
-  }catch(e){ makeups = []; }
+    histName.textContent = s.nama;
+    histSum.textContent  = 'Hadir ' + c.Hadir + ' • Sakit ' + c.Sakit + ' • Izin ' + c.Izin
+                         + ' • Alpa ' + c.Alpa + ' • Diganti ' + c.Diganti;
 
-  const mkModal   = document.getElementById('mkModal');
-  const mkList    = document.getElementById('mkList');
-  const mkStep1   = document.getElementById('mkStep1');
-  const mkStep2   = document.getElementById('mkStep2');
-  const mkSelInfo = document.getElementById('mkSelInfo');
-  const mkDate    = document.getElementById('mkDate');
-  let mkCurrent   = null;
-
-  function persistMakeups(){
-    try{ localStorage.setItem(MK_LS, JSON.stringify(makeups)); }catch(e){}
-  }
-
-  function findMakeup(sid, absentDate){
-    return makeups.find(m => m.sid === sid && m.absentDate === absentDate) || null;
-  }
-
-  function segClass(s, r){
-    if(r.status === 'Hadir') return 'st-hadir';
-    if(findMakeup(s.id, r.date)) return 'st-diganti';
-    return 'st-' + r.status.toLowerCase();
-  }
-
-  function addMonths(ymd, n){
-    const [y, m, d] = ymd.split('-').map(Number);
-    const x = new Date(y, m - 1 + n, d);
-    return x.getFullYear() + '-' +
-           String(x.getMonth() + 1).padStart(2,'0') + '-' +
-           String(x.getDate()).padStart(2,'0');
-  }
-
-  function inTerm(s, date){
-    if(!s.termDate) return true;
-    return date >= s.termDate && date < addMonths(s.termDate, 3);
-  }
-
-  function pendingAbsences(s){
-    const out = [];
-    Object.keys(records).sort().forEach(date => {
-      if(!inTerm(s, date)) return;
-      const r = records[date] && records[date][s.id];
-      if(r && ABSENT.includes(r.status) && !findMakeup(s.id, date)){
-        out.push({ date, status: r.status });
+    let html = '';
+    for(let i = 0; i < TOTAL_MEET; i++){
+      const r = m[i];
+      if(!r){
+        html += `<div class="hist-item none"><div class="hist-top">
+          <div><div class="hist-no">Pertemuan ${i+1}</div></div>
+          <span class="hist-chip st-none">Belum</span></div></div>`;
+        continue;
       }
-    });
-    return out;
-  }
+      const mk    = r.status !== 'Hadir' ? findMakeup(s.id, r.date) : null;
+      const mrec  = mk ? getRec(mk.date, s.id) : null;
+      const chipCls = mk ? 'st-diganti' : 'st-' + r.status.toLowerCase();
+      const chipTxt = mk ? 'Diganti' : r.status;
 
+      const det = [];
+      if(mk) det.push('🔁 Diganti pada ' + esc(fmtDate(mk.date)));
+      if(r.project) det.push('📁 ' + esc(r.project));
+      if(r.link)    det.push('<a href="' + esc(r.link) + '" target="_blank" rel="noopener">Buka link</a>');
+      if(r.catatan) det.push('📝 ' + esc(r.catatan));
+      if(mrec && mrec.status === 'Hadir' && mrec.project) det.push('📁 Pengganti: ' + esc(mrec.project));
+      if(mrec && mrec.link) det.push('<a href="' + esc(mrec.link) + '" target="_blank" rel="noopener">Link pengganti</a>');
+      if(mrec && mrec.catatan) det.push('📝 Pengganti: ' + esc(mrec.catatan));
+
+      html += `<div class="hist-item"><div class="hist-top">
+        <div><div class="hist-no">Pertemuan ${i+1}</div><div class="hist-date">${esc(fmtDate(r.date))}</div></div>
+        <span class="hist-chip ${chipCls}">${esc(chipTxt)}</span></div>
+        ${det.length ? '<div class="hist-detail">' + det.join('<br>') + '</div>' : ''}</div>`;
+    }
+    histList.innerHTML = html;
+    histModal.classList.add('open');
+    if(navigator.vibrate) navigator.vibrate(8);
+  }
+  histClose.addEventListener('click', () => histModal.classList.remove('open'));
+  histModal.addEventListener('click', e => { if(e.target === histModal) histModal.classList.remove('open'); });
+
+  /* ---------- kelas pengganti ---------- */
   function showStep(n){
     mkStep1.hidden = n !== 1;
     mkStep2.hidden = n !== 2;
   }
-
   function openMakeup(){
     const list = [];
     getStudents().forEach(s => pendingAbsences(s).forEach(a => list.push({ s, a })));
@@ -2512,27 +2483,43 @@ histModal.addEventListener('click', e => { if(e.target === histModal) closeHisto
             <div class="avatar-sm">${esc(initials(s.nama))}</div>
             <div class="mk-info">
               <div class="mk-name">${esc(s.nama)}</div>
-              <div class="mk-sub">${esc(a.status)} • ${esc(fmtDate(a.date))}${s.hari ? ' • ' + esc(s.hari) : ''}</div>
+              <div class="mk-sub">${esc(a.status)} • ${esc(fmtDate(a.date))} • ${esc(s.hari || '')}</div>
             </div>
-            <button type="button" class="presensi-btn" data-mk="${esc(s.id)}|${esc(a.date)}">Pilih</button>
+            <button type="button" class="presensi-btn" data-sid="${esc(s.id)}" data-absent="${esc(a.date)}">Pilih</button>
           </div>`).join('')
-      : `<p class="mk-sub" style="text-align:center;padding:24px 0">Tidak ada siswa yang perlu kelas pengganti.</p>`;
+      : '<p class="mk-sub" style="text-align:center;padding:24px 0">Tidak ada siswa yang perlu kelas pengganti.</p>';
 
     showStep(1);
     mkModal.classList.add('open');
     if(navigator.vibrate) navigator.vibrate(8);
   }
-
   function closeMakeup(){
     mkModal.classList.remove('open');
     mkCurrent = null;
   }
+  mkList.addEventListener('click', e => {
+    const b = e.target.closest('[data-sid]');
+    if(!b) return;
+    const sid = b.dataset.sid;
+    const absentDate = b.dataset.absent;
+    const s = getStudents().find(x => x.id === sid);
+    const r = getRec(absentDate, sid);
+    if(!s || !r) return;
 
+    mkCurrent = { sid, absentDate };
+    mkSelInfo.innerHTML = `
+      <div class="avatar-sm">${esc(initials(s.nama))}</div>
+      <div style="min-width:0">
+        <div class="att-name">${esc(s.nama)}</div>
+        <div class="att-meta">${esc(r.status)} • ${esc(fmtDate(absentDate))}</div>
+      </div>`;
+    mkDate.value = selectedDate;
+    showStep(2);
+  });
   function saveMakeup(){
     if(!mkCurrent || !mkDate.value) return;
     const s = getStudents().find(x => x.id === mkCurrent.sid);
     if(!s) return;
-
     if(!inTerm(s, mkDate.value)){
       window.alert('Tanggal di luar term siswa ini. Kelas pengganti tidak berlaku.');
       return;
@@ -2546,9 +2533,10 @@ histModal.addEventListener('click', e => { if(e.target === histModal) closeHisto
       date: mkDate.value,
       createdAt: Date.now()
     });
-    persistMakeups();
+    save(MK_LS, makeups);
     closeMakeup();
-    renderAttendance();
+    selectedDate = mkDate.value; // langsung pindah ke tanggal pengganti
+    render();
     if(navigator.vibrate) navigator.vibrate(12);
   }
 
@@ -2558,29 +2546,9 @@ histModal.addEventListener('click', e => { if(e.target === histModal) closeHisto
   document.getElementById('mkSave').addEventListener('click', saveMakeup);
   mkModal.addEventListener('click', e => { if(e.target === mkModal) closeMakeup(); });
 
-  mkList.addEventListener('click', e => {
-    const b = e.target.closest('[data-mk]');
-    if(!b) return;
-    const [sid, absentDate] = b.getAttribute('data-mk').split('|');
-    const s = getStudents().find(x => x.id === sid);
-    const r = records[absentDate] && records[absentDate][sid];
-    if(!s || !r) return;
-
-    mkCurrent = { sid, absentDate };
-    mkSelInfo.innerHTML = `
-      <div class="avatar-sm">${esc(initials(s.nama))}</div>
-      <div style="min-width:0">
-        <div class="att-name">${esc(s.nama)}</div>
-        <div class="att-meta">${esc(r.status)} • ${esc(fmtDate(absentDate))}</div>
-      </div>`;
-    mkDate.value = todayKey();
-    showStep(2);
-  });
-
-  /* expose refresh untuk tab switch */
-  window.__attendanceRefresh = renderAttendance;
-
-  renderAttendance();
+  /* ---------- init ---------- */
+  window.__attendanceRefresh = render;
+  render();
 })();
 </script>
 </body>
