@@ -1077,6 +1077,33 @@
     .modal-card{ padding:26px; }
     .btn-add-top{ padding:0 20px; font-size:14px; }
   }
+ .hist-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.hist-bar{flex:1;display:flex;gap:3px;min-width:0}
+.hist-bar i{flex:1;height:7px;border-radius:99px;background:rgba(148,163,184,.28)}
+.hist-bar i.st-hadir{background:linear-gradient(140deg,#22c55e,#16a34a)}
+.hist-bar i.st-sakit{background:linear-gradient(140deg,#fb923c,#f97316)}
+.hist-bar i.st-izin{background:linear-gradient(140deg,var(--blue-500),var(--blue-600))}
+.hist-bar i.st-alpa{background:linear-gradient(140deg,#f87171,#ef4444)}
+.hist-count{font-size:10.5px;font-weight:700;color:var(--muted);flex-shrink:0}
+.hist-btn{width:28px;height:28px;border:none;border-radius:9px;display:grid;place-items:center;background:rgba(59,130,246,.10);color:var(--blue-600);cursor:pointer;flex-shrink:0;transition:transform .15s}
+.hist-btn svg{width:14px;height:14px}
+.hist-btn:active{transform:scale(.88)}
+.hist-summary{font-size:11.5px;font-weight:600;color:var(--muted);margin:-6px 0 14px}
+.hist-list{display:flex;flex-direction:column;gap:8px}
+.hist-item{padding:11px 12px;border-radius:14px;background:rgba(59,130,246,.05);border:1px solid rgba(147,197,253,.35)}
+.hist-item.none{opacity:.6}
+.hist-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.hist-no{font-size:13px;font-weight:700}
+.hist-date{font-size:11px;font-weight:500;color:var(--muted);margin-top:2px}
+.hist-chip{padding:4px 10px;border-radius:999px;font-size:10.5px;font-weight:700;color:#fff;white-space:nowrap}
+.hist-chip.st-hadir{background:#16a34a}
+.hist-chip.st-sakit{background:#f97316}
+.hist-chip.st-izin{background:#2563eb}
+.hist-chip.st-alpa{background:#ef4444}
+.hist-chip.st-none{background:rgba(148,163,184,.25);color:var(--muted)}
+.hist-detail{font-size:11.5px;line-height:1.5;margin-top:7px;overflow-wrap:anywhere}
+.hist-detail a{color:var(--blue-700);font-weight:700}
+
 </style>
 </head>
 <body>
@@ -1492,6 +1519,21 @@
       </button>
     </div>
   </div>
+<div class="modal-overlay" id="histModal">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div class="card-head-left">
+        <span class="dot-accent"></span>
+        <h2 id="histName">Riwayat</h2>
+      </div>
+      <button type="button" class="modal-close" id="histClose" aria-label="Tutup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <p class="hist-summary" id="histSummary"></p>
+    <div class="hist-list" id="histList"></div>
+  </div>
+</div>
 
 <script>
 /* =========================================================
@@ -2052,6 +2094,81 @@ tabs.forEach(tab => {
     records[t][sid] = data;
     try { localStorage.setItem(ATT_LS, JSON.stringify(records)); } catch(e){}
   }
+ const TOTAL_MEET = 11;
+const histModal = document.getElementById('histModal');
+const histList  = document.getElementById('histList');
+const histName  = document.getElementById('histName');
+const histSum   = document.getElementById('histSummary');
+
+function fmtDate(k){
+  const p = k.split('-');
+  return (+p[2]) + ' ' + MONTHS_LONG[+p[1]-1].slice(0,3) + ' ' + p[0];
+}
+
+function getMeetings(s){
+  const rows = [];
+  Object.keys(records).sort().forEach(date => {
+    if(s.termDate && date < s.termDate) return;
+    const r = records[date] && records[date][s.id];
+    if(r) rows.push(Object.assign({ date }, r));
+  });
+  return rows.slice(0, TOTAL_MEET);
+}
+
+function progressHTML(s){
+  const m = getMeetings(s);
+  let segs = '';
+  for(let i = 0; i < TOTAL_MEET; i++){
+    segs += '<i class="' + (m[i] ? 'st-' + m[i].status.toLowerCase() : '') + '"></i>';
+  }
+  return `
+    <div class="hist-row">
+      <div class="hist-bar">${segs}</div>
+      <span class="hist-count">${m.length}/${TOTAL_MEET}</span>
+      <button type="button" class="hist-btn" data-history="${esc(s.id)}" aria-label="Lihat riwayat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>
+        </svg>
+      </button>
+    </div>`;
+}
+
+function openHistory(sid){
+  const s = getStudents().find(x => x.id === sid);
+  if(!s) return;
+  const m = getMeetings(s);
+  const c = { Hadir:0, Sakit:0, Izin:0, Alpa:0 };
+  m.forEach(r => { if(c[r.status] !== undefined) c[r.status]++; });
+
+  histName.textContent = s.nama;
+  histSum.textContent  = 'Hadir ' + c.Hadir + ' • Sakit ' + c.Sakit + ' • Izin ' + c.Izin + ' • Alpa ' + c.Alpa;
+
+  let html = '';
+  for(let i = 0; i < TOTAL_MEET; i++){
+    const r = m[i];
+    if(!r){
+      html += `<div class="hist-item none"><div class="hist-top">
+        <div><div class="hist-no">Pertemuan ${i+1}</div></div>
+        <span class="hist-chip st-none">Belum</span></div></div>`;
+      continue;
+    }
+    const det = [];
+    if(r.project) det.push('📁 ' + esc(r.project));
+    if(r.link)    det.push('<a href="' + esc(r.link) + '" target="_blank" rel="noopener">Buka link</a>');
+    if(r.catatan) det.push('📝 ' + esc(r.catatan));
+    html += `<div class="hist-item"><div class="hist-top">
+      <div><div class="hist-no">Pertemuan ${i+1}</div><div class="hist-date">${esc(fmtDate(r.date))}</div></div>
+      <span class="hist-chip st-${esc(r.status.toLowerCase())}">${esc(r.status)}</span></div>
+      ${det.length ? '<div class="hist-detail">' + det.join('<br>') + '</div>' : ''}</div>`;
+  }
+  histList.innerHTML = html;
+  histModal.classList.add('open');
+  if(navigator.vibrate) navigator.vibrate(8);
+}
+
+function closeHistory(){ histModal.classList.remove('open'); }
+document.getElementById('histClose').addEventListener('click', closeHistory);
+histModal.addEventListener('click', e => { if(e.target === histModal) closeHistory(); });
 
   /* ---------- rendering ---------- */
   function statusBtnHtml(sid, rec){
@@ -2078,6 +2195,7 @@ tabs.forEach(tab => {
           <div class="item-name">${esc(s.nama)}</div>
           <div class="item-meta">${esc(listMeta(s, rec) || '—')}</div>
         </div>
+        ${progressHTML(s)}
         ${statusBtnHtml(s.id, rec)}
       </div>`;
   }
@@ -2089,6 +2207,8 @@ tabs.forEach(tab => {
         <div class="avatar-sm">${esc(initials(s.nama))}</div>
         <div class="att-card-name">${esc(s.nama)}</div>
         <div class="att-card-meta">${esc([s.level, s.term, s.jam].filter(Boolean).join(' • ') || '—')}</div>
+                <div class="att-card-meta">${esc([s.level, s.term, s.jam].filter(Boolean).join(' • ') || '—')}</div>
+        ${progressHTML(s)}
         ${rec && rec.status === 'Hadir' && rec.project
             ? `<div class="att-card-meta">📁 ${esc(rec.project)}</div>` : ''}
         ${statusBtnHtml(s.id, rec)}
@@ -2205,12 +2325,14 @@ tabs.forEach(tab => {
 
     if(navigator.vibrate) navigator.vibrate(12);
   });
+ function handlePresensiClick(e){
+  const h = e.target.closest('[data-history]');
+  if(h){ openHistory(h.getAttribute('data-history')); return; }
+  const btn = e.target.closest('[data-presensi]');
+  if(!btn) return;
+  openModal(btn.getAttribute('data-presensi'));
+}
 
-  function handlePresensiClick(e){
-    const btn = e.target.closest('[data-presensi]');
-    if(!btn) return;
-    openModal(btn.getAttribute('data-presensi'));
-  }
   listEl.addEventListener('click', handlePresensiClick);
   boardEl.addEventListener('click', handlePresensiClick);
 
