@@ -2057,15 +2057,15 @@ tabs.forEach(tab => {
    ATTENDANCE MODULE
    ========================================================= */
 (function(){
-  const ATT_LS     = 'attendance.records.v1';
+  const ATT_LS     = 'attendance.records.v1';   // presensi reguler: records[tanggal][sid]
   const STUDENT_LS = 'attendance.students.v1';
-  const MK_LS      = 'attendance.makeups.v1';
+  const MK_LS      = 'attendance.makeups.v1';   // kelas pengganti, presensinya ada di dalam entri ini
   const TOTAL_MEET = 11;
   const ABSENT     = ['Sakit','Izin','Alpa'];
   const DAYS_ID    = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-  const DAY_SHORT  = ['Sen','Sel','Rab','Kam','Jum','Sab','Min']; // mulai Senin
-  const MONTHS_LONG = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-  const MONTHS_ID   = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  const DAY_SHORT  = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+  const MONTHS_LONG= ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+  const MONTHS_ID  = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 
   /* ---------- storage ---------- */
   function load(key, fallback){
@@ -2081,24 +2081,23 @@ tabs.forEach(tab => {
   /* ---------- state ---------- */
   let attView = 'list';
   let currentStatus = 'Hadir';
-  let editingStudentId = null;
-  let editingDate = null;
+  let editing = null;      // { sid, date, mkId }
   let mkCurrent = null;
 
   /* ---------- date helpers ---------- */
-  const pad      = n => String(n).padStart(2,'0');
-  const keyOf    = d => d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
-  const parseKey = k => { const [y,m,d] = k.split('-').map(Number); return new Date(y, m-1, d); };
-  const todayKey = () => keyOf(new Date());
-  const addDays  = (k,n) => { const d = parseKey(k); d.setDate(d.getDate()+n); return keyOf(d); };
-  const addMonths= (k,n) => { const d = parseKey(k); d.setMonth(d.getMonth()+n); return keyOf(d); };
-  const dayNameOf= k => DAYS_ID[parseKey(k).getDay()];
-  const fmtDate  = k => { const d = parseKey(k); return d.getDate()+' '+MONTHS_ID[d.getMonth()]+' '+d.getFullYear(); };
-  const fmtLong  = k => { const d = parseKey(k); return d.getDate()+' '+MONTHS_LONG[d.getMonth()]+' '+d.getFullYear(); };
+  const pad       = n => String(n).padStart(2,'0');
+  const keyOf     = d => d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+  const parseKey  = k => { const [y,m,d] = k.split('-').map(Number); return new Date(y, m-1, d); };
+  const todayKey  = () => keyOf(new Date());
+  const addDays   = (k,n) => { const d = parseKey(k); d.setDate(d.getDate()+n); return keyOf(d); };
+  const addMonths = (k,n) => { const d = parseKey(k); d.setMonth(d.getMonth()+n); return keyOf(d); };
+  const dayNameOf = k => DAYS_ID[parseKey(k).getDay()];
+  const fmtDate   = k => { const d = parseKey(k); return d.getDate()+' '+MONTHS_ID[d.getMonth()]+' '+d.getFullYear(); };
+  const fmtLong   = k => { const d = parseKey(k); return d.getDate()+' '+MONTHS_LONG[d.getMonth()]+' '+d.getFullYear(); };
 
   let selectedDate = todayKey();
 
-  /* ---------- misc helpers ---------- */
+  /* ---------- misc ---------- */
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
     {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
   ));
@@ -2119,19 +2118,34 @@ tabs.forEach(tab => {
     return v;
   }
   function getStudents(){ return load(STUDENT_LS, []); }
+  function metaOf(s){ return [s.level, s.term, s.jam].filter(Boolean).join(' • ') || '—'; }
 
-  /* ---------- term & records ---------- */
+  /* ---------- jadwal reguler ---------- */
   function inTerm(s, date){
     if(!s.termDate) return true;
     return date >= s.termDate && date < addMonths(s.termDate, 3);
   }
-  // jadwal reguler: hari sama dengan hari siswa, dan masih dalam term
-  function isRegular(s, date){
-    return !!s.hari && dayNameOf(date) === s.hari && inTerm(s, date);
+
+  // semua tanggal pertemuan reguler siswa dalam term (maks 11), berurutan
+  function regularDates(s){
+    if(!s.hari) return [];
+    if(!s.termDate){
+      // tanpa tanggal term: pakai tanggal yang sudah punya presensi
+      return Object.keys(records).sort()
+        .filter(d => dayNameOf(d) === s.hari && getRec(d, s.id))
+        .slice(0, TOTAL_MEET);
+    }
+    const out = [];
+    const end = addMonths(s.termDate, 3);
+    let d = s.termDate;
+    while(d < end && out.length < TOTAL_MEET){
+      if(dayNameOf(d) === s.hari) out.push(d);
+      d = addDays(d, 1);
+    }
+    return out;
   }
-  function findMakeup(sid, absentDate){
-    return makeups.find(m => m.sid === sid && m.absentDate === absentDate) || null;
-  }
+
+  /* ---------- presensi & kelas pengganti ---------- */
   function getRec(date, sid){
     return (records[date] && records[date][sid]) || null;
   }
@@ -2140,42 +2154,35 @@ tabs.forEach(tab => {
     records[date][sid] = data;
     save(ATT_LS, records);
   }
-  // riwayat 11 pertemuan reguler saja (pengganti tidak dihitung)
+  function findMakeup(sid, absentDate){
+    return makeups.find(m => m.sid === sid && m.absentDate === absentDate) || null;
+  }
+  // riwayat pertemuan 1..11 (selalu 11 baris, meski belum ada presensinya)
   function getMeetings(s){
-    const rows = [];
-    Object.keys(records).sort().forEach(date => {
-      if(!isRegular(s, date)) return;
-      const r = getRec(date, s.id);
-      if(r) rows.push(Object.assign({ date }, r));
-    });
-    return rows.slice(0, TOTAL_MEET);
+    return regularDates(s).map((date, i) => ({ no: i+1, date, rec: getRec(date, s.id) }));
+  }
+  function segClass(s, m){
+    if(!m.rec) return '';
+    if(m.rec.status !== 'Hadir' && findMakeup(s.id, m.date)) return 'st-diganti';
+    return 'st-' + m.rec.status.toLowerCase();
   }
   function pendingAbsences(s){
-    const out = [];
-    Object.keys(records).sort().forEach(date => {
-      if(!isRegular(s, date)) return;
-      const r = getRec(date, s.id);
-      if(r && ABSENT.includes(r.status) && !findMakeup(s.id, date)){
-        out.push({ date, status: r.status });
-      }
-    });
-    return out;
-  }
-  function segClass(s, r){
-    if(r.status === 'Hadir') return 'st-hadir';
-    if(findMakeup(s.id, r.date)) return 'st-diganti';
-    return 'st-' + r.status.toLowerCase();
+    return getMeetings(s)
+      .filter(m => m.rec && ABSENT.includes(m.rec.status) && !findMakeup(s.id, m.date))
+      .map(m => ({ date: m.date, status: m.rec.status }));
   }
   function progressHTML(s){
-    const m = getMeetings(s);
+    const meets = getMeetings(s);
     let segs = '';
     for(let i = 0; i < TOTAL_MEET; i++){
-      segs += '<i class="' + (m[i] ? segClass(s, m[i]) : '') + '"></i>';
+      const m = meets[i];
+      segs += '<i class="' + (m ? segClass(s, m) : '') + '"></i>';
     }
+    const done = meets.filter(m => m.rec).length;
     return `
       <div class="hist-row">
         <div class="hist-bar">${segs}</div>
-        <span class="hist-count">${m.length}/${TOTAL_MEET}</span>
+        <span class="hist-count">${done}/${TOTAL_MEET}</span>
         <button type="button" class="hist-btn" data-history="${esc(s.id)}" aria-label="Lihat riwayat">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/>
@@ -2184,7 +2191,7 @@ tabs.forEach(tab => {
       </div>`;
   }
 
-  /* ---------- DOM refs ---------- */
+  /* ---------- DOM ---------- */
   const listEl     = document.getElementById('attendanceList');
   const boardEl    = document.getElementById('attendanceBoard');
   const emptyEl    = document.getElementById('attEmpty');
@@ -2193,32 +2200,32 @@ tabs.forEach(tab => {
   const dayStripEl = document.getElementById('dayStrip');
   const attSegBtns = document.querySelectorAll('#page-attendance .seg-btn');
 
-  const attModal   = document.getElementById('attModal');
+  const attModal      = document.getElementById('attModal');
   const attModalClose = document.getElementById('attModalClose');
-  const attAvatar  = document.getElementById('attAvatar');
-  const attName    = document.getElementById('attStudentName');
-  const attMeta    = document.getElementById('attStudentMeta');
-  const projectEl  = document.getElementById('attProject');
-  const linkEl     = document.getElementById('attLink');
-  const noteEl     = document.getElementById('attNote');
-  const linkPrev   = document.getElementById('attLinkPreview');
-  const linkChip   = document.getElementById('attLinkChip');
-  const hadirFields= document.getElementById('hadirFields');
-  const saveBtn    = document.getElementById('attSaveBtn');
-  const statusBtns = document.querySelectorAll('#attModal .status-btn');
+  const attAvatar     = document.getElementById('attAvatar');
+  const attName       = document.getElementById('attStudentName');
+  const attMeta       = document.getElementById('attStudentMeta');
+  const projectEl     = document.getElementById('attProject');
+  const linkEl        = document.getElementById('attLink');
+  const noteEl        = document.getElementById('attNote');
+  const linkPrev      = document.getElementById('attLinkPreview');
+  const linkChip      = document.getElementById('attLinkChip');
+  const hadirFields   = document.getElementById('hadirFields');
+  const saveBtn       = document.getElementById('attSaveBtn');
+  const statusBtns    = document.querySelectorAll('#attModal .status-btn');
 
-  const histModal  = document.getElementById('histModal');
-  const histList   = document.getElementById('histList');
-  const histName   = document.getElementById('histName');
-  const histSum    = document.getElementById('histSummary');
-  const histClose  = document.getElementById('histClose');
+  const histModal = document.getElementById('histModal');
+  const histList  = document.getElementById('histList');
+  const histName  = document.getElementById('histName');
+  const histSum   = document.getElementById('histSummary');
+  const histClose = document.getElementById('histClose');
 
-  const mkModal    = document.getElementById('mkModal');
-  const mkList     = document.getElementById('mkList');
-  const mkStep1    = document.getElementById('mkStep1');
-  const mkStep2    = document.getElementById('mkStep2');
-  const mkSelInfo  = document.getElementById('mkSelInfo');
-  const mkDate     = document.getElementById('mkDate');
+  const mkModal   = document.getElementById('mkModal');
+  const mkList    = document.getElementById('mkList');
+  const mkStep1   = document.getElementById('mkStep1');
+  const mkStep2   = document.getElementById('mkStep2');
+  const mkSelInfo = document.getElementById('mkSelInfo');
+  const mkDate    = document.getElementById('mkDate');
 
   /* ---------- strip hari & minggu ---------- */
   function renderStrip(){
@@ -2235,7 +2242,6 @@ tabs.forEach(tab => {
     html += '<button type="button" class="day-chip nav" data-nav="7" aria-label="Minggu berikutnya">›</button>';
     dayStripEl.innerHTML = html;
   }
-
   dayStripEl.addEventListener('click', e => {
     const nav = e.target.closest('[data-nav]');
     if(nav){
@@ -2252,16 +2258,20 @@ tabs.forEach(tab => {
   });
 
   /* ---------- list & board ---------- */
-  function metaOf(s){ return [s.level, s.term, s.jam].filter(Boolean).join(' • ') || '—'; }
-
-  function statusBtnHtml(sid, rec, date){
+  function statusBtnHtml(sid, rec, date, mkId){
     const cls   = rec ? ' st-' + rec.status.toLowerCase() : '';
     const label = rec ? rec.status : 'Presensi';
-    return `<button type="button" class="presensi-btn${cls}" data-presensi="${esc(sid)}" data-date="${esc(date)}">${esc(label)}</button>`;
+    return `<button type="button" class="presensi-btn${cls}" data-presensi="${esc(sid)}" data-date="${esc(date)}" data-mkid="${esc(mkId || '')}">${esc(label)}</button>`;
+  }
+
+  // presensi untuk baris: reguler dari records, pengganti dari entri kelas pengganti
+  function recFor(s, date, mk){
+    if(mk) return mk.status ? mk : null;
+    return getRec(date, s.id);
   }
 
   function listItemHTML(s, mk, date){
-    const rec  = getRec(date, s.id);
+    const rec  = recFor(s, date, mk);
     const proj = rec && rec.status === 'Hadir' && rec.project ? ' • 📁 ' + rec.project : '';
     return `
       <div class="attendance-item">
@@ -2271,12 +2281,12 @@ tabs.forEach(tab => {
           <div class="item-meta">${esc(metaOf(s) + proj)}</div>
           ${progressHTML(s)}
         </div>
-        ${statusBtnHtml(s.id, rec, date)}
+        ${statusBtnHtml(s.id, rec, date, mk ? mk.id : '')}
       </div>`;
   }
 
   function boardCardHTML(s, mk, date){
-    const rec = getRec(date, s.id);
+    const rec = recFor(s, date, mk);
     return `
       <div class="attendance-card">
         <div class="avatar-sm">${esc(initials(s.nama))}</div>
@@ -2285,7 +2295,7 @@ tabs.forEach(tab => {
         <div class="att-card-meta">${esc(metaOf(s))}</div>
         ${rec && rec.status === 'Hadir' && rec.project ? `<div class="att-card-meta">📁 ${esc(rec.project)}</div>` : ''}
         ${progressHTML(s)}
-        ${statusBtnHtml(s.id, rec, date)}
+        ${statusBtnHtml(s.id, rec, date, mk ? mk.id : '')}
       </div>`;
   }
 
@@ -2293,7 +2303,7 @@ tabs.forEach(tab => {
     const h = e.target.closest('[data-history]');
     if(h){ openHistory(h.dataset.history); return; }
     const p = e.target.closest('[data-presensi]');
-    if(p) openModal(p.dataset.presensi, p.dataset.date);
+    if(p) openModal(p.dataset.presensi, p.dataset.date, p.dataset.mkid);
   }
   listEl.addEventListener('click', handleListClick);
   boardEl.addEventListener('click', handleListClick);
@@ -2304,7 +2314,10 @@ tabs.forEach(tab => {
     const date = selectedDate;
     const isToday = date === todayKey();
 
-    const regular = students.filter(s => isRegular(s, date)).map(s => ({ s, mk: null }));
+    const regular = students
+      .filter(s => regularDates(s).includes(date))
+      .map(s => ({ s, mk: null }));
+
     const extra = makeups
       .filter(m => m.date === date)
       .map(m => {
@@ -2316,10 +2329,10 @@ tabs.forEach(tab => {
     const items = regular.concat(extra)
       .sort((a, b) => startMinutes(a.s.jam) - startMinutes(b.s.jam));
 
-    document.getElementById('todayDay').textContent      = dayNameOf(date);
-    document.getElementById('todayDate').textContent     = fmtLong(date);
-    document.querySelector('.today-label').textContent   = isToday ? 'Jadwal hari ini' : 'Jadwal';
-    document.getElementById('todayCount').textContent    = items.length;
+    document.getElementById('todayDay').textContent       = dayNameOf(date);
+    document.getElementById('todayDate').textContent      = fmtLong(date);
+    document.querySelector('.today-label').textContent    = isToday ? 'Jadwal hari ini' : 'Jadwal';
+    document.getElementById('todayCount').textContent     = items.length;
     document.getElementById('attResultCount').textContent = items.length + ' siswa';
 
     renderStrip();
@@ -2361,17 +2374,17 @@ tabs.forEach(tab => {
       linkPrev.hidden = true;
     }
   }
-  function openModal(sid, date){
+  function openModal(sid, date, mkId){
     const s = getStudents().find(x => x.id === sid);
     if(!s) return;
-    editingStudentId = sid;
-    editingDate = date;
-    const rec = getRec(date, sid) || {};
+    editing = { sid, date, mkId: mkId || null };
+
+    const rec = (mkId ? makeups.find(m => m.id === mkId) : getRec(date, sid)) || {};
     currentStatus = rec.status || 'Hadir';
 
     attAvatar.textContent = initials(s.nama);
     attName.textContent   = s.nama;
-    attMeta.textContent   = [s.level, dayNameOf(date), fmtLong(date)].filter(Boolean).join(' • ');
+    attMeta.textContent   = [s.level, dayNameOf(date), fmtLong(date)].filter(Boolean).join(' • ') + (mkId ? ' • Pengganti' : '');
 
     projectEl.value = rec.project || '';
     linkEl.value    = rec.link || '';
@@ -2384,8 +2397,7 @@ tabs.forEach(tab => {
   }
   function closeModal(){
     attModal.classList.remove('open');
-    editingStudentId = null;
-    editingDate = null;
+    editing = null;
   }
   attModalClose.addEventListener('click', closeModal);
   attModal.addEventListener('click', e => { if(e.target === attModal) closeModal(); });
@@ -2399,7 +2411,7 @@ tabs.forEach(tab => {
   linkEl.addEventListener('change', updateLinkPreview);
 
   saveBtn.addEventListener('click', () => {
-    if(!editingStudentId) return;
+    if(!editing) return;
     const data = {
       status: currentStatus,
       project: '',
@@ -2412,7 +2424,15 @@ tabs.forEach(tab => {
       const raw = linkEl.value.trim();
       data.link = raw ? normalizeUrl(raw) : '';
     }
-    setRec(editingDate, editingStudentId, data);
+    if(editing.mkId){
+      const mk = makeups.find(m => m.id === editing.mkId);
+      if(mk){
+        Object.assign(mk, data);
+        save(MK_LS, makeups);
+      }
+    }else{
+      setRec(editing.date, editing.sid, data);
+    }
     closeModal();
     render();
     if(navigator.vibrate) navigator.vibrate(12);
@@ -2422,11 +2442,14 @@ tabs.forEach(tab => {
   function openHistory(sid){
     const s = getStudents().find(x => x.id === sid);
     if(!s) return;
-    const m = getMeetings(s);
+    const meets = getMeetings(s);
+
     const c = { Hadir:0, Sakit:0, Izin:0, Alpa:0, Diganti:0 };
-    m.forEach(r => {
-      if(r.status !== 'Hadir' && findMakeup(s.id, r.date)) c.Diganti++;
-      else if(c[r.status] !== undefined) c[r.status]++;
+    meets.forEach(m => {
+      if(!m.rec) return;
+      const mk = m.rec.status !== 'Hadir' ? findMakeup(s.id, m.date) : null;
+      if(mk) c.Diganti++;
+      else if(c[m.rec.status] !== undefined) c[m.rec.status]++;
     });
 
     histName.textContent = s.nama;
@@ -2435,29 +2458,35 @@ tabs.forEach(tab => {
 
     let html = '';
     for(let i = 0; i < TOTAL_MEET; i++){
-      const r = m[i];
-      if(!r){
+      const m = meets[i];
+      if(!m){
         html += `<div class="hist-item none"><div class="hist-top">
           <div><div class="hist-no">Pertemuan ${i+1}</div></div>
+          <span class="hist-chip st-none">—</span></div></div>`;
+        continue;
+      }
+      if(!m.rec){
+        html += `<div class="hist-item none"><div class="hist-top">
+          <div><div class="hist-no">Pertemuan ${m.no}</div><div class="hist-date">${esc(fmtDate(m.date))}</div></div>
           <span class="hist-chip st-none">Belum</span></div></div>`;
         continue;
       }
-      const mk    = r.status !== 'Hadir' ? findMakeup(s.id, r.date) : null;
-      const mrec  = mk ? getRec(mk.date, s.id) : null;
-      const chipCls = mk ? 'st-diganti' : 'st-' + r.status.toLowerCase();
-      const chipTxt = mk ? 'Diganti' : r.status;
+      const mk    = m.rec.status !== 'Hadir' ? findMakeup(s.id, m.date) : null;
+      const mrec  = mk && mk.status ? mk : null;
+      const chipCls = mk ? 'st-diganti' : 'st-' + m.rec.status.toLowerCase();
+      const chipTxt = mk ? 'Diganti' : m.rec.status;
 
       const det = [];
       if(mk) det.push('🔁 Diganti pada ' + esc(fmtDate(mk.date)));
-      if(r.project) det.push('📁 ' + esc(r.project));
-      if(r.link)    det.push('<a href="' + esc(r.link) + '" target="_blank" rel="noopener">Buka link</a>');
-      if(r.catatan) det.push('📝 ' + esc(r.catatan));
+      if(m.rec.project) det.push('📁 ' + esc(m.rec.project));
+      if(m.rec.link)    det.push('<a href="' + esc(m.rec.link) + '" target="_blank" rel="noopener">Buka link</a>');
+      if(m.rec.catatan) det.push('📝 ' + esc(m.rec.catatan));
       if(mrec && mrec.status === 'Hadir' && mrec.project) det.push('📁 Pengganti: ' + esc(mrec.project));
-      if(mrec && mrec.link) det.push('<a href="' + esc(mrec.link) + '" target="_blank" rel="noopener">Link pengganti</a>');
+      if(mrec && mrec.link)    det.push('<a href="' + esc(mrec.link) + '" target="_blank" rel="noopener">Link pengganti</a>');
       if(mrec && mrec.catatan) det.push('📝 Pengganti: ' + esc(mrec.catatan));
 
       html += `<div class="hist-item"><div class="hist-top">
-        <div><div class="hist-no">Pertemuan ${i+1}</div><div class="hist-date">${esc(fmtDate(r.date))}</div></div>
+        <div><div class="hist-no">Pertemuan ${m.no}</div><div class="hist-date">${esc(fmtDate(m.date))}</div></div>
         <span class="hist-chip ${chipCls}">${esc(chipTxt)}</span></div>
         ${det.length ? '<div class="hist-detail">' + det.join('<br>') + '</div>' : ''}</div>`;
     }
@@ -2531,11 +2560,15 @@ tabs.forEach(tab => {
       sid: mkCurrent.sid,
       absentDate: mkCurrent.absentDate,
       date: mkDate.value,
+      status: '',
+      project: '',
+      link: '',
+      catatan: '',
       createdAt: Date.now()
     });
     save(MK_LS, makeups);
     closeMakeup();
-    selectedDate = mkDate.value; // langsung pindah ke tanggal pengganti
+    selectedDate = mkDate.value;
     render();
     if(navigator.vibrate) navigator.vibrate(12);
   }
