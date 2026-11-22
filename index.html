@@ -1110,6 +1110,14 @@
 .day-chip.active{background:linear-gradient(140deg,var(--blue-500),var(--blue-600));color:#fff;border-color:transparent;box-shadow:0 6px 14px rgba(37,99,235,.28)}
 .day-chip.today::after{content:"";display:block;width:4px;height:4px;border-radius:50%;background:var(--orange-500);margin:3px auto 0}
 .day-chip.active.today::after{background:#fff}
+.btn-add-top.wide{width:100%;justify-content:center}
+.hist-bar i.st-diganti{background:linear-gradient(140deg,#a855f7,#7c3aed)}
+.hist-chip.st-diganti{background:#7c3aed}
+.mk-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:14px;background:rgba(59,130,246,.05);border:1px solid rgba(147,197,253,.35);margin-bottom:8px}
+.mk-info{flex:1;min-width:0}
+.mk-name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mk-sub{font-size:11px;font-weight:500;color:var(--muted);margin-top:2px}
+.mk-back{margin-top:12px;width:100%;padding:11px;border-radius:14px;border:1px solid rgba(147,197,253,.45);background:rgba(255,255,255,.78);font-family:inherit;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer}
 
 </style>
 </head>
@@ -1273,6 +1281,13 @@
             </div>
           </div>
          <div class="day-strip" id="dayStrip"></div>
+         <button type="button" class="btn-add-top wide" id="makeupOpenBtn">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+    <path d="M12 5v14M5 12h14"/>
+  </svg>
+  <span>Tambah Kelas Pengganti</span>
+</button>
+
           <div class="toolbar-row">
             <span class="result-count" id="attResultCount">0 siswa</span>
 
@@ -1539,6 +1554,37 @@
     </div>
     <p class="hist-summary" id="histSummary"></p>
     <div class="hist-list" id="histList"></div>
+  </div>
+</div>
+<div class="modal-overlay" id="mkModal">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div class="card-head-left">
+        <span class="dot-accent"></span>
+        <h2>Kelas Pengganti</h2>
+      </div>
+      <button type="button" class="modal-close" id="mkClose" aria-label="Tutup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div id="mkStep1">
+      <span class="status-label">Pilih siswa yang belum diganti</span>
+      <div id="mkList"></div>
+    </div>
+
+    <div id="mkStep2" hidden>
+      <div class="att-student-info" id="mkSelInfo"></div>
+      <div class="field">
+        <label for="mkDate">Tanggal kelas pengganti</label>
+        <input id="mkDate" type="date">
+      </div>
+      <button type="button" class="btn-primary" id="mkSave">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"/></svg>
+        Simpan Kelas Pengganti
+      </button>
+      <button type="button" class="mk-back" id="mkBack">← Kembali</button>
+    </div>
   </div>
 </div>
 
@@ -2131,7 +2177,7 @@ function progressHTML(s){
   const m = getMeetings(s);
   let segs = '';
   for(let i = 0; i < TOTAL_MEET; i++){
-    segs += '<i class="' + (m[i] ? 'st-' + m[i].status.toLowerCase() : '') + '"></i>';
+    segs += '<i class="' + (m[i] ? segClass(s, m[i]) : '') + '"></i>';
   }
   return `
     <div class="hist-row">
@@ -2144,16 +2190,20 @@ function progressHTML(s){
       </button>
     </div>`;
 }
-
 function openHistory(sid){
   const s = getStudents().find(x => x.id === sid);
   if(!s) return;
   const m = getMeetings(s);
-  const c = { Hadir:0, Sakit:0, Izin:0, Alpa:0 };
-  m.forEach(r => { if(c[r.status] !== undefined) c[r.status]++; });
+  const c = { Hadir:0, Sakit:0, Izin:0, Alpa:0, Diganti:0 };
+  m.forEach(r => {
+    const mk = r.status !== 'Hadir' ? findMakeup(s.id, r.date) : null;
+    if(mk) c.Diganti++;
+    else if(c[r.status] !== undefined) c[r.status]++;
+  });
 
   histName.textContent = s.nama;
-  histSum.textContent  = 'Hadir ' + c.Hadir + ' • Sakit ' + c.Sakit + ' • Izin ' + c.Izin + ' • Alpa ' + c.Alpa;
+  histSum.textContent  = 'Hadir ' + c.Hadir + ' • Sakit ' + c.Sakit + ' • Izin ' + c.Izin
+                       + ' • Alpa ' + c.Alpa + ' • Diganti ' + c.Diganti;
 
   let html = '';
   for(let i = 0; i < TOTAL_MEET; i++){
@@ -2164,13 +2214,19 @@ function openHistory(sid){
         <span class="hist-chip st-none">Belum</span></div></div>`;
       continue;
     }
+    const mk = r.status !== 'Hadir' ? findMakeup(s.id, r.date) : null;
+    const chipCls = mk ? 'st-diganti' : 'st-' + r.status.toLowerCase();
+    const chipTxt = mk ? 'Diganti' : r.status;
+
     const det = [];
+    if(mk) det.push('🔁 Diganti pada ' + esc(fmtDate(mk.date)));
     if(r.project) det.push('📁 ' + esc(r.project));
     if(r.link)    det.push('<a href="' + esc(r.link) + '" target="_blank" rel="noopener">Buka link</a>');
     if(r.catatan) det.push('📝 ' + esc(r.catatan));
+
     html += `<div class="hist-item"><div class="hist-top">
       <div><div class="hist-no">Pertemuan ${i+1}</div><div class="hist-date">${esc(fmtDate(r.date))}</div></div>
-      <span class="hist-chip st-${esc(r.status.toLowerCase())}">${esc(r.status)}</span></div>
+      <span class="hist-chip ${chipCls}">${esc(chipTxt)}</span></div>
       ${det.length ? '<div class="hist-detail">' + det.join('<br>') + '</div>' : ''}</div>`;
   }
   histList.innerHTML = html;
@@ -2383,6 +2439,142 @@ histModal.addEventListener('click', e => { if(e.target === histModal) closeHisto
     selectedDay = btn.getAttribute('data-day');
     renderAttendance();
     if(navigator.vibrate) navigator.vibrate(6);
+  });
+
+   /* ---------- kelas pengganti ---------- */
+  const MK_LS = 'attendance.makeups.v1';
+  const ABSENT = ['Sakit','Izin','Alpa'];
+  let makeups = [];
+  try{
+    const raw = localStorage.getItem(MK_LS);
+    if(raw) makeups = JSON.parse(raw) || [];
+  }catch(e){ makeups = []; }
+
+  const mkModal   = document.getElementById('mkModal');
+  const mkList    = document.getElementById('mkList');
+  const mkStep1   = document.getElementById('mkStep1');
+  const mkStep2   = document.getElementById('mkStep2');
+  const mkSelInfo = document.getElementById('mkSelInfo');
+  const mkDate    = document.getElementById('mkDate');
+  let mkCurrent   = null;
+
+  function persistMakeups(){
+    try{ localStorage.setItem(MK_LS, JSON.stringify(makeups)); }catch(e){}
+  }
+
+  function findMakeup(sid, absentDate){
+    return makeups.find(m => m.sid === sid && m.absentDate === absentDate) || null;
+  }
+
+  function segClass(s, r){
+    if(r.status === 'Hadir') return 'st-hadir';
+    if(findMakeup(s.id, r.date)) return 'st-diganti';
+    return 'st-' + r.status.toLowerCase();
+  }
+
+  function addMonths(ymd, n){
+    const [y, m, d] = ymd.split('-').map(Number);
+    const x = new Date(y, m - 1 + n, d);
+    return x.getFullYear() + '-' +
+           String(x.getMonth() + 1).padStart(2,'0') + '-' +
+           String(x.getDate()).padStart(2,'0');
+  }
+
+  function inTerm(s, date){
+    if(!s.termDate) return true;
+    return date >= s.termDate && date < addMonths(s.termDate, 3);
+  }
+
+  function pendingAbsences(s){
+    const out = [];
+    Object.keys(records).sort().forEach(date => {
+      if(!inTerm(s, date)) return;
+      const r = records[date] && records[date][s.id];
+      if(r && ABSENT.includes(r.status) && !findMakeup(s.id, date)){
+        out.push({ date, status: r.status });
+      }
+    });
+    return out;
+  }
+
+  function showStep(n){
+    mkStep1.hidden = n !== 1;
+    mkStep2.hidden = n !== 2;
+  }
+
+  function openMakeup(){
+    const list = [];
+    getStudents().forEach(s => pendingAbsences(s).forEach(a => list.push({ s, a })));
+
+    mkList.innerHTML = list.length
+      ? list.map(({ s, a }) => `
+          <div class="mk-item">
+            <div class="avatar-sm">${esc(initials(s.nama))}</div>
+            <div class="mk-info">
+              <div class="mk-name">${esc(s.nama)}</div>
+              <div class="mk-sub">${esc(a.status)} • ${esc(fmtDate(a.date))}${s.hari ? ' • ' + esc(s.hari) : ''}</div>
+            </div>
+            <button type="button" class="presensi-btn" data-mk="${esc(s.id)}|${esc(a.date)}">Pilih</button>
+          </div>`).join('')
+      : `<p class="mk-sub" style="text-align:center;padding:24px 0">Tidak ada siswa yang perlu kelas pengganti.</p>`;
+
+    showStep(1);
+    mkModal.classList.add('open');
+    if(navigator.vibrate) navigator.vibrate(8);
+  }
+
+  function closeMakeup(){
+    mkModal.classList.remove('open');
+    mkCurrent = null;
+  }
+
+  function saveMakeup(){
+    if(!mkCurrent || !mkDate.value) return;
+    const s = getStudents().find(x => x.id === mkCurrent.sid);
+    if(!s) return;
+
+    if(!inTerm(s, mkDate.value)){
+      window.alert('Tanggal di luar term siswa ini. Kelas pengganti tidak berlaku.');
+      return;
+    }
+    if(findMakeup(mkCurrent.sid, mkCurrent.absentDate)) return;
+
+    makeups.push({
+      id: 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+      sid: mkCurrent.sid,
+      absentDate: mkCurrent.absentDate,
+      date: mkDate.value,
+      createdAt: Date.now()
+    });
+    persistMakeups();
+    closeMakeup();
+    renderAttendance();
+    if(navigator.vibrate) navigator.vibrate(12);
+  }
+
+  document.getElementById('makeupOpenBtn').addEventListener('click', openMakeup);
+  document.getElementById('mkClose').addEventListener('click', closeMakeup);
+  document.getElementById('mkBack').addEventListener('click', () => showStep(1));
+  document.getElementById('mkSave').addEventListener('click', saveMakeup);
+  mkModal.addEventListener('click', e => { if(e.target === mkModal) closeMakeup(); });
+
+  mkList.addEventListener('click', e => {
+    const b = e.target.closest('[data-mk]');
+    if(!b) return;
+    const [sid, absentDate] = b.getAttribute('data-mk').split('|');
+    const s = getStudents().find(x => x.id === sid);
+    const r = records[absentDate] && records[absentDate][sid];
+    if(!s || !r) return;
+
+    mkCurrent = { sid, absentDate };
+    mkSelInfo.innerHTML = `
+      <div class="avatar-sm">${esc(initials(s.nama))}</div>
+      <div style="min-width:0">
+        <div class="att-name">${esc(s.nama)}</div>
+        <div class="att-meta">${esc(r.status)} • ${esc(fmtDate(absentDate))}</div>
+      </div>`;
+    mkDate.value = todayKey();
+    showStep(2);
   });
 
   /* expose refresh untuk tab switch */
