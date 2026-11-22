@@ -2592,9 +2592,8 @@ tabs.forEach(tab => {
   function openHistory(sid){
     const s = getStudents().find(x => x.id === sid);
     if(!s) return;
-       showNewTermBox(sid);
-    showPrevTerms(sid);
-
+   renderTermExtras(sid);
+    
     const meets = getMeetings(s);
 
     const c = { Hadir:0, Sakit:0, Izin:0, Alpa:0, Diganti:0 };
@@ -2730,108 +2729,102 @@ tabs.forEach(tab => {
   document.getElementById('mkClose').addEventListener('click', closeMakeup);
   document.getElementById('mkBack').addEventListener('click', () => showStep(1));
   document.getElementById('mkSave').addEventListener('click', saveMakeup);
-  mkModal.addEventListener('click', e => { if(e.target === mkModal) closeMakeup(); });
-  /* ---------- term baru ---------- */
-  const newTermBox = document.getElementById('newTermBox');
-  const ntDate     = document.getElementById('ntDate');
-  const ntStart    = document.getElementById('ntStart');
-  let ntSid = null;
+    /* ---------- term: mulai baru & term sebelumnya ---------- */
+  const termBox = document.createElement('div');
+  termBox.id = 'termExtra';
+  histList.insertAdjacentElement('afterend', termBox);
+  let termSid = null;
 
   function termLabel(k){
-    const d = parseKey(k);
-    return MONTHS_ID[d.getMonth()] + '-' + MONTHS_ID[parseKey(addMonths(k, 2)).getMonth()];
+    return MONTHS_ID[parseKey(k).getMonth()] + '-' + MONTHS_ID[parseKey(addMonths(k, 2)).getMonth()];
   }
 
-  function showNewTermBox(sid){
+  function renderTermExtras(sid){
+    termSid = sid;
     const s = getStudents().find(x => x.id === sid);
-    ntSid = sid;
-    ntDate.value = '';
-    const done = s ? getMeetings(s).filter(m => m.rec).length : 0;
-    newTermBox.hidden = !(s && s.termDate && done >= TOTAL_MEET);
+    if(!s){ termBox.innerHTML = ''; return; }
+
+    const done = getMeetings(s).filter(m => m.rec).length;
+    const prev = Array.isArray(s.termHistory) ? s.termHistory : [];
+    const canNew = !!s.termDate && done >= TOTAL_MEET;
+
+    const newHTML = canNew ? `
+      <div class="newterm">
+        <span class="status-label">Term sudah lengkap (${TOTAL_MEET} pertemuan)</span>
+        <div class="field">
+          <label for="ntDate">Tanggal mulai term baru</label>
+          <input id="ntDate" type="date">
+        </div>
+        <button type="button" class="btn-primary" id="ntStart">Mulai term baru</button>
+      </div>` : '';
+
+    const prevHTML = `
+      <div class="prev-term">
+        <button type="button" class="prev-term-btn" id="prevTermBtn" ${prev.length ? '' : 'disabled'}>
+          ${prev.length ? 'Term sebelumnya (' + prev.length + ')' : 'Term sebelumnya (belum ada)'}
+        </button>
+        <div class="prev-term-list" id="prevTermList" hidden>
+          ${prev.slice().reverse().map(t => `
+            <div class="prev-term-item">
+              <div class="prev-term-name">${esc(t.term || '-')}</div>
+              <div class="prev-term-sub">${esc(fmtDate(t.termDate))} – ${esc(fmtDate(t.endDate))} • ${t.selesai} pertemuan tercatat</div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+
+    termBox.innerHTML = newHTML + prevHTML;
   }
 
-  listEl.addEventListener('click', e => {
-    const h = e.target.closest('[data-history]');
-    if(h) showNewTermBox(h.dataset.history);
-  });
-  boardEl.addEventListener('click', e => {
-    const h = e.target.closest('[data-history]');
-    if(h) showNewTermBox(h.dataset.history);
-  });
-
-  ntStart.addEventListener('click', () => {
-    const students = getStudents();
-    const idx = students.findIndex(x => x.id === ntSid);
-    if(idx < 0) return;
-    const s = students[idx];
-    const newDate = ntDate.value;
-    if(!newDate){ ntDate.focus(); return; }
-
-    const meets = getMeetings(s);
-    const last = meets.length ? meets[meets.length - 1].date : s.termDate;
-    if(newDate <= last){
-      window.alert('Tanggal term baru harus setelah pertemuan terakhir (' + fmtDate(last) + ').');
-      return;
-    }
-    if(!window.confirm('Mulai term baru untuk ' + s.nama + ' mulai ' + fmtLong(newDate) + '? Data term sebelumnya tetap tersimpan.')) return;
-
-    const archive = Array.isArray(s.termHistory) ? s.termHistory.slice() : [];
-    archive.push({
-      termDate: s.termDate,
-      term: s.term || termLabel(s.termDate),
-      endDate: last,
-      selesai: meets.filter(m => m.rec).length
-    });
-
-    students[idx] = Object.assign({}, s, {
-      termDate: newDate,
-      term: termLabel(newDate),
-      termHistory: archive
-    });
-    save(STUDENT_LS, students);
-
-    // sinyal ke modul Student agar memuat ulang data siswa
-    window.dispatchEvent(new Event('levels-changed'));
-
-    newTermBox.hidden = true;
-    histModal.classList.remove('open');
-    selectedDate = newDate;
-    render();
-    if(navigator.vibrate) navigator.vibrate(12);
-  });
-   /* ---------- term sebelumnya ---------- */
-  const prevTermBox  = document.getElementById('prevTermBox');
-  const prevTermBtn  = document.getElementById('prevTermBtn');
-  const prevTermList = document.getElementById('prevTermList');
-  let prevSid = null;
-
-  function showPrevTerms(sid){
-    const s = getStudents().find(x => x.id === sid);
-    prevSid = sid;
-    prevTermList.hidden = true;
-    prevTermList.innerHTML = '';
-    prevTermBox.hidden = !(s && Array.isArray(s.termHistory) && s.termHistory.length);
-  }
-
-  prevTermBtn.addEventListener('click', () => {
-    const s = getStudents().find(x => x.id === prevSid);
-    if(!s || !Array.isArray(s.termHistory)) return;
-
-    const isOpen = !prevTermList.hidden;
-    if(isOpen){
-      prevTermList.hidden = true;
-      prevTermBtn.textContent = 'Term sebelumnya';
+  termBox.addEventListener('click', e => {
+    if(e.target.closest('#prevTermBtn')){
+      const list = document.getElementById('prevTermList');
+      const btn  = document.getElementById('prevTermBtn');
+      const open = !list.hidden;
+      list.hidden = open;
+      const n = list.children.length;
+      btn.textContent = open ? 'Term sebelumnya (' + n + ')' : 'Tutup term sebelumnya';
       return;
     }
 
-    prevTermList.innerHTML = s.termHistory.slice().reverse().map((t, i) => `
-      <div class="prev-term-item">
-        <div class="prev-term-name">${esc(t.term || 'Term ' + (s.termHistory.length - i))}</div>
-        <div class="prev-term-sub">${esc(fmtDate(t.termDate))} – ${esc(fmtDate(t.endDate))} • ${t.selesai} pertemuan tercatat</div>
-      </div>`).join('');
-    prevTermList.hidden = false;
-    prevTermBtn.textContent = 'Tutup term sebelumnya';
+    if(e.target.closest('#ntStart')){
+      const students = getStudents();
+      const idx = students.findIndex(x => x.id === termSid);
+      if(idx < 0) return;
+      const s = students[idx];
+      const newDate = document.getElementById('ntDate').value;
+      if(!newDate){ document.getElementById('ntDate').focus(); return; }
+
+      const meets = getMeetings(s);
+      const last = meets.length ? meets[meets.length - 1].date : s.termDate;
+      if(newDate <= last){
+        window.alert('Tanggal term baru harus setelah pertemuan terakhir (' + fmtDate(last) + ').');
+        return;
+      }
+      if(!window.confirm('Mulai term baru untuk ' + s.nama + ' mulai ' + fmtLong(newDate) + '? Data term sebelumnya tetap tersimpan.')) return;
+
+      const archive = Array.isArray(s.termHistory) ? s.termHistory.slice() : [];
+      archive.push({
+        termDate: s.termDate,
+        term: s.term || termLabel(s.termDate),
+        endDate: last,
+        selesai: meets.filter(m => m.rec).length
+      });
+
+      students[idx] = Object.assign({}, s, {
+        termDate: newDate,
+        term: termLabel(newDate),
+        termHistory: archive
+      });
+      save(STUDENT_LS, students);
+      window.dispatchEvent(new Event('levels-changed'));
+
+      histModal.classList.remove('open');
+      selectedDate = newDate;
+      render();
+      if(navigator.vibrate) navigator.vibrate(12);
+    }
   });
+
   /* ---------- init ---------- */
   window.__attendanceRefresh = render;
   render();
