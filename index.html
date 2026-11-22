@@ -2212,17 +2212,16 @@ histModal.addEventListener('click', e => { if(e.target === histModal) closeHisto
       </div>`;
   }
 
-  function boardCardHTML(s){
+   function boardCardHTML(s){
     const rec = getTodayRecord(s.id);
     return `
       <div class="attendance-card">
         <div class="avatar-sm">${esc(initials(s.nama))}</div>
         <div class="att-card-name">${esc(s.nama)}</div>
         <div class="att-card-meta">${esc([s.level, s.term, s.jam].filter(Boolean).join(' • ') || '—')}</div>
-                <div class="att-card-meta">${esc([s.level, s.term, s.jam].filter(Boolean).join(' • ') || '—')}</div>
-        ${progressHTML(s)}
         ${rec && rec.status === 'Hadir' && rec.project
             ? `<div class="att-card-meta">📁 ${esc(rec.project)}</div>` : ''}
+        ${progressHTML(s)}
         ${statusBtnHtml(s.id, rec)}
       </div>`;
   }
