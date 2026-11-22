@@ -1154,29 +1154,14 @@
   <div class="app">
 
     <!-- ===== Top Bar ===== -->
-    <header class="topbar">
-      <div class="brand">
-        <div class="logo">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="4" width="18" height="18" rx="4"/>
-            <path d="M8 2v4M16 2v4M3 10h18"/>
-            <path d="m9 15 2 2 4-4"/>
-          </svg>
-        </div>
-        <div class="brand-text">
-          <h1 id="pageTitle">Home</h1>
-          <p id="pageSub">Selamat datang kembali</p>
-        </div>
-      </div>
-
-      <button class="avatar" aria-label="Profil">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-          <circle cx="12" cy="7" r="4"/>
-        </svg>
-      </button>
-    </header>
-
+   <header class="topbar">
+  <div class="brand">
+    <div class="brand-text">
+      <h1 id="pageTitle">Nama Kelas</h1>
+      <p id="pageSub">Nama Guru</p>
+    </div>
+  </div>
+  </header>
     <!-- ===== Content ===== -->
     <main class="content">
 
@@ -1675,10 +1660,6 @@ tabs.forEach(tab => {
     pages.forEach(p => {
       p.classList.toggle('active', p.id === 'page-' + key);
     });
-
-    const [title, sub] = TITLES[key] || ["", ""];
-    elTitle.textContent = title;
-    elSub.textContent   = sub;
 
     document.querySelector('.content').scrollTop = 0;
 
@@ -2714,37 +2695,75 @@ tabs.forEach(tab => {
   render();
 })();
  /* =========================================================
-   SETTING MODULE: level & warna
+   SETTING MODULE: info kelas, level & warna
    ========================================================= */
 (function(){
   const STUDENT_LS = 'attendance.students.v1';
+  const SCHOOL_LS  = 'attendance.school.v1';
   const PALETTE = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#f97316','#64748b','#84cc16'];
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => (
     {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
   ));
-  const ICON_EDIT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
-  const ICON_DEL  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+  const ICON_CLOSE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>';
 
+  /* ---------- info kelas ---------- */
+  const DEF_SCHOOL = { kelas: 'Nama Kelas', guru: 'Nama Guru' };
+  function loadSchool(){
+    try{ return Object.assign({}, DEF_SCHOOL, JSON.parse(localStorage.getItem(SCHOOL_LS)) || {}); }
+    catch(e){ return Object.assign({}, DEF_SCHOOL); }
+  }
+  function applyHeader(){
+    const sc = loadSchool();
+    document.getElementById('pageTitle').textContent = sc.kelas;
+    document.getElementById('pageSub').textContent   = sc.guru;
+  }
+
+  /* ---------- halaman setting ---------- */
   document.getElementById('page-setting').innerHTML = `
     <div class="lv-card">
+      <p class="lv-title">Info Kelas</p>
+      <div class="lv-form" style="border-top:none;padding-top:0">
+        <input id="stKelas" class="lv-input" type="text" placeholder="Nama kelas" autocomplete="off">
+        <input id="stGuru"  class="lv-input" type="text" placeholder="Nama guru"  autocomplete="off">
+        <button type="button" class="btn-primary" id="stSave">Simpan</button>
+      </div>
+    </div>
+    <div class="lv-card" style="margin-top:14px">
       <p class="lv-title">Level & Warna</p>
       <div class="lv-list" id="lvList"></div>
-      <div class="lv-form">
-        <p class="lv-sub" id="lvFormTitle">Tambah level baru</p>
-        <input id="lvName" class="lv-input" type="text" placeholder="Nama level, cth: Level 7" autocomplete="off">
-        <div class="lv-palette" id="lvPalette"></div>
-        <button type="button" class="btn-primary" id="lvSave"><span id="lvSaveText">Tambah Level</span></button>
-        <button type="button" class="mk-back" id="lvCancel" hidden>Batal edit</button>
-      </div>
+      <button type="button" class="btn-primary" id="lvAdd">+ Tambah level</button>
     </div>`;
 
-  const lvList      = document.getElementById('lvList');
-  const lvName      = document.getElementById('lvName');
-  const lvPal       = document.getElementById('lvPalette');
-  const lvSave      = document.getElementById('lvSave');
-  const lvSaveText  = document.getElementById('lvSaveText');
-  const lvCancel    = document.getElementById('lvCancel');
-  const lvFormTitle = document.getElementById('lvFormTitle');
+  /* ---------- popup level ---------- */
+  document.body.insertAdjacentHTML('beforeend', `
+    <div class="modal-overlay" id="lvModal">
+      <div class="modal-card" role="dialog" aria-modal="true">
+        <div class="modal-head">
+          <div class="card-head-left">
+            <span class="dot-accent"></span>
+            <h2 id="lvModalTitle">Tambah level</h2>
+          </div>
+          <button type="button" class="modal-close" id="lvClose" aria-label="Tutup">${ICON_CLOSE}</button>
+        </div>
+        <div class="field">
+          <label for="lvName">Nama level</label>
+          <input id="lvName" class="lv-input" type="text" placeholder="cth: Level 7" autocomplete="off">
+        </div>
+        <span class="status-label" style="margin-top:14px">Warna</span>
+        <div class="lv-palette" id="lvPalette"></div>
+        <button type="button" class="btn-primary" id="lvSaveBtn">Simpan</button>
+        <button type="button" class="mk-back" id="lvDelBtn" hidden>Hapus level</button>
+      </div>
+    </div>`);
+
+  const stKelas    = document.getElementById('stKelas');
+  const stGuru     = document.getElementById('stGuru');
+  const lvList     = document.getElementById('lvList');
+  const lvModal    = document.getElementById('lvModal');
+  const lvModalTitle = document.getElementById('lvModalTitle');
+  const lvName     = document.getElementById('lvName');
+  const lvPal      = document.getElementById('lvPalette');
+  const lvDelBtn   = document.getElementById('lvDelBtn');
 
   let editName = null;
   let picked = PALETTE[0];
@@ -2755,20 +2774,6 @@ tabs.forEach(tab => {
   function writeStudents(arr){
     try{ localStorage.setItem(STUDENT_LS, JSON.stringify(arr)); }catch(e){}
   }
-  function refreshLevelSelect(){
-    const sel = document.getElementById('f-level');
-    if(!sel) return;
-    const cur = sel.value;
-    sel.innerHTML = '<option value="">Pilih</option>' +
-      LevelStore.get().map(l => `<option>${esc(l.name)}</option>`).join('');
-    sel.value = cur;
-  }
-  function notify(){
-    refreshLevelSelect();
-    renderList();
-    window.dispatchEvent(new Event('levels-changed'));
-    if(window.__attendanceRefresh) window.__attendanceRefresh();
-  }
 
   function renderList(){
     const levels = LevelStore.get();
@@ -2776,15 +2781,14 @@ tabs.forEach(tab => {
     lvList.innerHTML = levels.length ? levels.map(l => {
       const n = st.filter(s => s.level === l.name).length;
       return `
-        <div class="lv-row">
+        <button type="button" class="lv-row" data-lv="${esc(l.name)}"
+                style="width:100%;font-family:inherit;text-align:left;cursor:pointer">
           <span class="lv-dot" style="background:${l.color}"></span>
           <div class="lv-info">
             <div class="lv-name">${esc(l.name)}</div>
             <div class="lv-count">${n} siswa</div>
           </div>
-          <button type="button" class="icon-btn item-edit" data-lv-edit="${esc(l.name)}" aria-label="Edit">${ICON_EDIT}</button>
-          <button type="button" class="icon-btn item-del" data-lv-del="${esc(l.name)}" aria-label="Hapus">${ICON_DEL}</button>
-        </div>`;
+        </button>`;
     }).join('') : '<p class="lv-count">Belum ada level.</p>';
   }
 
@@ -2794,15 +2798,50 @@ tabs.forEach(tab => {
     ).join('');
   }
 
-  function resetForm(){
-    editName = null;
-    picked = PALETTE[0];
-    lvName.value = '';
-    lvFormTitle.textContent = 'Tambah level baru';
-    lvSaveText.textContent = 'Tambah Level';
-    lvCancel.hidden = true;
+  function openLevel(name){
+    const l = name ? LevelStore.get().find(x => x.name === name) : null;
+    editName = l ? l.name : null;
+    picked = l ? l.color : PALETTE[0];
+    lvName.value = l ? l.name : '';
+    lvModalTitle.textContent = l ? 'Edit level' : 'Tambah level';
+    lvDelBtn.hidden = !l;
     renderPalette();
+    lvModal.classList.add('open');
   }
+  function closeLevel(){ lvModal.classList.remove('open'); }
+
+  function refreshLevelSelect(){
+    const sel = document.getElementById('f-level');
+    if(!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">Pilih</option>' +
+      LevelStore.get().map(l => `<option>${esc(l.name)}</option>`).join('');
+    sel.value = cur;
+  }
+  function refresh(){
+    refreshLevelSelect();
+    renderList();
+    window.dispatchEvent(new Event('levels-changed'));
+    if(window.__attendanceRefresh) window.__attendanceRefresh();
+  }
+
+  /* ---------- events ---------- */
+  stSave.addEventListener('click', () => {
+    try{
+      localStorage.setItem(SCHOOL_LS, JSON.stringify({
+        kelas: stKelas.value.trim() || DEF_SCHOOL.kelas,
+        guru:  stGuru.value.trim()  || DEF_SCHOOL.guru
+      }));
+    }catch(e){}
+    applyHeader();
+    if(navigator.vibrate) navigator.vibrate(12);
+  });
+
+  document.getElementById('lvAdd').addEventListener('click', () => openLevel(null));
+  lvList.addEventListener('click', e => {
+    const b = e.target.closest('[data-lv]');
+    if(b) openLevel(b.dataset.lv);
+  });
 
   lvPal.addEventListener('click', e => {
     const b = e.target.closest('[data-color]');
@@ -2811,39 +2850,10 @@ tabs.forEach(tab => {
     renderPalette();
   });
 
-  lvList.addEventListener('click', e => {
-    const ed = e.target.closest('[data-lv-edit]');
-    if(ed){
-      const name = ed.dataset.lvEdit;
-      const l = LevelStore.get().find(x => x.name === name);
-      if(!l) return;
-      editName = name;
-      picked = l.color;
-      lvName.value = name;
-      lvFormTitle.textContent = 'Edit level: ' + name;
-      lvSaveText.textContent = 'Simpan Perubahan';
-      lvCancel.hidden = false;
-      renderPalette();
-      lvName.focus();
-      return;
-    }
-    const del = e.target.closest('[data-lv-del]');
-    if(del){
-      const name = del.dataset.lvDel;
-      const n = students().filter(s => s.level === name).length;
-      const msg = n
-        ? `Hapus level "${name}"? ${n} siswa dengan level ini akan dikosongkan levelnya.`
-        : `Hapus level "${name}"?`;
-      if(!window.confirm(msg)) return;
+  document.getElementById('lvClose').addEventListener('click', closeLevel);
+  lvModal.addEventListener('click', e => { if(e.target === lvModal) closeLevel(); });
 
-      LevelStore.set(LevelStore.get().filter(x => x.name !== name));
-      if(n) writeStudents(students().map(s => s.level === name ? Object.assign({}, s, { level: '' }) : s));
-      if(editName === name) resetForm();
-      notify();
-    }
-  });
-
-  lvSave.addEventListener('click', () => {
+  document.getElementById('lvSaveBtn').addEventListener('click', () => {
     const name = lvName.value.trim();
     if(!name){ lvName.focus(); return; }
 
@@ -2856,7 +2866,6 @@ tabs.forEach(tab => {
     if(editName){
       levels = levels.map(l => l.name === editName ? { name, color: picked } : l);
       if(name !== editName){
-        // ganti nama level juga di data siswa
         writeStudents(students().map(s => s.level === editName ? Object.assign({}, s, { level: name }) : s));
       }
     }else{
@@ -2864,14 +2873,30 @@ tabs.forEach(tab => {
     }
 
     LevelStore.set(levels);
-    resetForm();
-    notify();
+    closeLevel();
+    refresh();
     if(navigator.vibrate) navigator.vibrate(12);
   });
 
-  lvCancel.addEventListener('click', resetForm);
+  lvDelBtn.addEventListener('click', () => {
+    if(!editName) return;
+    const n = students().filter(s => s.level === editName).length;
+    const msg = n
+      ? `Hapus level "${editName}"? ${n} siswa dengan level ini akan dikosongkan levelnya.`
+      : `Hapus level "${editName}"?`;
+    if(!window.confirm(msg)) return;
 
-  resetForm();
+    LevelStore.set(LevelStore.get().filter(x => x.name !== editName));
+    if(n) writeStudents(students().map(s => s.level === editName ? Object.assign({}, s, { level: '' }) : s));
+    closeLevel();
+    refresh();
+  });
+
+  /* ---------- init ---------- */
+  const sc = loadSchool();
+  stKelas.value = sc.kelas === DEF_SCHOOL.kelas ? '' : sc.kelas;
+  stGuru.value  = sc.guru  === DEF_SCHOOL.guru  ? '' : sc.guru;
+  applyHeader();
   renderList();
   refreshLevelSelect();
 })();
