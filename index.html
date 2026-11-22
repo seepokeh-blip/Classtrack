@@ -1137,8 +1137,6 @@
 .lv-sw.on{box-shadow:0 0 0 2px var(--blue-600)}
 .lv-form .btn-primary{margin-top:4px}
 .lv-form .mk-back{margin-top:0}
-.report-warn{display:flex;align-items:center;gap:8px;margin-top:8px;padding:8px 10px;border-radius:12px;background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.35);color:#c2410c;font-size:11.5px;font-weight:700;line-height:1.4}
-.report-warn svg{width:15px;height:15px;flex-shrink:0}
 
 </style>
 </head>
@@ -1444,6 +1442,12 @@
               <option>Level 1</option>
               <option>Level 2</option>
               <option>Level 3</option>
+              <option>Level 4</option>
+              <option>Level 5</option>
+              <option>Level 6</option>
+              <option>Beginner</option>
+              <option>Intermediate</option>
+              <option>Advanced</option>
             </select>
           </div>
 
@@ -1611,7 +1615,10 @@
   const KEY = 'attendance.levels.v1';
   const DEFAULTS = [
     {name:'Level 1', color:'#3b82f6'}, {name:'Level 2', color:'#10b981'},
-    {name:'Level 3', color:'#f59e0b'}
+    {name:'Level 3', color:'#f59e0b'}, {name:'Level 4', color:'#ef4444'},
+    {name:'Level 5', color:'#8b5cf6'}, {name:'Level 6', color:'#ec4899'},
+    {name:'Beginner', color:'#06b6d4'}, {name:'Intermediate', color:'#f97316'},
+    {name:'Advanced', color:'#64748b'}
   ];
   function get(){
     try{
@@ -2241,19 +2248,6 @@ tabs.forEach(tab => {
       const m = meets[i];
       segs += '<i class="' + (m ? segClass(s, m) : '') + '"></i>';
     }
-     function reportWarnHTML(s){
-    const done = getMeetings(s).filter(m => m.rec).length;
-    if(done < TOTAL_MEET - 1) return '';
-    const left = TOTAL_MEET - done;
-    const msg = done >= TOTAL_MEET
-      ? 'Semua 11 pertemuan sudah tercatat. Siap buat rapor. Term segera berakhir.'
-      : 'Sudah ' + done + ' pertemuan. Siap buat rapor. Term segera berakhir, sisa ' + left + ' pertemuan.';
-    return `<div class="report-warn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6M9 11h2"/></svg>
-      <span>${msg}</span>
-    </div>`;
-  }
-
     const done = meets.filter(m => m.rec).length;
     return `
       <div class="hist-row">
@@ -2360,7 +2354,6 @@ tabs.forEach(tab => {
           <div class="item-name">${esc(s.nama)} ${mk ? '<span class="chip chip-term">Pengganti</span>' : ''}</div>
           <div class="item-meta">${lvBadge(s)}${esc(metaOf(s) + proj)}</div>
           ${progressHTML(s)}
-          ${reportWarnHTML(s)} 
         </div>
         ${statusBtnHtml(s.id, rec, date, mk ? mk.id : '')}
       </div>`;
@@ -2376,7 +2369,6 @@ tabs.forEach(tab => {
         <div class="att-card-meta">${lvBadge(s)}${esc(metaOf(s))}</div>
         ${rec && rec.status === 'Hadir' && rec.project ? `<div class="att-card-meta">📁 ${esc(rec.project)}</div>` : ''}
         ${progressHTML(s)}
-        ${reportWarnHTML(s)} 
         ${statusBtnHtml(s.id, rec, date, mk ? mk.id : '')}
       </div>`;
   }
