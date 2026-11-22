@@ -1149,6 +1149,7 @@
 .prev-term-item{padding:11px 12px;border-radius:14px;background:rgba(59,130,246,.05);border:1px solid rgba(147,197,253,.35)}
 .prev-term-name{font-size:13px;font-weight:700}
 .prev-term-sub{font-size:11px;font-weight:500;color:var(--muted);margin-top:2px}
+.prev-term-list[hidden]{display:none}
 
 </style>
 </head>
@@ -1585,9 +1586,14 @@
       </button>
     </div>
     <p class="hist-summary" id="histSummary"></p>
+   <div class="prev-term" id="prevTermBox" hidden>
+  <button type="button" class="prev-term-btn" id="prevTermBtn">Term sebelumnya</button>
+  <div class="prev-term-list" id="prevTermList" hidden></div>
+</div>
+
     <div class="hist-list" id="histList"></div>
    <div class="newterm" id="newTermBox" hidden>
-    <div class="prev-term" id="prevTermBox" hidden>
+    
   <button type="button" class="prev-term-btn" id="prevTermBtn">Term sebelumnya</button>
   <div class="prev-term-list" id="prevTermList" hidden></div>
 </div>
